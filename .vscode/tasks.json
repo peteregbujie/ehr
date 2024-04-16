@@ -1,0 +1,12 @@
+{
+ "version": "2.0.0",
+ "tasks": [
+  {
+   "type": "npm",
+   "script": "db:migrate",
+   "problemMatcher": [],
+   "label": "npm: db:migrate",
+   "detail": "tsx src/db/migrate.ts"
+  }
+ ]
+}
