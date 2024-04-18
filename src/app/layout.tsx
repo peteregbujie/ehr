@@ -1,11 +1,12 @@
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
+import { ContextProvider } from "./context-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
  title: "EHR",
- description: "Electronic Medical Record",
+ description: "Electronic Health Record",
 };
 
 const fontSans = FontSans({
@@ -27,7 +28,7 @@ export default function RootLayout({
      fontSans.variable
     )}
    >
-    {children}
+    <ContextProvider>{children}</ContextProvider>
    </body>
   </html>
  );
