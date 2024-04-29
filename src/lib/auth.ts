@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { users } from "@/db/schema/users";
+import { UsersTable as users } from "@/db/schema/users";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import type {
@@ -28,6 +28,7 @@ export const authConfig = {
   GoogleProvider({
    clientId: process.env.GOOGLE_ID!,
    clientSecret: process.env.GOOGLE_SECRET!,
+   allowDangerousEmailAccountLinking: true,
   }),
  ],
  callbacks: {
