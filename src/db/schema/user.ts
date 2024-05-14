@@ -1,4 +1,7 @@
+import { relations } from "drizzle-orm";
+
 import type { AdapterAccount } from "@auth/core/adapters";
+
 import {
  date,
  integer,
@@ -11,40 +14,67 @@ import {
  uuid,
  varchar,
 } from "drizzle-orm/pg-core";
+import AdminTable from "./admin";
+import DoctorTable from "./doctor";
+import PatientTable from "./patient";
 
-export const UserRoleEnum = pgEnum("userrole", ["admin", "patient", "doctor"]);
+export const UserRoleEnum = pgEnum("user_role", ["admin", "patient", "doctor"]);
 
 export const GenderEnum = pgEnum("gender", ["male", "female"]);
 
-export const UsersTable = pgTable(
+const UserTable = pgTable(
  "user",
  {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 100 }),
   gender: GenderEnum("gender").default("male").notNull(),
   date_of_birth: date("date", { mode: "date" }),
-  email: varchar("email", { length: 256 }).notNull(),
+  phone_number: numeric("phone_number", {
+   precision: 10,
+  })
+   .notNull()
+   .unique(),
+  email: varchar("email", { length: 30 }).notNull().unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   address: varchar("address", { length: 100 }),
   city: varchar("city", { length: 20 }),
   state: varchar("state", { length: 20 }),
-  zip_code: numeric("zip_code", { precision: 5 }),
+  zip_code: numeric("zip_code", { precision: 5, scale: 0 }),
   image: text("image"),
-  role: UserRoleEnum("userrole").default("patient").notNull(),
-  created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp("updated_at").notNull().defaultNow(),
+  role: UserRoleEnum("user_role").default("patient").notNull(),
+  created_at: timestamp("created_at", { mode: "string" })
+   .notNull()
+   .defaultNow(),
+  updated_at: timestamp("updated_at", { mode: "string" })
+   .notNull()
+   .defaultNow(),
  },
  (user) => ({
   emailIndex: uniqueIndex("users__email__idx").on(user.email),
  })
 );
 
-export const accounts = pgTable(
+export const UsersRelations = relations(UserTable, ({ one }) => ({
+ patients: one(PatientTable, {
+  fields: [UserTable.id],
+  references: [PatientTable.id],
+ }),
+ doctors: one(DoctorTable, {
+  fields: [UserTable.id],
+  references: [DoctorTable.id],
+ }),
+ admins: one(AdminTable, {
+  fields: [UserTable.id],
+  references: [AdminTable.id],
+ }),
+}));
+
+export const accountsTable = pgTable(
  "account",
  {
   userId: uuid("userId")
    .notNull()
-   .references(() => UsersTable.id, { onDelete: "cascade" }),
+   .references(() => UserTable.id, { onDelete: "cascade" }),
   type: text("type").$type<AdapterAccount["type"]>().notNull(),
   provider: text("provider").notNull(),
   providerAccountId: uuid("providerAccountId").notNull(),
@@ -61,15 +91,15 @@ export const accounts = pgTable(
  })
 );
 
-export const sessions = pgTable("session", {
+export const sessionsTable = pgTable("session", {
  sessionToken: text("sessionToken").notNull().primaryKey(),
  userId: uuid("userId")
-  .references(() => UsersTable.id, { onDelete: "cascade" })
+  .references(() => UserTable.id, { onDelete: "cascade" })
   .notNull(),
  expires: timestamp("expires", { mode: "date" }).notNull(),
 });
 
-export const verificationTokens = pgTable(
+export const verificationTokensTable = pgTable(
  "verificationToken",
  {
   identifier: text("identifier").notNull(),
@@ -80,3 +110,19 @@ export const verificationTokens = pgTable(
   primaryKey: [vt.identifier, vt.token],
  })
 );
+
+export const refreshTokensTable = pgTable(
+ "refreshToken",
+ {
+  token: uuid("token").notNull().primaryKey().defaultRandom(),
+  userId: uuid("userId")
+   .notNull()
+   .references(() => UserTable.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
+ },
+ (table) => ({
+  primaryKey: [table.token, table.userId],
+ })
+);
+
+export default UserTable;
