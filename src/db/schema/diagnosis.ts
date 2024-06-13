@@ -1,18 +1,16 @@
 import { relations } from "drizzle-orm";
-import { pgTable, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
-import PatientTable from "./patient";
 
 const DiagnosisTable = pgTable(
  "diagnosis",
  {
-  id: uuid("id").primaryKey().defaultRandom(),
-  patient_id: uuid("patient_id")
-   .notNull()
-   .references(() => PatientTable.id, { onDelete: "cascade" }),
-  diagnosis_code: varchar("diagnosis_code").notNull(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+    diagnosis_code: varchar("diagnosis_code").notNull(),
   description: varchar("description"),
-  encounter_id: uuid("encounter_id")
+  encounter_id: text("encounter_id")
    .notNull()
    .references(() => EncounterTable.id, { onDelete: "cascade" }),
  },
@@ -26,10 +24,7 @@ export const DiagnosisRelations = relations(DiagnosisTable, ({ one }) => ({
   fields: [DiagnosisTable.encounter_id],
   references: [EncounterTable.id],
  }),
- patient: one(PatientTable, {
-  fields: [DiagnosisTable.patient_id],
-  references: [PatientTable.id],
- }),
+ 
 }));
 
 export default DiagnosisTable;

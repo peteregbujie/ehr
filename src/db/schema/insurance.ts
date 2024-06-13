@@ -1,13 +1,15 @@
 import { relations } from "drizzle-orm";
-import { pgTable, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
 import PatientTable from "./patient";
 
 const InsuranceTable = pgTable(
  "insurance",
  {
-  id: uuid("id").primaryKey().defaultRandom(),
-  patient_id: uuid("patient_id")
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  patient_id: text("patient_id")
    .notNull()
    .references(() => PatientTable.id, { onDelete: "cascade" }),
   company_name: varchar("company_name").notNull(),

@@ -1,10 +1,12 @@
-import { pgTable, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm/relations";
 import UserTable from "./user";
 
 const AdminTable = pgTable("admin", {
- id: uuid("id").primaryKey().defaultRandom(),
- user_id: uuid("user_id")
+ id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+ user_id: text("user_id")
   .notNull()
   .references(() => UserTable.id, { onDelete: "cascade" }),
 });
