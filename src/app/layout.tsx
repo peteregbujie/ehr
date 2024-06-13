@@ -1,35 +1,36 @@
-import { cn } from "@/lib/utils";
+
+import NavBar from "@/components/Navbar";
+import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
-import { Inter as FontSans } from "next/font/google";
-import { ContextProvider } from "./context-provider";
+import { SessionProvider } from "next-auth/react";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({ subsets: ["latin"] });
+
 export const metadata: Metadata = {
- title: "EHR",
- description: "Electronic Health Record",
+  title: {
+    template: "%s | Electronic Health Record",
+    absolute: "EHR",
+  },
+  description:
+    "Electronic Health Record",
 };
 
-const fontSans = FontSans({
- subsets: ["latin"],
- variable: "--font-sans",
-});
-
 export default function RootLayout({
- children,
-}: {
- children: React.ReactNode;
-}) {
- return (
-  <html lang="en" suppressHydrationWarning>
-   <head />
-   <body
-    className={cn(
-     "min-h-screen bg-background font-sans antialiased",
-     fontSans.variable
-    )}
-   >
-    <ContextProvider>{children}</ContextProvider>
-   </body>
-  </html>
- );
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        <SessionProvider>
+          <NavBar />
+          {children}
+          <Toaster />
+        </SessionProvider>
+      </body>
+    </html>
+  );
 }
