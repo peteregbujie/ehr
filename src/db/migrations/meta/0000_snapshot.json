@@ -1,5 +1,5 @@
 {
-  "id": "af11b278-1a65-4854-8f54-2e763a262432",
+  "id": "10b5cf4b-03b6-474f-b6df-2ed132aad86c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1320,7 +1320,8 @@
         },
         "gender": {
           "name": "gender",
-          "type": "text",
+          "type": "gender",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
@@ -1348,6 +1349,14 @@
           "primaryKey": false,
           "notNull": false
         },
+        "role": {
+          "name": "role",
+          "type": "role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'patient'"
+        },
         "address": {
           "name": "address",
           "type": "varchar(100)",
@@ -1374,12 +1383,6 @@
         },
         "image": {
           "name": "image",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "role": {
-          "name": "role",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1603,7 +1606,25 @@
       "uniqueConstraints": {}
     }
   },
-  "enums": {},
+  "enums": {
+    "public.gender": {
+      "name": "gender",
+      "schema": "public",
+      "values": [
+        "male",
+        "female"
+      ]
+    },
+    "public.role": {
+      "name": "role",
+      "schema": "public",
+      "values": [
+        "patient",
+        "admin",
+        "provider"
+      ]
+    }
+  },
   "schemas": {},
   "_meta": {
     "columns": {},

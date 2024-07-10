@@ -5,7 +5,7 @@ export {
     default as AppointmentTable
 } from "./appointment";
 export { DiagnosisRelations, default as DiagnosisTable } from "./diagnosis";
-export { AccountsTable, SessionsTable, default as UserTable, UsersRelations, VerificationTokensTable } from "./user";
+export { AccountsTable, SessionsTable, default as UserTable, UsersRelations, VerificationTokensTable, userRoles, gender_id } from "./user";
 
 export {
     ProviderPatientRelations,

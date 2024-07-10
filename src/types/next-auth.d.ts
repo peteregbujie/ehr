@@ -1,14 +1,11 @@
 import { DefaultSession } from "next-auth";
 
-export type Role = "admin" | "provider" | "patient";
+import { userRoles } from "@/db/schema/user";
 
 declare module "next-auth" {
- interface Session {
-  user: User & DefaultSession["user"];
- }
-
- interface User {
-  role: Role;
-  id: string;
- }
+    interface Session {
+        user: {
+            role: userRoles;
+        } & DefaultSession["user"];
+    }
 }

@@ -5,6 +5,7 @@ import {
   date,
   integer,
   numeric,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -16,52 +17,57 @@ import AdminTable from "./admin";
 import PatientTable from "./patient";
 import ProviderTable from "./provider";
 
+
+
+export const userRoles = pgEnum('role', ['patient', 'admin', 'provider']);
+export const gender_id = pgEnum('gender', ['male', 'female']);
+
 const UserTable = pgTable(
- "user",
- {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: varchar("name", { length: 100 }),
-  gender: text("gender", { enum: ["male", "female"] }),
-  date_of_birth: date("date", { mode: "date" }),
-  phone_number: numeric("phone_number", {
-   precision: 10,
+  "user",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name", { length: 100 }),
+    gender: gender_id("gender").notNull(),
+    date_of_birth: date("date", { mode: "date" }),
+    phone_number: numeric("phone_number", {
+      precision: 10,
+    })
+      .unique(),
+    email: varchar("email", { length: 30 }).notNull().unique(),
+    emailVerified: timestamp("emailVerified", { mode: "date" }),
+    role: userRoles("role").notNull().default('patient'),
+    address: varchar("address", { length: 100 }),
+    city: varchar("city", { length: 20 }),
+    state: varchar("state", { length: 20 }),
+    zip_code: numeric("zip_code", { precision: 5, scale: 0 }),
+    image: text("image"),
+    created_at: timestamp("created_at", { mode: "string" })
+      .notNull()
+      .defaultNow(),
+    updated_at: timestamp("updated_at", { mode: "string" })
+      .notNull()
+      .defaultNow(),
+  },
+  (user) => ({
+    emailIndex: uniqueIndex("users__email__idx").on(user.email),
   })
-    .unique(),
-  email: varchar("email", { length: 30 }).notNull().unique(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
-  address: varchar("address", { length: 100 }),
-  city: varchar("city", { length: 20 }),
-  state: varchar("state", { length: 20 }),
-  zip_code: numeric("zip_code", { precision: 5, scale: 0 }),
-  image: text("image"),
-  role: text("role", { enum: ["admin", "patient", "provider"] }),
-  created_at: timestamp("created_at", { mode: "string" })
-   .notNull()
-   .defaultNow(),
-  updated_at: timestamp("updated_at", { mode: "string" })
-   .notNull()
-   .defaultNow(),
- },
- (user) => ({
-  emailIndex: uniqueIndex("users__email__idx").on(user.email),
- })
 );
 
 export const UsersRelations = relations(UserTable, ({ one }) => ({
- patients: one(PatientTable, {
-  fields: [UserTable.id],
-  references: [PatientTable.id],
- }),
- providers: one(ProviderTable, {
-  fields: [UserTable.id],
-  references: [ProviderTable.id],
- }),
- admins: one(AdminTable, {
-  fields: [UserTable.id],
-  references: [AdminTable.id],
- }),
+  patients: one(PatientTable, {
+    fields: [UserTable.id],
+    references: [PatientTable.id],
+  }),
+  providers: one(ProviderTable, {
+    fields: [UserTable.id],
+    references: [ProviderTable.id],
+  }),
+  admins: one(AdminTable, {
+    fields: [UserTable.id],
+    references: [AdminTable.id],
+  }),
 }));
 
 
@@ -88,7 +94,7 @@ export const AccountsTable = pgTable(
     }),
   })
 )
- 
+
 export const SessionsTable = pgTable("session", {
   sessionToken: text("sessionToken").primaryKey(),
   userId: text("userId")
@@ -96,7 +102,7 @@ export const SessionsTable = pgTable("session", {
     .references(() => UserTable.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { mode: "date" }).notNull(),
 })
- 
+
 export const VerificationTokensTable = pgTable(
   "verificationToken",
   {
@@ -110,7 +116,7 @@ export const VerificationTokensTable = pgTable(
     }),
   })
 )
- 
+
 
 
 
