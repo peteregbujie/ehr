@@ -29,7 +29,7 @@ export { MedicationRelations, default as MedicationTable } from "./medication";
 
 export { VitalSignRelations, default as VitalSignTable } from "./vitalsign";
 
-export { PatientRelations, default as PatientTable } from "./patient";
+export { PatientRelations, default as PatientTable, bloodTypes, marital_status, preferred_language } from "./patient";
 
 export { ProcedureRelations, default as ProcedureTable } from "./procedure";
 

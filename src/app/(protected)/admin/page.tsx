@@ -9,17 +9,9 @@ export const metadata: Metadata = {
 export default async function Page() {
     const user = await getCurrentUser();
 
-    if (!user) {
-        redirect("/api/auth/signin?callbackUrl=/admin");
-    }
+    if (!user || user.role !== "admin") redirect("/login");
 
-    if (user.role !== "admin") {
-        return (
-            <main className="mx-auto my-10">
-                <p className="text-center">You are not authorized to view this page</p>
-            </main>
-        );
-    }
+
 
     return (
         <main className="mx-auto my-10 space-y-3">
