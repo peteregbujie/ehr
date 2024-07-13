@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import { date, pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 const MedicationTable = pgTable(
  "medication",
@@ -30,5 +31,13 @@ export const MedicationRelations = relations(
   references: [EncounterTable.id],
  })
 }));
+
+
+
+// Schema for inserting a medication - can be used to validate API requests
+export const insertMedicationSchema = createInsertSchema(MedicationTable);
+
+// Schema for selecting a medication - can be used to validate API responses
+export const selectMedicationSchema = createSelectSchema(MedicationTable);
 
 export default MedicationTable;
