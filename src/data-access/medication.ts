@@ -4,7 +4,7 @@ import { insertMedicationSchema, selectMedicationSchema } from "@/db/schema/medi
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { createEncounter, getEncounterById, getEncountersByAppointmentId } from "./encouter";
 import { eq } from 'drizzle-orm';
-import { getAppointmentByPatientId } from "./appointment";
+import { getAppointmentsAndEncountersByPatientId, getAppointmentByPatientId } from "./appointment";
 
 
 
@@ -49,23 +49,44 @@ export const getMedications = async () => {
 
   // get medications for a patient
   
-export async function fetchMedicationsByPatientId(patientId: string) {
+/* export async function getMedicationsByPatientId(patientId: string) {
   // Step 1: Fetch all appointments for the patient
   const appointments = await getAppointmentByPatientId(patientId);
   
   // Initialize an array to hold all medications for the patient
   let medications = [];
   
-  // Step 2: For each appointment, fetch encounters
+  // Step 2: For each appointment, get encounters
   for (const appointment of appointments) {
       const encounters = await getEncountersByAppointmentId(appointment.id);
       
-      // Step 3: For each encounter, fetch medications
+      // Step 3: For each encounter, get medications
       for (const encounter of encounters) {
-          const fetchedMedications = await getMedicationsByEncounterId(encounter.id);
-          medications.push(...fetchedMedications);
+          constallMedications = await getMedicationsByEncounterId(encounter.id);
+          medications.push(...getedMedications);
       }
   }
   
+  return medications;
+} */
+
+
+  //refactored the above function by abstracting the first two steps into a getAppointmentsAndEncountersByPatientId function
+
+export async function getMedicationsByPatientId(patientId: string) {
+  const Encounters = await getAppointmentsAndEncountersByPatientId(patientId);
+
+  // Initialize an array to hold all medications for the patient
+  let medications = [];
+
+  // Step 3: For each set of appointments and encounters, get medications
+ 
+    for (const encounter of Encounters) {
+      const allMedications = await getMedicationsByEncounterId(encounter.id);
+      medications.push(...allMedications);
+    }
+  
+    
+
   return medications;
 }

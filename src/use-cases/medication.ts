@@ -1,4 +1,4 @@
-import { createMedication, fetchMedicationsByPatientId, getMedications, getMedicationsByEncounterId } from "@/data-access/medication";
+import { createMedication, getMedicationsByPatientId, getMedications, getMedicationsByEncounterId } from "@/data-access/medication";
 
 
 
@@ -7,9 +7,9 @@ export async function getMedicationUseCase() {
 }
 
 
-// fetch Medications By Patient Id use case
-export const fetchMedicationsByPatientIdUseCase = async (patientId: string) => {
-    return await fetchMedicationsByPatientId(patientId)
+// get Medications By Patient Id use case
+export const getMedicationsByPatientIdUseCase = async (patientId: string) => {
+    return await getMedicationsByPatientId(patientId)
 }
 
 // create Medication use case

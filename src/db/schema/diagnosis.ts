@@ -36,9 +36,9 @@ export const DiagnosisRelations = relations(DiagnosisTable, ({ one }) => ({
 }));
 
 // Schema for inserting a medication - can be used to validate API requests
-export const insertDiagnosisTableSchema = createInsertSchema(DiagnosisTable);
+export const insertDiagnosisSchema = createInsertSchema(DiagnosisTable);
 
 // Schema for selecting a medication - can be used to validate API responses
-export const selectDiagnosisTableSchema = createSelectSchema(DiagnosisTable);
+export const selectDiagnosisSchema = createSelectSchema(DiagnosisTable);
 
 export default DiagnosisTable;

@@ -1,6 +1,7 @@
 import db, { eq } from "@/db";
 import AppointmentTable, { insertAppointmentSchema } from "@/db/schema/appointment";
 import { InvalidDataError } from "@/use-cases/errors";
+import { getEncountersByAppointmentId } from "./encouter";
 
 
 //create appointment
@@ -62,3 +63,22 @@ export const updateAppointment = async (appointmentId: string, appointmentData: 
 export const deleteAppointment = async (appointmentId: string) => {
     await db.delete(AppointmentTable).where(eq(AppointmentTable.id, appointmentId)).returning();
 }
+
+
+// Abstract function to get appointments and encounters for a patient
+export async function getAppointmentsAndEncountersByPatientId(patientId: string) {
+    // Step 1: Fetch all appointments for the patient
+    const appointments = await getAppointmentByPatientId(patientId);
+  
+    // Initialize an array to hold all appointments and encounters for the patient
+    let results = [];
+  
+    // Step 2: For each appointment, get encounters
+    for (const appointment of appointments) {
+      const encounters = await getEncountersByAppointmentId(appointment.id);
+      results.push(...encounters);
+    }
+  
+    return results;
+  }
+
