@@ -82,3 +82,20 @@ export async function getAppointmentsAndEncountersByPatientId(patientId: string)
     return results;
   }
 
+
+  export async function getAppointmentsAndEncountersByProviderId(providerId: string) {
+    // Step 1: Fetch all appointments for the patient
+    const appointments = await getAppointmentByProviderId(providerId);
+  
+    // Initialize an array to hold all appointments and encounters for the patient
+    let results = [];
+  
+    // Step 2: For each appointment, get encounters
+    for (const appointment of appointments) {
+      const encounters = await getEncountersByAppointmentId(appointment.id);
+      results.push(...encounters);
+    }
+  
+    return results;
+  }
+

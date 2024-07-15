@@ -90,3 +90,14 @@ export async function getMedicationsByPatientId(patientId: string) {
 
   return medications;
 }
+
+
+// delete medication
+export const deleteMedication = async (medicationId: string) => {
+    await db.delete(MedicationTable).where(eq(MedicationTable.id, medicationId)).returning();
+}
+
+// update medication
+export const updateMedication = async (medicationId: string, medicationData: object) => {
+    await db.update(MedicationTable).set(medicationData).where(eq(MedicationTable.id, medicationId)).returning();
+}

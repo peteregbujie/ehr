@@ -1,16 +1,15 @@
 
 
-// create diagnosis check if encounter exists
-// create diagnosis with encounter id
+
  
 import db from "@/db";
-import { DiagnosisTable, PatientTable } from "@/db/schema";
-
+import { DiagnosisTable } from "@/db/schema";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncounterById, getEncountersByAppointmentId } from "./encouter";
 import { eq } from 'drizzle-orm';
-import { getAppointmentsAndEncountersByPatientId, getAppointmentByPatientId } from "./appointment";
+import { getAppointmentsAndEncountersByPatientId, getAppointmentByPatientId, getAppointmentsAndEncountersByProviderId } from "./appointment";
 import { insertDiagnosisSchema } from "@/db/schema/diagnosis";
+import { getLabByEncounterId } from "./lab";
 
 
 
@@ -69,4 +68,33 @@ export async function getDiagnosesByPatientId(patientId: string) {
     
   
     return diagnoses;
+  }
+
+
+  
+  export async function getDiagnosesByProviderId(providerId: string) {
+    const Encounters = await getAppointmentsAndEncountersByProviderId(providerId);
+  
+    // Initialize an array to hold all labs for the patient
+    let diagnoses = [];
+  
+    // Step 3: For each encounter, get labs
+      for (const encounter of Encounters) {
+        const allDiagnoses = await getLabByEncounterId(encounter.id);
+        diagnoses.push(...allDiagnoses);
+      }
+    
+  
+    return diagnoses;
+  }
+
+
+  // delete diagnosis
+  export const deleteDiagnosis = async (diagnosisId: string) => {
+    await db.delete(DiagnosisTable).where(eq(DiagnosisTable.id, diagnosisId)).returning();
+  }
+
+  // update diagnosis
+  export const updateDiagnosis = async (diagnosisId: string, diagnosisData: object) => {
+    await db.update(DiagnosisTable).set(diagnosisData).where(eq(DiagnosisTable.id, diagnosisId)).returning();
   }

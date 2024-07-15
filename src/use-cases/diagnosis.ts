@@ -1,5 +1,5 @@
 
-import { createDiagnosis, getDiagnosesByPatientId, getDiagnosis, getDiagnosisByEncounterId } from "@/data-access/diagnosis";
+import { createDiagnosis, deleteDiagnosis, getDiagnosesByPatientId, getDiagnosesByProviderId, getDiagnosis, getDiagnosisByEncounterId, updateDiagnosis } from "@/data-access/diagnosis";
 
 
 
@@ -23,3 +23,19 @@ export const createDiagnosisUseCase = async (enounterId: string, diagnosisData: 
   export const getDiagnosisForEncounterUseCase = async (encounterId: string) => {
     return await getDiagnosisByEncounterId(encounterId)
   }
+
+  // get diagnosis by provider id use case
+  export const getDiagnosisByProviderIdUseCase = async (providerId: string) => {
+    return await getDiagnosesByProviderId(providerId)
+  }
+
+  // delete diagnosis use case
+  export const deleteDiagnosisUseCase = async (diagnosisId: string) => {
+    return await deleteDiagnosis(diagnosisId)
+  }
+
+  // update diagnosis use case
+  export const updateDiagnosisUseCase = async (diagnosisId: string, diagnosisData: object) => {
+    return await updateDiagnosis(diagnosisId, diagnosisData)
+  }
+  

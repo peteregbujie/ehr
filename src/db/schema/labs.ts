@@ -9,12 +9,13 @@ import {
 } from "drizzle-orm/pg-core";
 
 import EncounterTable from "./encounter";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const lab_status = pgEnum('lab_status', ["pending", "completed", "cancelled"]);
 
 const LabTable = pgTable(
  "labs",
- {
+ {  
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -40,5 +41,10 @@ export const LabRelations = relations(LabTable, ({ one }) => ({
  }),
  
 }));
+
+export const insertLabSchema = createInsertSchema(LabTable);
+
+// Schema for selecting a encounter - can be used to validate API responses
+export const selectLabSchema = createSelectSchema(LabTable);
 
 export default LabTable;

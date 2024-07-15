@@ -1,4 +1,4 @@
-import { createMedication, getMedicationsByPatientId, getMedications, getMedicationsByEncounterId } from "@/data-access/medication";
+import { createMedication, getMedicationsByPatientId, getMedications, getMedicationsByEncounterId, deleteMedication, updateMedication } from "@/data-access/medication";
 
 
 
@@ -21,4 +21,15 @@ export const createMedicationUseCase = async (enounterId: string, medicationData
   // get medications for an encounter use case
   export const getMedicationsForEncounterUseCase = async (encounterId: string) => {
     return await getMedicationsByEncounterId(encounterId)
+  }
+
+  // delete medication use case
+  export const deleteMedicationUseCase = async (medicationId: string) => {
+    return await deleteMedication(medicationId)
+  }
+
+  // update medication use case
+  export const updateMedicationUseCase = async (medicationId: string, medicationData: object) => {
+    return await updateMedication(medicationId, medicationData)   
+
   }
