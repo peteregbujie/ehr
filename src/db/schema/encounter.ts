@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   date,
+  pgEnum,
   pgTable,
   text,
   time,
@@ -17,6 +18,10 @@ import PatientTable from "./patient";
 import ProcedureTable from "./procedure";
 import ProviderTable from "./provider";
 import VitalSignsTable from "./vitalsign";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+
+export const Encounter_type = pgEnum('encounter_type', ["inpatient", "outpatient", "emergency"]);
 
 const EncounterTable = pgTable(
  "encounter",
@@ -24,23 +29,13 @@ const EncounterTable = pgTable(
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  patient_id: text("patient_id")
-   .notNull()
-   .references(() => PatientTable.id, { onDelete: "cascade" }),
-  provider_id: text("provider_id")
-   .notNull()
-   .references(() => ProviderTable.id, { onDelete: "cascade" }),
   appointment_id: text("appointment_id")
    .notNull()
    .references(() => AppointmentTable.id, { onDelete: "cascade" }),
   date:  date('date'),
    time: time('time'),
-  encounter_type: text("encounter_type", {
-   enum: ["inpatient", "outpatient", "emergency"],
-  }).notNull(),
+  encounter_type: Encounter_type('encounter_type').notNull().default('outpatient'),
   chief_complaint: varchar("chief_complaint", { length: 2000 }),
-  medical_history: text("medical_history"),
-  physical_exam: text("physical_exam"),
   assessment_and_plan: text("assessment_and_plan"),
   notes: varchar("notes", { length: 2000 }),
   updated_at: timestamp("updated_at", { mode: "string" })
@@ -60,20 +55,20 @@ export const EncounterRelations = relations(
   allergies: many(AllergiesTable),
    procedures: many(ProcedureTable),  
   labs: many(LabTable),
-  immunizations: many(ImmunizationTable),
-  patients: one(PatientTable, {
-   fields: [EncounterTable.patient_id],
-   references: [PatientTable.id],
-  }),
-  providers: one(ProviderTable, {
-   fields: [EncounterTable.provider_id],
-   references: [ProviderTable.id],
-  }),
+  immunizations: many(ImmunizationTable),  
   appointment: one(AppointmentTable, {
    fields: [EncounterTable.appointment_id],
    references: [AppointmentTable.id],
   }),
  })
 );
+
+
+
+// Schema for inserting a encounter - can be used to validate API requests
+export const insertEncounterSchema = createInsertSchema(EncounterTable);
+
+// Schema for selecting a encounter - can be used to validate API responses
+export const selectEncounterSchema = createSelectSchema(EncounterTable);
 
 export default EncounterTable;

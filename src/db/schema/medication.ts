@@ -1,7 +1,14 @@
 import { relations } from "drizzle-orm";
-import { date, pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { date, pgEnum, pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+
+export const Med_Route = pgEnum('med_route', ["oral", "IV"]);
+
+
+export const Med_Status = pgEnum('med_status', ["active", "Inactive", "suspended", "completed"]);
+
 
 const MedicationTable = pgTable(
  "medication",
@@ -9,12 +16,16 @@ const MedicationTable = pgTable(
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  medication_name: varchar("medication_name", { length: 100 }).notNull(),
-  dosage: varchar("dosage", { length: 100 }),
-  frequency: varchar("frequency", { length: 100 }),
-  encounter_id: text("encounter_id")
+    encounter_id: text("encounter_id")
    .notNull()
    .references(() => EncounterTable.id, { onDelete: "cascade" }),
+  medication_name: varchar("medication_name", { length: 100 }).notNull(),
+  code: varchar("code", { length: 50 }),
+  dosage: varchar("dosage", { length: 100 }),
+  frequency: varchar("frequency", { length: 100 }),
+  route: Med_Route("med_route").notNull(),  
+  status: Med_Status("med_status").notNull(),
+  note: varchar("note", { length: 100 }),
   start_date: date("start_date").notNull(),
   end_date: date("end_date").notNull(),
  },

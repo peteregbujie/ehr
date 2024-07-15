@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   date,
+  pgEnum,
   pgTable,
   text,
   time,
@@ -8,6 +9,8 @@ import {
   varchar
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
+
+export const Severity = pgEnum('severity', ["mild","moderate", "severe"]);
 
 const AllergiesTable = pgTable(
  "allergy",
@@ -20,8 +23,10 @@ const AllergiesTable = pgTable(
    .references(() => EncounterTable.id, { onDelete: "cascade" }),
   allergen: varchar("allergen", { length: 100 }),
   allergy_reaction: varchar("allergy_reaction", { length: 100 }),
-  allergy_date: date("allergy_date").notNull(),
-  allergy_time: time("allergy_time").notNull(),
+ severity: Severity("severity").notNull(),
+  note: varchar("note", { length: 2000 }),
+  updated_At: date("updated_At").notNull(),
+  created_At: date("created_At").notNull(),
  },
  (allergies) => ({
   allergiesIndex: uniqueIndex("allergiesIndex").on(allergies.id),

@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
-import PatientTable from "./patient";
+import EncounterTable from "./encounter";
 
 const InsuranceTable = pgTable(
  "insurance",
@@ -9,9 +9,9 @@ const InsuranceTable = pgTable(
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  patient_id: text("patient_id")
+  encounter_id: text("patient_id")
    .notNull()
-   .references(() => PatientTable.id, { onDelete: "cascade" }),
+   .references(() => EncounterTable.id, { onDelete: "cascade" }),
   company_name: varchar("company_name").notNull(),
   policy_number: varchar("policy_number"),
   group_number: varchar("group_number"),
@@ -23,9 +23,9 @@ const InsuranceTable = pgTable(
 );
 
 export const InsuranceRelations = relations(InsuranceTable, ({ one }) => ({
- patient: one(PatientTable, {
-  fields: [InsuranceTable.patient_id],
-  references: [PatientTable.id],
+ patient: one(EncounterTable, {
+  fields: [InsuranceTable.encounter_id],
+  references: [EncounterTable.id],
  }),
 }));
 

@@ -1,5 +1,5 @@
 {
-  "id": "10b5cf4b-03b6-474f-b6df-2ed132aad86c",
+  "id": "5b1b7199-4e26-45ce-a2c9-ea79c0b74a1a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -166,15 +166,28 @@
           "primaryKey": false,
           "notNull": false
         },
-        "allergy_date": {
-          "name": "allergy_date",
+        "severity": {
+          "name": "severity",
+          "type": "severity",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "varchar(2000)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_At": {
+          "name": "updated_At",
           "type": "date",
           "primaryKey": false,
           "notNull": true
         },
-        "allergy_time": {
-          "name": "allergy_time",
-          "type": "time",
+        "created_At": {
+          "name": "created_At",
+          "type": "date",
           "primaryKey": false,
           "notNull": true
         }
@@ -250,21 +263,24 @@
         },
         "location": {
           "name": "location",
-          "type": "text",
+          "type": "varchar(50)",
           "primaryKey": false,
           "notNull": false
         },
         "appointment_type": {
           "name": "appointment_type",
-          "type": "text",
+          "type": "appointment_type",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "status": {
-          "name": "status",
-          "type": "text",
+        "appointment_status": {
+          "name": "appointment_status",
+          "type": "appointment_status",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'scheduled'"
         },
         "notes": {
           "name": "notes",
@@ -331,21 +347,46 @@
           "primaryKey": true,
           "notNull": true
         },
+        "diagnosis_name": {
+          "name": "diagnosis_name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "diagnosis_code": {
           "name": "diagnosis_code",
-          "type": "varchar",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "encounter_id": {
+          "name": "encounter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "severity": {
+          "name": "severity",
+          "type": "severity",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
         "description": {
           "name": "description",
-          "type": "varchar",
+          "type": "varchar(2000)",
           "primaryKey": false,
           "notNull": false
         },
-        "encounter_id": {
-          "name": "encounter_id",
-          "type": "text",
+        "updated_At": {
+          "name": "updated_At",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_At": {
+          "name": "created_At",
+          "type": "date",
           "primaryKey": false,
           "notNull": true
         }
@@ -395,18 +436,6 @@
           "primaryKey": true,
           "notNull": true
         },
-        "patient_id": {
-          "name": "patient_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_id": {
-          "name": "provider_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "appointment_id": {
           "name": "appointment_id",
           "type": "text",
@@ -427,25 +456,15 @@
         },
         "encounter_type": {
           "name": "encounter_type",
-          "type": "text",
+          "type": "encounter_type",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'outpatient'"
         },
         "chief_complaint": {
           "name": "chief_complaint",
           "type": "varchar(2000)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "medical_history": {
-          "name": "medical_history",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "physical_exam": {
-          "name": "physical_exam",
-          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -487,32 +506,6 @@
         }
       },
       "foreignKeys": {
-        "encounter_patient_id_patient_id_fk": {
-          "name": "encounter_patient_id_patient_id_fk",
-          "tableFrom": "encounter",
-          "tableTo": "patient",
-          "columnsFrom": [
-            "patient_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "encounter_provider_id_provider_id_fk": {
-          "name": "encounter_provider_id_provider_id_fk",
-          "tableFrom": "encounter",
-          "tableTo": "provider",
-          "columnsFrom": [
-            "provider_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "encounter_appointment_id_appointment_id_fk": {
           "name": "encounter_appointment_id_appointment_id_fk",
           "tableFrom": "encounter",
@@ -540,15 +533,15 @@
           "primaryKey": true,
           "notNull": true
         },
-        "patient_id": {
-          "name": "patient_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "vaccine_name": {
           "name": "vaccine_name",
           "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "site": {
+          "name": "site",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -595,19 +588,6 @@
         }
       },
       "foreignKeys": {
-        "immunization_patient_id_patient_id_fk": {
-          "name": "immunization_patient_id_patient_id_fk",
-          "tableFrom": "immunization",
-          "tableTo": "patient",
-          "columnsFrom": [
-            "patient_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "immunization_encounter_id_encounter_id_fk": {
           "name": "immunization_encounter_id_encounter_id_fk",
           "tableFrom": "immunization",
@@ -684,10 +664,10 @@
         }
       },
       "foreignKeys": {
-        "insurance_patient_id_patient_id_fk": {
-          "name": "insurance_patient_id_patient_id_fk",
+        "insurance_patient_id_encounter_id_fk": {
+          "name": "insurance_patient_id_encounter_id_fk",
           "tableFrom": "insurance",
-          "tableTo": "patient",
+          "tableTo": "encounter",
           "columnsFrom": [
             "patient_id"
           ],
@@ -711,9 +691,35 @@
           "primaryKey": true,
           "notNull": true
         },
+        "encounter_id": {
+          "name": "encounter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "lab_name": {
           "name": "lab_name",
           "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "testCode": {
+          "name": "testCode",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lab_status": {
+          "name": "lab_status",
+          "type": "lab_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "comments": {
+          "name": "comments",
+          "type": "varchar(2000)",
           "primaryKey": false,
           "notNull": false
         },
@@ -723,20 +729,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "encounter_id": {
-          "name": "encounter_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "date_ordered": {
-          "name": "date_ordered",
+        "resultDate": {
+          "name": "resultDate",
           "type": "date",
           "primaryKey": false,
           "notNull": false
         },
-        "date_received": {
-          "name": "date_received",
+        "date_ordered": {
+          "name": "date_ordered",
           "type": "date",
           "primaryKey": false,
           "notNull": false
@@ -787,11 +787,23 @@
           "primaryKey": true,
           "notNull": true
         },
+        "encounter_id": {
+          "name": "encounter_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "medication_name": {
           "name": "medication_name",
           "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
         },
         "dosage": {
           "name": "dosage",
@@ -805,11 +817,25 @@
           "primaryKey": false,
           "notNull": false
         },
-        "encounter_id": {
-          "name": "encounter_id",
-          "type": "text",
+        "med_route": {
+          "name": "med_route",
+          "type": "med_route",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
+        },
+        "med_status": {
+          "name": "med_status",
+          "type": "med_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
         },
         "start_date": {
           "name": "start_date",
@@ -893,9 +919,10 @@
           "primaryKey": false,
           "notNull": true
         },
-        "language": {
-          "name": "language",
-          "type": "text",
+        "marital_status": {
+          "name": "marital_status",
+          "type": "marital_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -917,20 +944,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "allergies": {
-          "name": "allergies",
-          "type": "varchar(2000)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "chronic_conditions": {
-          "name": "chronic_conditions",
-          "type": "varchar(2000)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "medications": {
-          "name": "medications",
+        "social_history": {
+          "name": "social_history",
           "type": "varchar(2000)",
           "primaryKey": false,
           "notNull": false
@@ -949,7 +964,8 @@
         },
         "blood_type": {
           "name": "blood_type",
-          "type": "text",
+          "type": "blood_types",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -959,23 +975,13 @@
           "primaryKey": false,
           "notNull": true
         },
-        "insurance_provider": {
-          "name": "insurance_provider",
-          "type": "varchar(50)",
+        "preferred_language": {
+          "name": "preferred_language",
+          "type": "preferred_language",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
-        },
-        "insurance_policy_number": {
-          "name": "insurance_policy_number",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "race": {
-          "name": "race",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'English'"
         },
         " created_at": {
           "name": " created_at",
@@ -983,18 +989,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "last_appointment": {
-          "name": "last_appointment",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "next_appointment_date": {
-          "name": "next_appointment_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
         },
         "notes": {
           "name": "notes",
@@ -1323,7 +1317,7 @@
           "type": "gender",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "date": {
           "name": "date",
@@ -1484,12 +1478,6 @@
           "primaryKey": true,
           "notNull": true
         },
-        "patient_id": {
-          "name": "patient_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "encounter_id": {
           "name": "encounter_id",
           "type": "text",
@@ -1558,11 +1546,11 @@
         }
       },
       "indexes": {
-        "patients__id__idx": {
-          "name": "patients__id__idx",
+        "encounter__id__idx": {
+          "name": "encounter__id__idx",
           "columns": [
             {
-              "expression": "patient_id",
+              "expression": "encounter_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1575,19 +1563,6 @@
         }
       },
       "foreignKeys": {
-        "vital_signs_patient_id_patient_id_fk": {
-          "name": "vital_signs_patient_id_patient_id_fk",
-          "tableFrom": "vital_signs",
-          "tableTo": "patient",
-          "columnsFrom": [
-            "patient_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "vital_signs_encounter_id_encounter_id_fk": {
           "name": "vital_signs_encounter_id_encounter_id_fk",
           "tableFrom": "vital_signs",
@@ -1607,12 +1582,110 @@
     }
   },
   "enums": {
+    "public.appointment_type": {
+      "name": "appointment_type",
+      "schema": "public",
+      "values": [
+        "new_patient",
+        "follow_up",
+        "annual_physical"
+      ]
+    },
+    "public.appointment_status": {
+      "name": "appointment_status",
+      "schema": "public",
+      "values": [
+        "scheduled",
+        "cancelled",
+        "completed"
+      ]
+    },
+    "public.encounter_type": {
+      "name": "encounter_type",
+      "schema": "public",
+      "values": [
+        "inpatient",
+        "outpatient",
+        "emergency"
+      ]
+    },
+    "public.med_route": {
+      "name": "med_route",
+      "schema": "public",
+      "values": [
+        "oral",
+        "IV"
+      ]
+    },
+    "public.med_status": {
+      "name": "med_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "Inactive",
+        "suspended",
+        "completed"
+      ]
+    },
+    "public.severity": {
+      "name": "severity",
+      "schema": "public",
+      "values": [
+        "mild",
+        "moderate",
+        "severe"
+      ]
+    },
+    "public.blood_types": {
+      "name": "blood_types",
+      "schema": "public",
+      "values": [
+        "A positive",
+        "A negative",
+        "B positive",
+        "B negative",
+        "AB positive",
+        "AB negative",
+        "O positive",
+        "O negative"
+      ]
+    },
     "public.gender": {
       "name": "gender",
       "schema": "public",
       "values": [
         "male",
         "female"
+      ]
+    },
+    "public.lab_status": {
+      "name": "lab_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "completed",
+        "cancelled"
+      ]
+    },
+    "public.marital_status": {
+      "name": "marital_status",
+      "schema": "public",
+      "values": [
+        "Married",
+        "Single",
+        "Divorced",
+        "Widowed"
+      ]
+    },
+    "public.preferred_language": {
+      "name": "preferred_language",
+      "schema": "public",
+      "values": [
+        "English",
+        "Spanish",
+        "Vietnamese",
+        "Mandarin",
+        "Portuguese"
       ]
     },
     "public.role": {

@@ -56,15 +56,14 @@ const PatientTable = pgTable(
     emergency_contact_number: numeric("emergency_contact_number", {
       precision: 10,
     }).notNull(),
-    chronic_conditions: varchar("chronic_conditions", { length: 2000 }),
-    past_surgeries: varchar("past_surgeries", { length: 2000 }),
-    family_history: varchar("family_history", { length: 2000 }),
+    socialHistory: varchar("social_history", { length: 2000 }),
+    past_medical_history: varchar("past_surgeries", { length: 2000 }),
+    family_medical_history: varchar("family_history", { length: 2000 }),
     blood_type: bloodTypes("blood_type").notNull(),
     primary_care_physician: text("provider_id")
       .notNull()
       .references(() => ProviderTable.id, { onDelete: "cascade" }),
     preferred_language: preferred_language("preferred_language").notNull().default('English'),
-    race: varchar("race", { length: 50 }),
     created_at: timestamp(" created_at", { mode: "string" })
       .notNull()
       .defaultNow(),
@@ -80,10 +79,7 @@ const PatientTable = pgTable(
 );
 
 export const PatientRelations = relations(PatientTable, ({ one, many }) => ({
-  appointments: many(AppointmentTable),
-  encounter: many(EncounterTable),
-  insurance: many(InsuranceTable),
-  VitalSigns: many(VitalSignsTable),
+  appointments: many(AppointmentTable), 
   providers_patients: many(ProviderPatientTable),
   user: one(UserTable, {
     fields: [PatientTable.user_id],

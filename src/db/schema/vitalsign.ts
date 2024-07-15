@@ -7,7 +7,6 @@ import {
     uniqueIndex
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
-import PatientTable from "./patient";
 
 const VitalSignsTable = pgTable(
   "vital_signs",
@@ -15,9 +14,7 @@ const VitalSignsTable = pgTable(
     id: text("id")
      .primaryKey()
      .$defaultFn(() => crypto.randomUUID()),
-    patient_id: text("patient_id")
-     .notNull()
-          .references(() => PatientTable.id, { onDelete: "cascade" }),
+    
     encounter_id: text("encounter_id")
      .notNull()
           .references(() => EncounterTable.id, { onDelete: "cascade" }),
@@ -39,7 +36,7 @@ const VitalSignsTable = pgTable(
     measured_at: timestamp("measured_at").notNull(),
   },
   (vitalSigns) => ({
-    patientIdIndex: uniqueIndex("patients__id__idx").on(vitalSigns.patient_id),
+    encounterIndex: uniqueIndex("encounter__id__idx").on(vitalSigns.encounter_id),
   })
 );
 
@@ -49,10 +46,7 @@ export const VitalSignRelations = relations(VitalSignsTable, ({ one }) => ({
   fields: [VitalSignsTable.encounter_id],
   references: [EncounterTable.id],
  }),
-patient: one(PatientTable, {
-  fields: [VitalSignsTable.patient_id],
-  references: [PatientTable.id],
- }),
+
  
 }));
 

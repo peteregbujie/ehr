@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   date,
+  pgEnum,
   pgTable,
   text,
   time,
@@ -9,6 +10,12 @@ import {
 } from "drizzle-orm/pg-core";
 import PatientTable from "./patient";
 import ProviderTable from "./provider";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
+
+
+export const Appointment_type = pgEnum('appointment_type', ["new_patient", "follow_up", "annual_physical"]);
+export const Apt_Status = pgEnum('appointment_status', ["scheduled", "cancelled", "completed"]);
 
 const AppointmentTable = pgTable(
  "appointment",
@@ -24,13 +31,9 @@ const AppointmentTable = pgTable(
      .references(() => ProviderTable.id, { onDelete: "cascade" }),
   scheduled_date:  date('scheduled_date'),
    scheduled_time: time('scheduled_time'),
-  location: text("location"),
-  type: text("appointment_type", {
-   enum: ["new_patient", "follow_up", "annual_physical"],
-  }).notNull(),
-  status: text("status", {
-   enum: ['scheduled', 'cancelled', 'completed'],
-  }).notNull(),
+  location: varchar("location", { length: 50 }),
+  type: Appointment_type('appointment_type'),
+  status: Apt_Status('appointment_status').default("scheduled").notNull(),
   notes: varchar("notes", { length: 500 }),
  },
  (appointment) => ({
@@ -48,5 +51,11 @@ export const AppointmentRelations = relations(AppointmentTable, ({ one }) => ({
   references: [ProviderTable.id],
  }),
 }));
+
+// Schema for inserting a medication - can be used to validate API requests
+export const insertAppointmentSchema = createInsertSchema(AppointmentTable);
+
+// Schema for selecting a medication - can be used to validate API responses
+export const selectAppointmentSchema = createSelectSchema(AppointmentTable);
 
 export default AppointmentTable;

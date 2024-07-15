@@ -24,7 +24,7 @@ export async function updatePatientUseCase(
     await updatePatient(patientId, data);
 }
 
-export async function getPatientUseCase(
+export async function getPatientByIdUseCase(
 
     patientId: PatientId,
 

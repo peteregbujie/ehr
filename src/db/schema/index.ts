@@ -1,10 +1,9 @@
 export { default as AdminTable, AdminsRelations } from "./admin";
-export { AllergiesRelations, default as AllergiesTable } from "./allergy";
+export { AllergiesRelations, default as AllergiesTable, Severity } from "./allergy";
 export {
     AppointmentRelations,
-    default as AppointmentTable
-} from "./appointment";
-export { DiagnosisRelations, default as DiagnosisTable } from "./diagnosis";
+    default as AppointmentTable, Appointment_type, Apt_Status} from "./appointment";
+export { DiagnosisRelations, default as DiagnosisTable, severity } from "./diagnosis";
 export { AccountsTable, SessionsTable, default as UserTable, UsersRelations, VerificationTokensTable, userRoles, gender_id } from "./user";
 
 export {
@@ -14,7 +13,7 @@ export {
 
 export { default as ProviderTable, providerRelations } from "./provider";
 
-export { EncounterRelations, default as EncounterTable } from "./encounter";
+export { EncounterRelations, default as EncounterTable, Encounter_type } from "./encounter";
 
 export {
     ImmunizationRelations,
@@ -23,9 +22,9 @@ export {
 
 export { InsuranceRelations, default as InsuranceTable } from "./insurance";
 
-export { LabRelations, default as LabTable } from "./labs";
+export { LabRelations, default as LabTable, lab_status } from "./labs";
 
-export { MedicationRelations, default as MedicationTable } from "./medication";
+export { MedicationRelations, default as MedicationTable, Med_Route, Med_Status } from "./medication";
 
 export { VitalSignRelations, default as VitalSignTable } from "./vitalsign";
 

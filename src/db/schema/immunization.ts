@@ -8,18 +8,16 @@ import {
   varchar
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
-import PatientTable from "./patient";
+
 
 const ImmunizationTable = pgTable(
  "immunization",
  {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  patient_id: text("patient_id")
-   .notNull()
-   .references(() => PatientTable.id, { onDelete: "cascade" }),
+    .$defaultFn(() => crypto.randomUUID()), 
   vaccine_name: varchar("vaccine_name", { length: 100 }).notNull(),
+  site: text("site").notNull(),
   date_administered: date("date_administered").notNull(),
   time_administered: time("time_administered").notNull(),
   encounter_id: text("encounter_id")
@@ -39,10 +37,7 @@ export const ImmunizationRelations = relations(
    fields: [ImmunizationTable.encounter_id],
    references: [EncounterTable.id],
   }),
-  patient: one(PatientTable, {
-   fields: [ImmunizationTable.patient_id],
-   references: [PatientTable.id],
-  }),
+
  })
 );
 

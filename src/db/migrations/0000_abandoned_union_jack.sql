@@ -1,5 +1,65 @@
 DO $$ BEGIN
+ CREATE TYPE "public"."appointment_type" AS ENUM('new_patient', 'follow_up', 'annual_physical');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."appointment_status" AS ENUM('scheduled', 'cancelled', 'completed');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."encounter_type" AS ENUM('inpatient', 'outpatient', 'emergency');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."med_route" AS ENUM('oral', 'IV');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."med_status" AS ENUM('active', 'Inactive', 'suspended', 'completed');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."severity" AS ENUM('mild', 'moderate', 'severe');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."blood_types" AS ENUM('A positive', 'A negative', 'B positive', 'B negative', 'AB positive', 'AB negative', 'O positive', 'O negative');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "public"."gender" AS ENUM('male', 'female');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."lab_status" AS ENUM('pending', 'completed', 'cancelled');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."marital_status" AS ENUM('Married', 'Single', 'Divorced', 'Widowed');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."preferred_language" AS ENUM('English', 'Spanish', 'Vietnamese', 'Mandarin', 'Portuguese');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -35,8 +95,10 @@ CREATE TABLE IF NOT EXISTS "allergy" (
 	"encounter_id" text NOT NULL,
 	"allergen" varchar(100),
 	"allergy_reaction" varchar(100),
-	"allergy_date" date NOT NULL,
-	"allergy_time" time NOT NULL
+	"severity" "severity" NOT NULL,
+	"note" varchar(2000),
+	"updated_At" date NOT NULL,
+	"created_At" date NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "appointment" (
@@ -45,30 +107,30 @@ CREATE TABLE IF NOT EXISTS "appointment" (
 	"provider_id" text NOT NULL,
 	"scheduled_date" date,
 	"scheduled_time" time,
-	"location" text,
-	"appointment_type" text NOT NULL,
-	"status" text NOT NULL,
+	"location" varchar(50),
+	"appointment_type" "appointment_type",
+	"appointment_status" "appointment_status" DEFAULT 'scheduled' NOT NULL,
 	"notes" varchar(500)
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "diagnosis" (
 	"id" text PRIMARY KEY NOT NULL,
-	"diagnosis_code" varchar NOT NULL,
-	"description" varchar,
-	"encounter_id" text NOT NULL
+	"diagnosis_name" varchar(50) NOT NULL,
+	"diagnosis_code" varchar(50) NOT NULL,
+	"encounter_id" text NOT NULL,
+	"severity" "severity" NOT NULL,
+	"description" varchar(2000),
+	"updated_At" date NOT NULL,
+	"created_At" date NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "encounter" (
 	"id" text PRIMARY KEY NOT NULL,
-	"patient_id" text NOT NULL,
-	"provider_id" text NOT NULL,
 	"appointment_id" text NOT NULL,
 	"date" date,
 	"time" time,
-	"encounter_type" text NOT NULL,
+	"encounter_type" "encounter_type" DEFAULT 'outpatient' NOT NULL,
 	"chief_complaint" varchar(2000),
-	"medical_history" text,
-	"physical_exam" text,
 	"assessment_and_plan" text,
 	"notes" varchar(2000),
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -76,8 +138,8 @@ CREATE TABLE IF NOT EXISTS "encounter" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "immunization" (
 	"id" text PRIMARY KEY NOT NULL,
-	"patient_id" text NOT NULL,
 	"vaccine_name" varchar(100) NOT NULL,
+	"site" text NOT NULL,
 	"date_administered" date NOT NULL,
 	"time_administered" time NOT NULL,
 	"encounter_id" text NOT NULL,
@@ -95,19 +157,26 @@ CREATE TABLE IF NOT EXISTS "insurance" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "labs" (
 	"id" text PRIMARY KEY NOT NULL,
-	"lab_name" varchar(100),
-	"lab_result" varchar(2000),
 	"encounter_id" text NOT NULL,
-	"date_ordered" date,
-	"date_received" date
+	"lab_name" varchar(100),
+	"testCode" varchar(100),
+	"lab_status" "lab_status" DEFAULT 'pending' NOT NULL,
+	"comments" varchar(2000),
+	"lab_result" varchar(2000),
+	"resultDate" date,
+	"date_ordered" date
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "medication" (
 	"id" text PRIMARY KEY NOT NULL,
+	"encounter_id" text NOT NULL,
 	"medication_name" varchar(100) NOT NULL,
+	"code" varchar(50),
 	"dosage" varchar(100),
 	"frequency" varchar(100),
-	"encounter_id" text NOT NULL,
+	"med_route" "med_route" NOT NULL,
+	"med_status" "med_status" NOT NULL,
+	"note" varchar(100),
 	"start_date" date NOT NULL,
 	"end_date" date NOT NULL
 );
@@ -118,23 +187,17 @@ CREATE TABLE IF NOT EXISTS "patient" (
 	"height" numeric(3, 2) NOT NULL,
 	"weight" numeric(3) NOT NULL,
 	"occupation" varchar(50) NOT NULL,
-	"language" text NOT NULL,
+	"marital_status" "marital_status" NOT NULL,
 	"emergency_contact_name" varchar(50) NOT NULL,
 	"emergency_contact_relationship" varchar(50) NOT NULL,
 	"emergency_contact_number" numeric(10) NOT NULL,
-	"allergies" varchar(2000),
-	"chronic_conditions" varchar(2000),
-	"medications" varchar(2000),
+	"social_history" varchar(2000),
 	"past_surgeries" varchar(2000),
 	"family_history" varchar(2000),
-	"blood_type" text NOT NULL,
+	"blood_type" "blood_types" NOT NULL,
 	"provider_id" text NOT NULL,
-	"insurance_provider" varchar(50),
-	"insurance_policy_number" varchar(50),
-	"race" varchar(50),
+	"preferred_language" "preferred_language" DEFAULT 'English' NOT NULL,
 	" created_at" timestamp DEFAULT now() NOT NULL,
-	"last_appointment" date,
-	"next_appointment_date" date,
 	"notes" varchar(2000)
 );
 --> statement-breakpoint
@@ -171,7 +234,7 @@ CREATE TABLE IF NOT EXISTS "session" (
 CREATE TABLE IF NOT EXISTS "user" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" varchar(100),
-	"gender" "gender",
+	"gender" "gender" NOT NULL,
 	"date" date,
 	"phone_number" numeric(10),
 	"email" varchar(30) NOT NULL,
@@ -197,7 +260,6 @@ CREATE TABLE IF NOT EXISTS "verificationToken" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "vital_signs" (
 	"id" text PRIMARY KEY NOT NULL,
-	"patient_id" text NOT NULL,
 	"encounter_id" text NOT NULL,
 	"height" numeric(3, 2) NOT NULL,
 	"weight" numeric(3) NOT NULL,
@@ -248,25 +310,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "encounter" ADD CONSTRAINT "encounter_patient_id_patient_id_fk" FOREIGN KEY ("patient_id") REFERENCES "public"."patient"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "encounter" ADD CONSTRAINT "encounter_provider_id_provider_id_fk" FOREIGN KEY ("provider_id") REFERENCES "public"."provider"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "encounter" ADD CONSTRAINT "encounter_appointment_id_appointment_id_fk" FOREIGN KEY ("appointment_id") REFERENCES "public"."appointment"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "immunization" ADD CONSTRAINT "immunization_patient_id_patient_id_fk" FOREIGN KEY ("patient_id") REFERENCES "public"."patient"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -278,7 +322,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "insurance" ADD CONSTRAINT "insurance_patient_id_patient_id_fk" FOREIGN KEY ("patient_id") REFERENCES "public"."patient"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "insurance" ADD CONSTRAINT "insurance_patient_id_encounter_id_fk" FOREIGN KEY ("patient_id") REFERENCES "public"."encounter"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -338,12 +382,6 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "vital_signs" ADD CONSTRAINT "vital_signs_patient_id_patient_id_fk" FOREIGN KEY ("patient_id") REFERENCES "public"."patient"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "vital_signs" ADD CONSTRAINT "vital_signs_encounter_id_encounter_id_fk" FOREIGN KEY ("encounter_id") REFERENCES "public"."encounter"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -361,4 +399,4 @@ CREATE UNIQUE INDEX IF NOT EXISTS "patientIndex" ON "patient" USING btree ("id")
 CREATE UNIQUE INDEX IF NOT EXISTS "proceduresIndex" ON "procedure" USING btree ("id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "providerIndex" ON "provider" USING btree ("id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "users__email__idx" ON "user" USING btree ("email");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "patients__id__idx" ON "vital_signs" USING btree ("patient_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "encounter__id__idx" ON "vital_signs" USING btree ("encounter_id");
