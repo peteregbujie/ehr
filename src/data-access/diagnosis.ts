@@ -7,7 +7,7 @@ import { DiagnosisTable } from "@/db/schema";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncounterById, getEncountersByAppointmentId } from "./encouter";
 import { eq } from 'drizzle-orm';
-import { getAppointmentsAndEncountersByPatientId, getAppointmentByPatientId, getAppointmentsAndEncountersByProviderId } from "./appointment";
+import { getAppointmentsAndEncountersByPatientId,  getAppointmentsAndEncountersByProviderId } from "./appointment";
 import { insertDiagnosisSchema } from "@/db/schema/diagnosis";
 import { getLabByEncounterId } from "./lab";
 
@@ -80,7 +80,7 @@ export async function getDiagnosesByPatientId(patientId: string) {
   
     // Step 3: For each encounter, get labs
       for (const encounter of Encounters) {
-        const allDiagnoses = await getLabByEncounterId(encounter.id);
+        const allDiagnoses = await getDiagnosisByEncounterId(encounter.id);
         diagnoses.push(...allDiagnoses);
       }
     

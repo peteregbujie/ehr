@@ -16,7 +16,7 @@ import {
 import AdminTable from "./admin";
 import PatientTable from "./patient";
 import ProviderTable from "./provider";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 
 
@@ -119,6 +119,8 @@ export const VerificationTokensTable = pgTable(
 )
 
 export const insertUserSchema = createInsertSchema(UserTable);
+export const selectUserSchema = createSelectSchema(UserTable);
+
 
 
 

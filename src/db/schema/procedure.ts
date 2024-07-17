@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import EncounterTable from "./encounter";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 const ProcedureTable = pgTable(
  "procedure",
@@ -38,5 +39,10 @@ export const ProcedureRelations = relations(ProcedureTable, ({ one }) => ({
  }),
  
 }));
+
+export const insertProcedureSchema = createInsertSchema(ProcedureTable);
+
+// Schema for selecting a patient - can be used to validate API responses
+export const selectProcedureSchema = createSelectSchema(ProcedureTable);
 
 export default ProcedureTable;

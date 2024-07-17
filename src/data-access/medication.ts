@@ -1,10 +1,10 @@
 import db from "@/db";
-import { MedicationTable, PatientTable } from "@/db/schema";
-import { insertMedicationSchema, selectMedicationSchema } from "@/db/schema/medication";
+import { MedicationTable } from "@/db/schema";
+import { insertMedicationSchema,  } from "@/db/schema/medication";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import { createEncounter, getEncounterById, getEncountersByAppointmentId } from "./encouter";
+import {  getEncounterById} from "./encouter";
 import { eq } from 'drizzle-orm';
-import { getAppointmentsAndEncountersByPatientId, getAppointmentByPatientId } from "./appointment";
+import { getAppointmentsAndEncountersByPatientId } from "./appointment";
 
 
 
