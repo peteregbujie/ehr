@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
+import { updateUserNameFn } from "@/data-access/user";
 import { userNameSchema } from "@/lib/validations/user";
 import { revalidatePath } from "next/cache";
 
@@ -19,7 +20,7 @@ export async function updateUserName(userId: string, data: FormData) {
        const { name } = userNameSchema.parse(data);
 
     // Update the user name.
-    await updateUserName(userId, {name});
+    await updateUserNameFn(userId, name);
 
     revalidatePath('/settings');
     return { status: "success" };

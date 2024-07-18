@@ -66,7 +66,7 @@ export async function getUsers() {
 
 
 // change user role
-export async function updateUserRole(userId: UserId, role: UserRoles) {
+export async function updateUserRoleFn(userId: UserId, role: UserRoles) {
    
     const updatedUser = await db.update(UserTable).set({ role}).where(eq(UserTable.id, userId)).returning();
    
@@ -75,7 +75,7 @@ export async function updateUserRole(userId: UserId, role: UserRoles) {
 }   
 
 //update user name
-export async function updateUserName(userId: UserId, name: string) {
+export async function updateUserNameFn(userId: UserId, name: string) {
     await db.update(UserTable).set({ name}).where(eq(UserTable.id, userId)).returning();
 }
 

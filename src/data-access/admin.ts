@@ -1,6 +1,6 @@
 // create a provider
 
-import { createUser, getUserById, updateUserRole } from "./user";
+import { createUser, getUserById,  updateUserRoleFn } from "./user";
 import { updateProvider } from "./provider";
 import { ProviderTypes } from "@/db/schema/provider";
 import { AdminTable } from "@/db/schema";
@@ -16,7 +16,7 @@ export const createAdmin = async (UserId: string, providerData: ProviderTypes )=
     if (!user) {
         createUser(UserId);
     }
-  const updatedUser = await updateUserRole(UserId, "admin");
+  const updatedUser = await updateUserRoleFn(UserId, "admin");
 
   const newAdmin = await updateProvider(updatedUser.id, providerData );
   return { newAdmin}

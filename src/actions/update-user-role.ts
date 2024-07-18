@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { UserRoles, userRoleSchema } from "@/lib/validations/user";
 import { auth } from "@/auth";
+import { updateUserRoleFn } from "@/data-access/user";
 
 
 export type FormData = {
@@ -20,7 +21,7 @@ export async function updateUserRole(userId: string, data: FormData) {
     const { role } = userRoleSchema.parse(data);
 
     // Update the user role.
-    await updateUserRole(userId, { role });
+    await updateUserRoleFn(userId,  role );
 
     revalidatePath("/settings");
     return { status: "success" };
