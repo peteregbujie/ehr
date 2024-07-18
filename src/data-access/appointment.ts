@@ -1,11 +1,11 @@
 import db, { eq } from "@/db";
-import AppointmentTable, { insertAppointmentSchema } from "@/db/schema/appointment";
+import AppointmentTable, { AppointmentTypes, insertAppointmentSchema } from "@/db/schema/appointment";
 import { InvalidDataError } from "@/use-cases/errors";
 import { getEncountersByAppointmentId } from "./encouter";
 
 
 //create appointment
-export const createAppointment = async (appointmentData: object) => {
+export const createAppointment = async (appointmentData: AppointmentTypes) => {
     // Parse the input data against the schema
     const parsedData = insertAppointmentSchema.safeParse(appointmentData); 
 
@@ -46,7 +46,7 @@ export const getAppointmentById = async (appointmentId: string) => {
 
 
 //update appointment
-export const updateAppointment = async (appointmentId: string, appointmentData: object) => {
+export const updateAppointment = async (appointmentId: string, appointmentData: AppointmentTypes) => {
     // Parse the input data against the schema  
     const parsedData = insertAppointmentSchema.safeParse(appointmentData);
 

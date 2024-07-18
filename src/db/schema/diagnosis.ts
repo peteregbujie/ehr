@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import { date, pgEnum, pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -35,10 +35,10 @@ export const DiagnosisRelations = relations(DiagnosisTable, ({ one }) => ({
  
 }));
 
-// Schema for inserting a medication - can be used to validate API requests
 export const insertDiagnosisSchema = createInsertSchema(DiagnosisTable);
 
-// Schema for selecting a medication - can be used to validate API responses
 export const selectDiagnosisSchema = createSelectSchema(DiagnosisTable);
+
+export type DiagnosisTypes = InferSelectModel<typeof DiagnosisTable>
 
 export default DiagnosisTable;

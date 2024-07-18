@@ -1,7 +1,6 @@
 import avatarPlaceholder from "@/assets/images/avatar_placeholder.png";
 import { Lock, LogOut, Settings } from "lucide-react";
-import { User } from "next-auth";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "./ui/button";
@@ -14,14 +13,18 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { getCurrentUser } from "@/lib/session";
+import { NotFoundError } from "@/use-cases/errors";
 
 
-interface UserButtonProps {
- user: User;
-}
+export default  function UserButton() {
+  
+  const { data: session} = useSession();
 
-export default function UserButton({ user }: UserButtonProps) {
- return (
+  if (!session || !session.user) return new NotFoundError();    
+
+  const user = session.user;
+
   <DropdownMenu>
    <DropdownMenuTrigger asChild>
     <Button size="icon" className="flex-none rounded-full">
@@ -64,5 +67,5 @@ export default function UserButton({ user }: UserButtonProps) {
     </DropdownMenuItem>
    </DropdownMenuContent>
   </DropdownMenu>
- );
+ 
 }

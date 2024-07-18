@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
   pgEnum,
@@ -52,10 +52,10 @@ export const AppointmentRelations = relations(AppointmentTable, ({ one }) => ({
  }),
 }));
 
-// Schema for inserting a medication - can be used to validate API requests
 export const insertAppointmentSchema = createInsertSchema(AppointmentTable);
 
-// Schema for selecting a medication - can be used to validate API responses
 export const selectAppointmentSchema = createSelectSchema(AppointmentTable);
+
+export type AppointmentTypes = InferSelectModel<typeof AppointmentTable>
 
 export default AppointmentTable;

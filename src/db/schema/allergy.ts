@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
   pgEnum,
@@ -9,6 +9,7 @@ import {
   varchar
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const Severity = pgEnum('severity', ["mild","moderate", "severe"]);
 
@@ -39,5 +40,11 @@ export const AllergiesRelations = relations(AllergiesTable, ({ one }) => ({
   references: [EncounterTable.id],
  }),
 }));
+
+export const insertAllergiesSchema = createInsertSchema(AllergiesTable);
+
+export const selectAllergiesSchema = createSelectSchema(AllergiesTable);
+
+export type AllergiesTypes = InferSelectModel<typeof AllergiesTable>
 
 export default AllergiesTable;

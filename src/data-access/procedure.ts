@@ -8,7 +8,7 @@ import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncounterById,  } from "./encouter";
 import { eq } from 'drizzle-orm';
 import { getAppointmentsAndEncountersByPatientId,  getAppointmentsAndEncountersByProviderId } from "./appointment";
-import { insertProcedureSchema } from "@/db/schema/procedure";
+import { insertProcedureSchema, ProcedureTypes } from "@/db/schema/procedure";
 
 
 
@@ -18,16 +18,15 @@ export const getProcedure = async () => {
 }
 
 
-  export async function createProcedure(EncounterId:string, diagnosisData: object) {
+  export async function createProcedure(EncounterId:string, procedureData: ProcedureTypes) {
     // Step 1: Fetch the encounter
     const encounter = await getEncounterById(EncounterId);
   
     if (!encounter) {
       throw new NotFoundError();
     }          
-       // Now parsedData.data should conform to InsertProcedureDataType
-       // Step 3: Create the diagnosis with the (existing or new) encounterId
-       const parsedData = insertProcedureSchema.safeParse({...diagnosisData, encounter_id: encounter.id});
+     
+       const parsedData = insertProcedureSchema.safeParse(procedureData);
 
        if (!parsedData.success) {
            throw new InvalidDataError();
@@ -94,6 +93,6 @@ export async function getProceduresByPatientId(patientId: string) {
   }
 
   // update diagnosis
-  export const updateProcedure = async (diagnosisId: string, diagnosisData: object) => {
-    await db.update(ProcedureTable).set(diagnosisData).where(eq(ProcedureTable.id, diagnosisId)).returning();
+  export const updateProcedure = async (procedureId: string, procedureData: ProcedureTypes) => {
+    await db.update(ProcedureTable).set(procedureData).where(eq(ProcedureTable.id, procedureId)).returning();
   }

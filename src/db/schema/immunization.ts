@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
   pgTable,
@@ -8,6 +8,7 @@ import {
   varchar
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 
 const ImmunizationTable = pgTable(
@@ -40,5 +41,11 @@ export const ImmunizationRelations = relations(
 
  })
 );
+
+export const insertImmunizationSchema = createInsertSchema(ImmunizationTable);
+
+export const selectImmunizationSchema = createSelectSchema(ImmunizationTable);
+
+export type ImmunizationTypes = InferSelectModel<typeof ImmunizationTable>
 
 export default ImmunizationTable;

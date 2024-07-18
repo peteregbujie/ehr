@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
   pgEnum,
@@ -70,5 +70,7 @@ export const insertEncounterSchema = createInsertSchema(EncounterTable);
 
 // Schema for selecting a encounter - can be used to validate API responses
 export const selectEncounterSchema = createSelectSchema(EncounterTable);
+
+export type EncounterTypes = InferSelectModel<typeof EncounterTable>
 
 export default EncounterTable;

@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
   pgEnum,
@@ -46,5 +46,7 @@ export const insertLabSchema = createInsertSchema(LabTable);
 
 // Schema for selecting a encounter - can be used to validate API responses
 export const selectLabSchema = createSelectSchema(LabTable);
+
+export type LabTypes = InferSelectModel<typeof LabTable>
 
 export default LabTable;

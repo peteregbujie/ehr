@@ -1,5 +1,6 @@
 
 import { createDiagnosis, deleteDiagnosis, getDiagnosesByPatientId, getDiagnosesByProviderId, getDiagnosis, getDiagnosisByEncounterId, updateDiagnosis } from "@/data-access/diagnosis";
+import { DiagnosisTypes } from "@/db/schema/diagnosis";
 
 
 
@@ -14,7 +15,7 @@ export const getDiagnosisByPatientIdUseCase = async (patientId: string) => {
 }
 
 // create Diagnosis use case
-export const createDiagnosisUseCase = async (enounterId: string, diagnosisData: object) => {
+export const createDiagnosisUseCase = async (enounterId: string, diagnosisData: DiagnosisTypes) => {
     return await createDiagnosis(enounterId, diagnosisData)
 }
 
@@ -35,7 +36,7 @@ export const createDiagnosisUseCase = async (enounterId: string, diagnosisData: 
   }
 
   // update diagnosis use case
-  export const updateDiagnosisUseCase = async (diagnosisId: string, diagnosisData: object) => {
+  export const updateDiagnosisUseCase = async (diagnosisId: string, diagnosisData: DiagnosisTypes) => {
     return await updateDiagnosis(diagnosisId, diagnosisData)
   }
   

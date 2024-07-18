@@ -1,4 +1,5 @@
 import { createMedication, getMedicationsByPatientId, getMedications, getMedicationsByEncounterId, deleteMedication, updateMedication } from "@/data-access/medication";
+import { MedicationTypes } from "@/db/schema/medication";
 
 
 
@@ -13,7 +14,7 @@ export const getMedicationsByPatientIdUseCase = async (patientId: string) => {
 }
 
 // create Medication use case
-export const createMedicationUseCase = async (enounterId: string, medicationData: object) => {
+export const createMedicationUseCase = async (enounterId: string, medicationData: MedicationTypes) => {
     return await createMedication(enounterId, medicationData)
 }
 
@@ -29,7 +30,7 @@ export const createMedicationUseCase = async (enounterId: string, medicationData
   }
 
   // update medication use case
-  export const updateMedicationUseCase = async (medicationId: string, medicationData: object) => {
+  export const updateMedicationUseCase = async (medicationId: string, medicationData: MedicationTypes) => {
     return await updateMedication(medicationId, medicationData)   
 
   }

@@ -1,5 +1,6 @@
 
 import { createLab, getLabsByPatientId, getLab, getLabByEncounterId, getLabsByProviderId, deleteLab, updateLab } from "@/data-access/lab"
+import { LabTypes } from "@/db/schema/labs"
 
 
 
@@ -20,7 +21,7 @@ export const getLabByProviderIdUseCase = async (providerId: string) => {
 }
 
 // create Lab use case
-export const createLabUseCase = async (enounterId: string, labData: object) => {
+export const createLabUseCase = async (enounterId: string, labData: LabTypes) => {
     return await createLab(enounterId, labData)
 }
 
@@ -37,6 +38,6 @@ export const createLabUseCase = async (enounterId: string, labData: object) => {
 
 
   // update lab use case
-  export const updateLabUseCase = async (labId: string, labData: object) => {
+  export const updateLabUseCase = async (labId: string, labData: LabTypes) => {
     return await updateLab(labId, labData)
   }

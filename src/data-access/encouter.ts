@@ -1,6 +1,6 @@
 import db, { eq } from "@/db";
 import { EncounterTable } from "@/db/schema";
-import { insertEncounterSchema } from "@/db/schema/encounter";
+import { EncounterTypes, insertEncounterSchema } from "@/db/schema/encounter";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { EncounterId } from "@/use-cases/types";
 import { getAppointmentById } from "./appointment";
@@ -8,7 +8,7 @@ import { getAppointmentById } from "./appointment";
 
 
 
-export const createEncounter = async (encounterData: object, AppointmentId:string) => {
+export const createEncounter = async (encounterData: EncounterTypes, AppointmentId:string) => {
 
     const appointment = await getAppointmentById(AppointmentId);
 
@@ -18,7 +18,7 @@ export const createEncounter = async (encounterData: object, AppointmentId:strin
 
 
     // Parse the input data against the schema  
-    const parsedData = insertEncounterSchema.safeParse({appointment_id:appointment.id, ...encounterData});
+    const parsedData = insertEncounterSchema.safeParse(encounterData);
 
     if (!parsedData.success) {
         throw new InvalidDataError();
@@ -44,7 +44,7 @@ export const getEncounters  = async () => {
 }
 
 
-export const updateEncounter = async (encounterId: EncounterId, data: unknown) => {
+export const updateEncounter = async (encounterId: EncounterId, data: EncounterTypes) => {
     // Parse the input data against the schema  
     const parsedData = insertEncounterSchema.safeParse(data);
 

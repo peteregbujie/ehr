@@ -1,4 +1,5 @@
 import { createAppointment, deleteAppointment, getAllAppointments, getAppointmentById,  getAppointmentByPatientId,  getAppointmentByProviderId, updateAppointment } from "@/data-access/appointment";
+import { AppointmentTypes } from "@/db/schema/appointment";
 
 
 // get all appointments use case
@@ -12,7 +13,7 @@ export async function getAppointmentByIdUseCase (appointmentId: string) {
 }
 
 // update appointment use case
-export async function updateAppointmentUseCase (appointmentId: string, data: object) {
+export async function updateAppointmentUseCase (appointmentId: string, data: AppointmentTypes) {
     return await updateAppointment(appointmentId, data)
 }
 
@@ -22,7 +23,7 @@ export async function deleteAppointmentUseCase (appointmentId: string) {
 }
 
 // create appointment use case
-export async function createAppointmentUseCase (data: object) {
+export async function createAppointmentUseCase (data: AppointmentTypes) {
     return await createAppointment(data)
 }
 

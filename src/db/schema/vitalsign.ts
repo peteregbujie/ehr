@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
     numeric,
     pgTable,
@@ -7,6 +7,7 @@ import {
     uniqueIndex
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 const VitalSignsTable = pgTable(
   "vital_signs",
@@ -49,5 +50,13 @@ export const VitalSignRelations = relations(VitalSignsTable, ({ one }) => ({
 
  
 }));
+
+export type VitalSignTypes = InferSelectModel<typeof VitalSignsTable>
+
+export const insertVitalSignSchema = createInsertSchema(VitalSignsTable);
+
+export const selectVitalSignSchema = createSelectSchema(VitalSignsTable);
+
+
 
 export default VitalSignsTable;

@@ -8,7 +8,7 @@ import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncounterById, getEncountersByAppointmentId } from "./encouter";
 import { eq } from 'drizzle-orm';
 import { getAppointmentsAndEncountersByPatientId,  getAppointmentsAndEncountersByProviderId } from "./appointment";
-import { insertDiagnosisSchema } from "@/db/schema/diagnosis";
+import { DiagnosisTypes, insertDiagnosisSchema } from "@/db/schema/diagnosis";
 import { getLabByEncounterId } from "./lab";
 
 
@@ -19,7 +19,7 @@ export const getDiagnosis = async () => {
 }
 
 
-  export async function createDiagnosis(EncounterId:string, diagnosisData: object) {
+  export async function createDiagnosis(EncounterId:string, diagnosisData: DiagnosisTypes) {
     // Step 1: Fetch the encounter
     const encounter = await getEncounterById(EncounterId);
   
@@ -95,6 +95,6 @@ export async function getDiagnosesByPatientId(patientId: string) {
   }
 
   // update diagnosis
-  export const updateDiagnosis = async (diagnosisId: string, diagnosisData: object) => {
+  export const updateDiagnosis = async (diagnosisId: string, diagnosisData: DiagnosisTypes) => {
     await db.update(DiagnosisTable).set(diagnosisData).where(eq(DiagnosisTable.id, diagnosisId)).returning();
   }

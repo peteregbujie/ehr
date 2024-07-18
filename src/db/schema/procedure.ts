@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
   numeric,
@@ -42,7 +42,10 @@ export const ProcedureRelations = relations(ProcedureTable, ({ one }) => ({
 
 export const insertProcedureSchema = createInsertSchema(ProcedureTable);
 
-// Schema for selecting a patient - can be used to validate API responses
 export const selectProcedureSchema = createSelectSchema(ProcedureTable);
+
+export type ProcedureTypes = InferSelectModel<typeof ProcedureTable>
+
+
 
 export default ProcedureTable;

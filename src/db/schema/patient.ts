@@ -1,7 +1,6 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 
 import {
-  date,
   numeric,
   pgEnum,
   pgTable,
@@ -11,14 +10,12 @@ import {
   varchar
 } from "drizzle-orm/pg-core";
 import AppointmentTable from "./appointment";
-import EncounterTable from "./encounter";
-import InsuranceTable from "./insurance";
 
 import ProviderTable from "./provider";
 import ProviderPatientTable from "./provider_patient";
 import UserTable from "./user";
-import VitalSignsTable from "./vitalsign";
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import InsuranceTable from "./insurance";
 
 
 
@@ -81,6 +78,10 @@ const PatientTable = pgTable(
 export const PatientRelations = relations(PatientTable, ({ one, many }) => ({
   appointments: many(AppointmentTable), 
   providers_patients: many(ProviderPatientTable),
+  insurance: one(InsuranceTable, {
+    fields: [PatientTable.user_id],
+    references: [InsuranceTable.id],
+  }),
   user: one(UserTable, {
     fields: [PatientTable.user_id],
     references: [UserTable.id],
@@ -92,5 +93,8 @@ export const insertPatientSchema = createInsertSchema(PatientTable);
 
 // Schema for selecting a patient - can be used to validate API responses
 export const selectPatientSchema = createSelectSchema(PatientTable);
+
+
+export type PatientTypes = InferSelectModel<typeof PatientTable>
 
 export default PatientTable;

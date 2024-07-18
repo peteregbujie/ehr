@@ -1,9 +1,10 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import { pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import AppointmentTable from "./appointment";
 import EncounterTable from "./encounter";
 import ProviderPatientTable from "./provider_patient";
 import UserTable from "./user";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 const ProviderTable = pgTable(
  "provider",
@@ -38,5 +39,12 @@ export const providerRelations = relations(ProviderTable, ({ one, many }) => ({
   references: [UserTable.id],
  }),
 }));
+
+
+
+export const insertProviderSchema = createInsertSchema(ProviderTable);
+export const selectProviderSchema = createSelectSchema(ProviderTable);
+
+export type ProviderTypes = InferSelectModel<typeof ProviderTable>
 
 export default ProviderTable;

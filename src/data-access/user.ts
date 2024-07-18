@@ -1,13 +1,11 @@
 import db from "@/db";
 import UserTable, {  insertUserSchema } from "@/db/schema/user";
-import { assertAuthenticated, getCurrentUser } from "@/lib/session";
-import {  UserRoles, userRoleSchema } from "@/lib/validations/user";
+import {  UserRoles } from "@/lib/validations/user";
 
-import { AuthenticationError, InvalidDataError } from "@/use-cases/errors";
+import { InvalidDataError } from "@/use-cases/errors";
 import { UserId } from "@/use-cases/types";
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+
 
 
 export type FormData = {
@@ -70,8 +68,9 @@ export async function getUsers() {
 // change user role
 export async function updateUserRole(userId: UserId, role: UserRoles) {
    
-    await db.update(UserTable).set({  role}).where(eq(UserTable.id, userId)).returning();
+    const updatedUser = await db.update(UserTable).set({ role}).where(eq(UserTable.id, userId)).returning();
    
+    return updatedUser[0]
     
 }   
 

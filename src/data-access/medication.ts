@@ -1,6 +1,6 @@
 import db from "@/db";
 import { MedicationTable } from "@/db/schema";
-import { insertMedicationSchema,  } from "@/db/schema/medication";
+import { insertMedicationSchema, MedicationTypes,  } from "@/db/schema/medication";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import {  getEncounterById} from "./encouter";
 import { eq } from 'drizzle-orm';
@@ -14,7 +14,7 @@ export const getMedications = async () => {
 }
 
 
-  export async function createMedication(EncounterId:string, medicationData: object) {
+  export async function createMedication(EncounterId:string, medicationData: MedicationTypes) {
     // Step 1: Fetch the encounter
     const encounter = await getEncounterById(EncounterId);
   
@@ -98,6 +98,6 @@ export const deleteMedication = async (medicationId: string) => {
 }
 
 // update medication
-export const updateMedication = async (medicationId: string, medicationData: object) => {
+export const updateMedication = async (medicationId: string, medicationData: MedicationTypes) => {
     await db.update(MedicationTable).set(medicationData).where(eq(MedicationTable.id, medicationId)).returning();
 }

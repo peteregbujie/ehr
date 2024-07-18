@@ -7,7 +7,7 @@ import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncounterById } from "./encouter";
 import { eq } from 'drizzle-orm';
 import { getAppointmentsAndEncountersByPatientId, getAppointmentByPatientId, getAppointmentsAndEncountersByProviderId } from "./appointment";
-import { insertLabSchema } from "@/db/schema/labs";
+import { insertLabSchema, LabTypes } from "@/db/schema/labs";
 
 
 
@@ -18,7 +18,7 @@ export const getLab = async () => {
 }
 
 
-  export async function createLab(EncounterId:string, labData: object) {
+  export async function createLab(EncounterId:string, labData: LabTypes) {
     // Step 1: Fetch the encounter
     const encounter = await getEncounterById(EncounterId);
   
@@ -97,7 +97,7 @@ export async function getLabsByPatientId(patientId: string) {
 
 
   // update lab
-  export const updateLab = async (labId: string, labData: object) => {
+  export const updateLab = async (labId: string, labData: LabTypes) => {
     await db.update(LabTable).set(labData).where(eq(LabTable.id, labId)).returning();
   }
   

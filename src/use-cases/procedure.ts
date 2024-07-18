@@ -1,5 +1,6 @@
 
 import { createProcedure, deleteProcedure, getProceduresByPatientId, getProceduresByProviderId, getProcedure, getProcedureByEncounterId, updateProcedure } from "@/data-access/procedure";
+import { ProcedureTypes } from "@/db/schema/procedure";
 
 
 
@@ -14,28 +15,28 @@ export const getProcedureByPatientIdUseCase = async (patientId: string) => {
 }
 
 // create Procedure use case
-export const createProcedureUseCase = async (enounterId: string, diagnosisData: object) => {
-    return await createProcedure(enounterId, diagnosisData)
+export const createProcedureUseCase = async (enounterId: string, procedureData: ProcedureTypes) => {
+    return await createProcedure(enounterId, procedureData)
 }
 
 
-  // get diagnosiss for an encounter use case
+  // get procedures for an encounter use case
   export const getProcedureForEncounterUseCase = async (encounterId: string) => {
     return await getProcedureByEncounterId(encounterId)
   }
 
-  // get diagnosis by provider id use case
+  // get procedure by provider id use case
   export const getProcedureByProviderIdUseCase = async (providerId: string) => {
     return await getProceduresByProviderId(providerId)
   }
 
-  // delete diagnosis use case
-  export const deleteProcedureUseCase = async (diagnosisId: string) => {
-    return await deleteProcedure(diagnosisId)
+  // delete procedure use case
+  export const deleteProcedureUseCase = async (procedureId: string) => {
+    return await deleteProcedure(procedureId)
   }
 
-  // update diagnosis use case
-  export const updateProcedureUseCase = async (diagnosisId: string, diagnosisData: object) => {
-    return await updateProcedure(diagnosisId, diagnosisData)
+  // update procedure use case
+  export const updateProcedureUseCase = async (procedureId: string, procedureData: ProcedureTypes) => {
+    return await updateProcedure(procedureId, procedureData)
   }
   
