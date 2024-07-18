@@ -1,10 +1,18 @@
 import db from "@/db";
-import UserTable, { insertUserSchema } from "@/db/schema/user";
-import { InvalidDataError } from "@/use-cases/errors";
+import UserTable, {  insertUserSchema } from "@/db/schema/user";
+import { assertAuthenticated, getCurrentUser } from "@/lib/session";
+import {  UserRoles, userRoleSchema } from "@/lib/validations/user";
+
+import { AuthenticationError, InvalidDataError } from "@/use-cases/errors";
 import { UserId } from "@/use-cases/types";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 
+export type FormData = {
+    role: UserRoles;
+  };
 
 export async function createUser(data: unknown, trx = db) {
     // Parse the input data against the schema
@@ -57,3 +65,19 @@ export async function getUsers() {
     const users = await db.query.UserTable.findMany();
     return users;
 }
+
+
+// change user role
+export async function updateUserRole(userId: UserId, role: UserRoles) {
+   
+    await db.update(UserTable).set({  role}).where(eq(UserTable.id, userId)).returning();
+   
+    
+}   
+
+//update user name
+export async function updateUserName(userId: UserId, name: string) {
+    await db.update(UserTable).set({ name}).where(eq(UserTable.id, userId)).returning();
+}
+
+

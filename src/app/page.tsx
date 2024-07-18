@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { Icons } from "@/components/shared/Icons";
 import { siteConfig } from "@/config/site";
+import { Icons } from "@/components/shared/Icons";
 
 
 export default function Login() {

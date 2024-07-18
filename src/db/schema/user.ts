@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import type { AdapterAccountType } from "next-auth/adapters";
 
 import {
@@ -30,15 +30,15 @@ const UserTable = pgTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     name: varchar("name", { length: 100 }),
-    gender: gender_id("gender").notNull(),
+    role: userRoles("role").notNull().default('patient'),
+    gender: gender_id("gender"),
     date_of_birth: date("date", { mode: "date" }),
     phone_number: numeric("phone_number", {
       precision: 10,
     })
       .unique(),
     email: varchar("email", { length: 30 }).notNull().unique(),
-    emailVerified: timestamp("emailVerified", { mode: "date" }),
-    role: userRoles("role").notNull().default('patient'),
+    emailVerified: timestamp("emailVerified", { mode: "date" }),   
     address: varchar("address", { length: 100 }),
     city: varchar("city", { length: 20 }),
     state: varchar("state", { length: 20 }),
@@ -121,7 +121,6 @@ export const VerificationTokensTable = pgTable(
 export const insertUserSchema = createInsertSchema(UserTable);
 export const selectUserSchema = createSelectSchema(UserTable);
 
-
-
+export type UserTypes = InferSelectModel<typeof UserTable>
 
 export default UserTable;
