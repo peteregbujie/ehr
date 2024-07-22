@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/select";
 import { SectionColumns } from "@/components/dashboard/section-columns";
 import  {UserTypes}  from "@/db/schema/user";
-import { Icons } from "../shared/Icons";
-import { updateUserRole, type FormData } from "@/actions/update-user-role";
+import { Icons } from "../shared/icons";
+import { updateUserRole,  } from "@/actions/update-user-role";
 
 interface UserNameFormProps {
   user: Pick<UserTypes, "id" | "role">;

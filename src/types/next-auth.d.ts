@@ -4,10 +4,11 @@ import { UserRoles } from "@/lib/validations/user";
 
 declare module "next-auth" {
     interface Session {
-        user: {
-            role: UserRoles;
-        } & DefaultSession["user"];
+      user: User & DefaultSession["user"];
     }
-}
-
+  
+    interface User {
+      role: UserRoles 
+    }
+  }
 

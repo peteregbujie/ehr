@@ -11,6 +11,7 @@ import {
 import PatientTable from "./patient";
 import ProviderTable from "./provider";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import EncounterTable from "./encounter";
 
 
 
@@ -41,7 +42,7 @@ const AppointmentTable = pgTable(
  })
 );
 
-export const AppointmentRelations = relations(AppointmentTable, ({ one }) => ({
+export const AppointmentRelations = relations(AppointmentTable, ({ one, many }) => ({
  patient: one(PatientTable, {
   fields: [AppointmentTable.patient_id],
   references: [PatientTable.id],
@@ -50,6 +51,7 @@ export const AppointmentRelations = relations(AppointmentTable, ({ one }) => ({
   fields: [AppointmentTable.provider_id],
   references: [ProviderTable.id],
  }),
+ encounter: many(EncounterTable),
 }));
 
 export const insertAppointmentSchema = createInsertSchema(AppointmentTable);

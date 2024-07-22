@@ -4,7 +4,9 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
-import { Icons } from "@/components/shared/Icons";
+import { Icons } from "@/components/shared/icons";
+
+
 
 
 export default function Login() {

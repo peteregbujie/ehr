@@ -4,7 +4,7 @@ import ProviderTable, { ProviderTypes } from "@/db/schema/provider";
 import {  NotFoundError } from "@/use-cases/errors";
 import { ProviderId } from "@/use-cases/types";
 import { eq } from "drizzle-orm";
-import { createUser, getUserById, updateUserRole } from "./user";
+import { createUser, getUserById, updateUserRoleFn } from "./user";
 
 
 
@@ -13,7 +13,7 @@ export const createProvider = async (UserId: string, providerData: ProviderTypes
     if (!user) {
         createUser(UserId);
     }
-  const updatedUser = await updateUserRole(UserId, "provider");
+  const updatedUser = await updateUserRoleFn(UserId, "provider");
 
  const newProvider = await updateProvider(updatedUser.id, providerData );
   return { newProvider}
