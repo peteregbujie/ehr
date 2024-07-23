@@ -33,16 +33,8 @@ const UserTable = pgTable(
     role: userRoles("role").notNull().default('patient'),
     gender: gender_id("gender"),
     date_of_birth: date("date", { mode: "date" }),
-    phone_number: numeric("phone_number", {
-      precision: 10,
-    })
-      .unique(),
     email: varchar("email", { length: 30 }).notNull().unique(),
-    emailVerified: timestamp("emailVerified", { mode: "date" }),   
-    address: varchar("address", { length: 100 }),
-    city: varchar("city", { length: 20 }),
-    state: varchar("state", { length: 20 }),
-    zip_code: numeric("zip_code", { precision: 5, scale: 0 }),
+    emailVerified: timestamp("emailVerified", { mode: "date" }),       
     image: text("image"),
     created_at: timestamp("created_at", { mode: "string" })
       .notNull()

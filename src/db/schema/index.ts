@@ -32,3 +32,4 @@ export { PatientRelations, default as PatientTable, bloodTypes, marital_status, 
 
 export { ProcedureRelations, default as ProcedureTable } from "./procedure";
 
+export { default as AddressTable, AddressRelations } from "./address";

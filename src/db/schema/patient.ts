@@ -16,6 +16,7 @@ import ProviderPatientTable from "./provider_patient";
 import UserTable from "./user";
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import InsuranceTable from "./insurance";
+import AddressTable from "./address";
 
 
 
@@ -40,6 +41,13 @@ const PatientTable = pgTable(
     user_id: text("user_id")
       .notNull()
       .references(() => UserTable.id, { onDelete: "cascade" }),
+      phone_number: numeric("phone_number", {
+        precision: 10,
+      })
+        .unique(),
+    address: text("address_id")
+        .notNull()
+        .references(() => AddressTable.id, { onDelete: "cascade" }),
     height: numeric("height", { precision: 3, scale: 2 }).notNull(),
     weight: numeric("weight", { precision: 3 }).notNull(),
     occupation: varchar("occupation", { length: 50 }).notNull(),
@@ -77,6 +85,10 @@ const PatientTable = pgTable(
 
 export const PatientRelations = relations(PatientTable, ({ one, many }) => ({
   appointments: many(AppointmentTable), 
+  address: one(AddressTable, {
+    fields: [PatientTable.address],
+    references: [AddressTable.id],
+  }),
   providers_patients: many(ProviderPatientTable),
   insurance: one(InsuranceTable, {
     fields: [PatientTable.user_id],
