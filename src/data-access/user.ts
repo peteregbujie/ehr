@@ -1,5 +1,5 @@
 import db from "@/db";
-import UserTable, {  insertUserSchema } from "@/db/schema/user";
+import UserTable, {  insertUserSchema, UserTypes } from "@/db/schema/user";
 import {  UserRoles } from "@/lib/validations/user";
 
 import { InvalidDataError } from "@/use-cases/errors";
@@ -12,7 +12,9 @@ export type FormData = {
     role: UserRoles;
   };
 
-export async function createUser(data: unknown, trx = db) {
+  type SanitizedinsertUserSchema = Pick<UserTypes, "email"| "name"| "date_of_birth"| "gender">
+
+export async function createUser(data: SanitizedinsertUserSchema, trx = db) {
     // Parse the input data against the schema
     const parsedData = insertUserSchema.safeParse(data);
 
@@ -21,7 +23,9 @@ export async function createUser(data: unknown, trx = db) {
     }
 
     // Now parsedData.data should conform to InsertUserDataType
-    await trx.insert(UserTable).values(parsedData.data).returning();
+  await trx.insert(UserTable).values(parsedData.data).returning();
+
+  
 }
 
 
@@ -41,9 +45,9 @@ export async function getUserById(userId: UserId) {
     return user;
 }
 
+type userUpdateType =  Pick<UserTypes,  "email">
 
-
-export async function updateUser(userId: UserId, data: unknown) {
+export async function updateUser(userId: UserId, data: userUpdateType) {
     // Parse the input data against the schema
     const parsedData = insertUserSchema.safeParse(data);
 
@@ -80,3 +84,23 @@ export async function updateUserNameFn(userId: UserId, name: string) {
 }
 
 
+export async function getPatientEncountersByPhoneNumber(
+    phone_no:string,
+    ) {
+    const raw = await db.query.PatientTable.findFirst({
+       
+    where: (table, {eq}) => eq(table.phone_number, phone_no),
+    with: {
+      appointments: {
+        with: {
+          encounter: true,
+        },
+        },
+        },
+    
+    });
+    
+    return raw;
+    
+    }
+    

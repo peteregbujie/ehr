@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SectionColumns } from "@/components/dashboard/section-columns";
-import { Icons } from "../shared/Icons";
+import { Icons } from "../shared/icons";
 
 interface UserNameFormProps {
   user: Pick<UserTypes, "id" | "name">;

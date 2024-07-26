@@ -1,3 +1,5 @@
+"use server"
+
 import { assertAuthenticated, getCurrentUser, getUserRole } from "@/lib/session";
 import { AuthenticationError, PublicError } from "@/use-cases/errors";
 import { createServerActionProcedure } from "zsa";
@@ -34,37 +36,50 @@ export const unauthenticatedAction = createServerActionProcedure()
         return { user: undefined };
     });
 
-export const isAdminAction = createServerActionProcedure(authenticatedAction)
+export const isAdminProcedure = createServerActionProcedure(authenticatedAction)
     .experimental_shapeError(shapeErrors)
     .handler(async ({ ctx }) => {
         const user = await getUserRole(ctx.user.role);
         if (user.role !== "admin") {
             throw new AuthenticationError();
         }
-        return { user };
+        return { user: {
+            id: ctx.user.id,
+            email: ctx.user.email,
+            role: ctx.user.role
+        } 
+    };
     }
     )
 
 
-export const isProviderAction = createServerActionProcedure(authenticatedAction)
+export const isProviderProcedure = createServerActionProcedure(authenticatedAction)
     .experimental_shapeError(shapeErrors)
     .handler(async ({ ctx }) => {
         const user = await getUserRole(ctx.user.role);
         if (user.role !== "provider") {
             throw new AuthenticationError();
         }
-        return { user };
+        return { user: {
+            id: ctx.user.id,
+            email: ctx.user.email,
+            role: ctx.user.role
+        }  };
     }
     )
 
 
-export const isPatientAction = createServerActionProcedure(authenticatedAction)
+export const isPatientProcedure = createServerActionProcedure(authenticatedAction)
     .experimental_shapeError(shapeErrors)
     .handler(async ({ ctx }) => {
         const user = await getUserRole(ctx.user.role);
         if (user.role !== "patient") {
             throw new AuthenticationError();
         }
-        return { user };
+        return { user: {
+            id: ctx.user.id,
+            email: ctx.user.email,
+            role: ctx.user.role
+        }  };
     }
     )

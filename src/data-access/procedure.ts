@@ -33,7 +33,9 @@ export const getProcedure = async () => {
        }
    
        // Now parsedData.data should conform to InsertProcedureDataType
-       await db.insert(ProcedureTable).values(parsedData.data).returning();
+      await db.insert(ProcedureTable).values(parsedData.data).returning();
+
+  
 
        
   }

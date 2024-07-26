@@ -5,6 +5,7 @@ import { Adapter } from "next-auth/adapters";
 
 import { getUserById } from "./data-access/user";
 import authConfig from "./auth.config";
+import { UserRoles } from "./lib/validations/user";
 
 
 
@@ -19,7 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   callbacks: {
     async session({ token, session }) {
-      if (session.user) {
+      if (session?.user) {
         if (token.sub) {
           session.user.id = token.sub;
         }
@@ -28,24 +29,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           session.user.email = token.email;
         }
 
-        if (token.role) {
-          session.user.role = token.role;
+        if (token.role  ) {
+          session.user.role = token.role as UserRoles
         }
 
         session.user.name = token.name;
         session.user.image = token.picture;
+        
       }
 
       return session;
     },
 
     async jwt({ token }) {
-      if (!token.sub) return token;
+      if (!token.sub) return token;      
 
       const dbUser = await getUserById(token.sub);
 
       if (!dbUser) return token;
-
+     
+     
       token.name = dbUser.name;
       token.email = dbUser.email;
       token.picture = dbUser.image;

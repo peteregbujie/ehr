@@ -17,7 +17,7 @@ const AddressTable = pgTable("address", {
     city: varchar("city", { length: 20 }),
     state: varchar("state", { length: 20 }),
     zip_code: numeric("zip_code", { precision: 5, scale: 0 }),
- country: text("country").notNull(),
+ country: text("country")
 });
 
 export type AddressTypes = InferSelectModel<typeof AddressTable>;
