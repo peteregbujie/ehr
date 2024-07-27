@@ -24,6 +24,7 @@ const AppointmentTable = pgTable(
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
+    reason: varchar("reason", { length: 50 }),
   patient_id: text("patient_id")
    .notNull()
    .references(() => PatientTable.id, { onDelete: "cascade" }),

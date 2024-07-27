@@ -23,7 +23,8 @@ export async function deleteAppointmentUseCase (appointmentId: string) {
 }
 
 // create appointment use case
-export async function createAppointmentUseCase (data: AppointmentTypes) {
+export type newAppointmentType = Omit<AppointmentTypes, 'id'>
+export async function createAppointmentUseCase (data: newAppointmentType) {
     return await createAppointment(data)
 }
 

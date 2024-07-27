@@ -21,58 +21,26 @@ import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NewPatientSchema } from "@/lib/validations/patient"
 
 
 
-
-const formSchema = z.object({
-    full_name: z.string().min(3).max(32),
-    email: z.string().email(),
-    gender: z.enum(["male", "female"]),
-    date_of_birth: z.string().date(),
-    phone_number: z.string().min(10).max(10),   
-    address: z.string(),
-    height: z.string(),
-    weight: z.string(),
-    occupation: z.string(),
-    marital_status: z.enum(["Married", "Single", "Divorced","Widowed" ]),
-    emergency_contact_name: z.string(),
-    emergency_contact_relationship: z.string(),
-    emergency_contact_number: z.string(),
-    socialHistory: z.string(),
-    past_medical_history: z.string(),
-    family_medical_history: z.string(),
-    blood_type: z.enum(["A positive",
-      "A negative",
-      "B positive",
-      "B negative",
-      "AB positive",
-      "AB negative",
-      "O positive",
-      "O negative",]),
-      primary_care_physician: z.string(),
-      preferred_language: z.enum(["English", "Spanish", "Vietnamese", "Mandarin", "Portuguese"]),
-      note: z.string(),
-
-  })
-
-
-export function ReactHookForm() {    
+export function PatientForm() {    
  
   const { isPending, execute,  error } = useServerAction(createPatientAction, {
     onSuccess() {
-        toast.success("Your role has been updated.");      
+        toast.success("Patient has been created.");      
     },
     onError() {
         toast.error("Something went wrong.", {
-            description: "Your role was not updated. Please try again.",
+            description: "Patient was not created. Please try again.",
           })
     },
   }) 
  
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof NewPatientSchema>>({
+    resolver: zodResolver(NewPatientSchema),
     defaultValues: {
       full_name: "",
       email: "",
@@ -97,7 +65,7 @@ export function ReactHookForm() {
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof NewPatientSchema>> = (
     values
   ) => {
     execute({

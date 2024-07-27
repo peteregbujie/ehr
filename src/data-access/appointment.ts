@@ -2,10 +2,11 @@ import db, { eq } from "@/db";
 import AppointmentTable, { AppointmentTypes, insertAppointmentSchema } from "@/db/schema/appointment";
 import { InvalidDataError } from "@/use-cases/errors";
 import { getEncountersByAppointmentId } from "./encouter";
+import { newPatientType } from "@/use-cases/appointment";
 
 
 //create appointment
-export const createAppointment = async (appointmentData: AppointmentTypes) => {
+export const createAppointment = async (appointmentData: newPatientType) => {
     // Parse the input data against the schema
     const parsedData = insertAppointmentSchema.safeParse(appointmentData); 
 

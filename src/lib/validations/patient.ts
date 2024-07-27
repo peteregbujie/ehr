@@ -2,7 +2,7 @@
 import * as z from "zod";
 
 
-const NewPatientType = z.object({
+export const NewPatientSchema = z.object({
     full_name: z.string().min(3).max(32),
     email: z.string().email(),
     gender: z.enum(["male", "female"]),
@@ -33,4 +33,4 @@ const NewPatientType = z.object({
 
   });
 
-  export type NewPatientType = z.infer<typeof NewPatientType>;
+  export type NewPatientType = z.infer<typeof NewPatientSchema>;
