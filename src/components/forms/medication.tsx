@@ -225,12 +225,12 @@ render={({ field }) => (
       {error && (
     <Alert variant="destructive">
       <Terminal className="h-4 w-4" />
-      <AlertTitle>Error creating post</AlertTitle>
+      <AlertTitle>Error creating order</AlertTitle>
       <AlertDescription>{error.message}</AlertDescription>
     </Alert>
   )}
   <LoaderButton isLoading={isPending}>
-  <Send /> Create Patient
+  <Send /> Order Medication
   </LoaderButton>
 
   </form>

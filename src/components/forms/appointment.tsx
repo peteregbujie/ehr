@@ -216,12 +216,12 @@ export function AppointmentForm  ()  {
             {error && (
           <Alert variant="destructive">
             <Terminal className="h-4 w-4" />
-            <AlertTitle>Error creating post</AlertTitle>
+            <AlertTitle>Error creating appointment</AlertTitle>
             <AlertDescription>{error.message}</AlertDescription>
           </Alert>
         )}
         <LoaderButton isLoading={isPending}>
-        <Send /> Create Patient
+        <Send /> Create Appointment
         </LoaderButton>
 
     </form>

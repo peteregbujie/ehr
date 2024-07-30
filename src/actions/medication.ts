@@ -15,5 +15,5 @@ export const createMedicationAction = isProviderProcedure
     await createMedicationUseCase({
       phone_number, medication_name, code, dosage, frequency, route, status, note, start_date, end_date
     });
-    revalidatePath(`/dashboard/medication/}`);
+    revalidatePath("/dashboard/provider");
   });

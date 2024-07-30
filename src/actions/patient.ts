@@ -53,5 +53,5 @@ export const createPatientAction = isAdminProcedure
           preferred_language,
           note
         });
-        revalidatePath(`/dashboard/patients`);
+        revalidatePath("/dashboard/admin");
       });

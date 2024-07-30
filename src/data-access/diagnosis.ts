@@ -10,6 +10,8 @@ import { eq } from 'drizzle-orm';
 import { getAppointmentsAndEncountersByPatientId,  getAppointmentsAndEncountersByProviderId } from "./appointment";
 import { DiagnosisTypes, insertDiagnosisSchema } from "@/db/schema/diagnosis";
 import { getLabByEncounterId } from "./lab";
+import { searchPatient } from "./patient";
+import { NewDiagnosisType } from "@/lib/validations/diagnosis";
 
 
 
@@ -18,7 +20,7 @@ export const getDiagnosis = async () => {
     return diagnosis;
 }
 
-
+/* 
   export async function createDiagnosis(EncounterId:string, diagnosisData: DiagnosisTypes) {
     // Step 1: Fetch the encounter
     const encounter = await getEncounterById(EncounterId);
@@ -38,11 +40,41 @@ export const getDiagnosis = async () => {
        await db.insert(DiagnosisTable).values(parsedData.data).returning();
 
        
-  }
+  } */
 
+
+  export async function createDiagnosis( diagnosisData: NewDiagnosisType) {
+
+    const query = diagnosisData.phone_number;
+   
+    // destructure enocunter from returned data
+    
+    const patient = await searchPatient(query);
+
+    const latestEncounter = patient?.appointments[0].encounter;
+
+     
+    if (!latestEncounter) {
+      throw new NotFoundError();
+    }          
+    const  encounterId = latestEncounter[0].id
+
+       // Now parsedData.data should conform to InsertMedicationDataType
+       // Step 3: Create the medication with the (existing or new) encounterId
+       const parsedData = insertDiagnosisSchema.safeParse({...diagnosisData, encounter_id: encounterId});
+
+       if (!parsedData.success) {
+           throw new InvalidDataError();
+       }
+   
+       // Now parsedData.data should conform to InsertMedicationDataType
+       await db.insert(DiagnosisTable).values(parsedData.data).returning();
+
+       
+  }
   // get diagnosis for an encounter
 
-  export async function getDiagnosisByEncounterId(encounterId: string): Promise<any[]> {
+  export async function getDiagnosisByEncounterId(encounterId: string) {
     const diagnosis = await db.query.DiagnosisTable.findMany({
       where: eq(DiagnosisTable.encounter_id, encounterId), 
     });

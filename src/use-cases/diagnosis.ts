@@ -1,6 +1,7 @@
 
-import { createDiagnosis, deleteDiagnosis, getDiagnosesByPatientId, getDiagnosesByProviderId, getDiagnosis, getDiagnosisByEncounterId, updateDiagnosis } from "@/data-access/diagnosis";
+import {deleteDiagnosis, getDiagnosesByPatientId, getDiagnosesByProviderId, getDiagnosis, getDiagnosisByEncounterId, updateDiagnosis, createDiagnosis } from "@/data-access/diagnosis";
 import { DiagnosisTypes } from "@/db/schema/diagnosis";
+import { NewDiagnosisType } from "@/lib/validations/diagnosis";
 
 
 
@@ -9,14 +10,14 @@ export async function getDiagnosisUseCase() {
 }
 
 
-// get Diagnosiss By Patient Id use case
+// get Diagnosis By Patient Id use case
 export const getDiagnosisByPatientIdUseCase = async (patientId: string) => {
     return await getDiagnosesByPatientId(patientId)
 }
 
 // create Diagnosis use case
-export const createDiagnosisUseCase = async (enounterId: string, diagnosisData: DiagnosisTypes) => {
-    return await createDiagnosis(enounterId, diagnosisData)
+export const createDiagnosisUseCase = async (diagnosisData: NewDiagnosisType) => {
+    return await createDiagnosis( diagnosisData)
 }
 
 

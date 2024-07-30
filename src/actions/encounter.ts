@@ -17,5 +17,5 @@ export const createEncounterAction = isProviderProcedure
         phone_number,
         location
     });
-    revalidatePath(`/dashboard/encounter/}`);
+    revalidatePath("/dashboard/provider");
   });

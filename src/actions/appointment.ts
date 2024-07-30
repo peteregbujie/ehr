@@ -14,5 +14,5 @@ export const createAppointmentAction = isAdminProcedure
     await createAppointmentUseCase( {
         reason, patient_id, provider_id, type, status, notes, scheduled_date, scheduled_time, location,
     });
-    revalidatePath(`/dashboard/appointment/${patient_id}`);
+    revalidatePath("/dashboard/admin");
   });

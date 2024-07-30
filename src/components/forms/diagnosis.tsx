@@ -12,67 +12,54 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useServerAction } from "zsa-react";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createEncounterAction } from "@/actions/encounter";
+import { createDiagnosisAction } from "@/actions/diagnosis";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
 import { Send, Terminal } from "lucide-react";
-import { newEncounterSchema } from "@/lib/validations/encounter";
+
 import { Textarea } from "../ui/textarea";
+import { NewDiagnosisSchema } from "@/lib/validations/diagnosis";
 
 
 
 
-
-export function EncounterForm  ()  {
+export function DiagnosisForm  ()  {
 
     
-  const { isPending, execute,  error } = useServerAction(createEncounterAction, {
+  const { isPending, execute,  error } = useServerAction(createDiagnosisAction, {
     onSuccess() {
-        toast.success("Encounter has been created.");      
+        toast.success("Diagnosis has been created.");      
     },
     onError() {
         toast.error("Something went wrong.", {
-            description: "Your Encounter was not created. Please try again.",
+            description: "Your Diagnosis was not created. Please try again.",
           })
     },
   })
 
-  const form = useForm<z.infer<typeof newEncounterSchema>>({
-    resolver: zodResolver(newEncounterSchema),
+  const form = useForm<z.infer<typeof NewDiagnosisSchema>>({
+    resolver: zodResolver(NewDiagnosisSchema),
     defaultValues: {
-      phone_number: "", date: "", time: "", encounter_type: "inpatient", location: "", assessment_and_plan: "", chief_complaint: "", notes: "",
+      phone_number: "", diagnosis_name:"",diagnosis_code:"", severity: "mild",date: "", note: ""
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof newEncounterSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof NewDiagnosisSchema>> = (
     values
   ) => {
     execute({
         phone_number: values.phone_number, 
-        date: values.date,
-        time: values.time,
-        encounter_type: values.encounter_type,
-        location: values.location,
-        assessment_and_plan: values.assessment_and_plan,
-        chief_complaint: values.chief_complaint,
-        notes: values.notes,       
+        diagnosis_name: values.diagnosis_name, diagnosis_code: values.diagnosis_code, severity: values.severity, date: values.date, note: values.note, 
     });
   };
 
 
   form.reset({
-    phone_number: "", 
-    date: "", 
-    time: "", 
-    encounter_type: "inpatient", 
-    location: "", 
-    assessment_and_plan: "", 
-    chief_complaint: "", 
-    notes: "",
-})
+    phone_number: "", diagnosis_name: "", diagnosis_code:"", date: "", severity: "mild",  note: "",
+    },
+)
 
   return    (
     <>
@@ -98,12 +85,12 @@ render={({ field }) => (
 
 <FormField
 control={form.control}
-name="assessment_and_plan"
+name="diagnosis_name"
 render={({ field }) => (
   <FormItem>
-    <FormLabel>Assessment and Plan</FormLabel>
+    <FormLabel>Brand Name</FormLabel>
     <FormControl>
-      <Input placeholder="Assessment and Plan" {...field} />
+      <Input placeholder="name of diagnosis" {...field} />
     </FormControl>
     <FormMessage />
   </FormItem>
@@ -112,33 +99,36 @@ render={({ field }) => (
 
 <FormField
 control={form.control}
-name="chief_complaint"
+name="diagnosis_code"
 render={({ field }) => (
   <FormItem>
-    <FormLabel>Chief Complaint</FormLabel>
+    <FormLabel>Code</FormLabel>
     <FormControl>
-      <Input placeholder="chief complaint" {...field} />
+      <Input placeholder="diagnosis code" {...field} />
     </FormControl>
     <FormMessage />
   </FormItem>
 )}
 />
 
+
+
 <FormField
 control={form.control}
-name="encounter_type"
+name="severity"
 render={({ field }) => (
   <FormItem>
-    <FormLabel>Encounter Type</FormLabel>
+    <FormLabel>Status</FormLabel>
     <FormControl>
     <Select>
               <SelectTrigger asChild>                     
-                <SelectValue placeholder='Encounter Type' {...field}/>
+                <SelectValue placeholder='Status' {...field}/>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="inpatient">Inpatient </SelectItem>
-                <SelectItem value="outpatient"> Outpatient</SelectItem>
-                <SelectItem value="emergency">Emergency</SelectItem>                     
+                <SelectItem value="mild">Mild </SelectItem>
+                <SelectItem value="moderate"> Moderate</SelectItem>
+                <SelectItem value="severe">Severe</SelectItem> 
+                                  
               </SelectContent>
             </Select>
     </FormControl>
@@ -147,14 +137,12 @@ render={({ field }) => (
 )}
 />
 
-
-
 <FormField
 control={form.control}
-name="notes"
+name="note"
 render={({ field }) => (
   <FormItem>
-    <FormLabel>Notes</FormLabel>
+    <FormLabel>Note</FormLabel>
     <FormControl>
     <Textarea rows={7} {...field} />
     </FormControl>
@@ -168,7 +156,7 @@ control={form.control}
 name="date"
 render={({ field }) => (
   <FormItem>
-    <FormLabel>Date</FormLabel>
+    <FormLabel>Start Date</FormLabel>
     <FormControl>
       <Input type="date" placeholder="date" {...field} />
     </FormControl>
@@ -177,33 +165,9 @@ render={({ field }) => (
 )}
 />
 
-<FormField
-control={form.control}
-name="time"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Scheduled Time</FormLabel>
-    <FormControl>
-      <Input type="time" placeholder="Time" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
 
-<FormField
-control={form.control}
-name="location"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Location</FormLabel>
-    <FormControl>
-      <Input placeholder="Location" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+
+
 
 <Button disabled={isPending} type="submit" className="w-full">
         {isPending ? "Saving..." : "Save"}
@@ -211,12 +175,12 @@ render={({ field }) => (
       {error && (
     <Alert variant="destructive">
       <Terminal className="h-4 w-4" />
-      <AlertTitle>Error creating encounter</AlertTitle>
+      <AlertTitle>Error creating diagnosis</AlertTitle>
       <AlertDescription>{error.message}</AlertDescription>
     </Alert>
   )}
   <LoaderButton isLoading={isPending}>
-  <Send /> Create Encounter
+  <Send /> Create Diagnosis
   </LoaderButton>
 
   </form>
