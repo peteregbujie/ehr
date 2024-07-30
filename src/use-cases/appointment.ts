@@ -1,5 +1,6 @@
 import { createAppointment, deleteAppointment, getAllAppointments, getAppointmentById,  getAppointmentByPatientId,  getAppointmentByProviderId, updateAppointment } from "@/data-access/appointment";
 import { AppointmentTypes } from "@/db/schema/appointment";
+import { NewAppointmentType } from "@/lib/validations/appointment";
 
 
 // get all appointments use case
@@ -23,8 +24,8 @@ export async function deleteAppointmentUseCase (appointmentId: string) {
 }
 
 // create appointment use case
-export type newAppointmentType = Omit<AppointmentTypes, 'id'>
-export async function createAppointmentUseCase (data: newAppointmentType) {
+
+export async function createAppointmentUseCase (data: NewAppointmentType) {
     return await createAppointment(data)
 }
 

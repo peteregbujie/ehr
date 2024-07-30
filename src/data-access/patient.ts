@@ -1,9 +1,10 @@
 
 import db from "@/db";
 import PatientTable, { insertPatientSchema, PatientTypes } from "@/db/schema/patient";
+import UserTable from "@/db/schema/user";
 import { InvalidDataError} from "@/use-cases/errors";
 import { PatientId } from "@/use-cases/types";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 
 
@@ -74,3 +75,32 @@ export const getPatientById = async (patientId: PatientId) => {
 
     return patient;
 }
+
+
+export const searchPatient = async (phone_number: string) => {
+    const patient = await db.query.PatientTable.findFirst({
+        where: eq(PatientTable.phone_number, phone_number),
+        orderBy: (PatientTable, { asc }) => [asc(PatientTable.created_at)],  
+        with: {
+            appointments: {
+              orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
+            with: {
+              encounter: {
+              orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
+            }
+            },
+            },
+            },      
+    });
+if(patient){
+    const { appointments, ...rest } = patient;
+    const appointmentsWithEncounters = appointments.map(({ encounter, ...rest }) => ({
+        ...rest,
+        encounter,
+    }));
+    return { ...rest, appointments: appointmentsWithEncounters };
+}
+return null;
+}    
+
+

@@ -1,24 +1,36 @@
 import db, { eq } from "@/db";
-import { EncounterTable } from "@/db/schema";
+import { EncounterTable, PatientTable } from "@/db/schema";
 import { EncounterTypes, insertEncounterSchema } from "@/db/schema/encounter";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { EncounterId } from "@/use-cases/types";
-import { getAppointmentById } from "./appointment";
+import { getAppointmentById, getAppointmentsByPhoneNumber, getPatientAppointmentsByPhoneNumber } from "./appointment";
+import { NewEncounterType } from "@/lib/validations/encounter";
 
 
 
 
-export const createEncounter = async (encounterData: EncounterTypes, AppointmentId:string) => {
+export const createEncounter = async (encounterData: NewEncounterType) => {
+    // destructure the phone number from the encounter data
+    const { phone_number } = encounterData;
 
-    const appointment = await getAppointmentById(AppointmentId);
+    const appointmentResults = await getPatientAppointmentsByPhoneNumber(phone_number);
 
-    if (!appointment) {
+    const { id: firstAppointmentId, provider_id, patient_id } = appointmentResults[0]?.appointments?.[0] || {};
+
+
+    if (firstAppointmentId) {
         throw new NotFoundError();
       }
 
+      const newEncounterData = {
+        ...encounterData,
+        provider_id,
+        patient_id,
+        id: firstAppointmentId,
+      }
 
     // Parse the input data against the schema  
-    const parsedData = insertEncounterSchema.safeParse(encounterData);
+    const parsedData = insertEncounterSchema.safeParse(newEncounterData);
 
     if (!parsedData.success) {
         throw new InvalidDataError();
@@ -68,3 +80,28 @@ export const getEncountersByAppointmentId = async (appointmentId: string) => {
         where: eq(EncounterTable.appointment_id, appointmentId),
     });
 }
+
+
+
+export async function getPatientEncountersByPhoneNumber(
+    phone_no:string,
+    ) {
+    const raw = await db.query.PatientTable.findFirst({
+       
+    where: (table, {eq}) => eq(table.phone_number, phone_no),
+    with: {
+      appointments: {
+        with: {
+          encounter: {
+          orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
+          }
+        },
+        },
+        },
+    
+    });
+    
+    return raw;
+    
+    }
+    

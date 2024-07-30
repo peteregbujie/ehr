@@ -1,10 +1,12 @@
 import db from "@/db";
+import { PatientTypes } from "@/db/schema/patient";
 import UserTable, {  insertUserSchema, UserTypes } from "@/db/schema/user";
+import { NewPatientType } from "@/lib/validations/patient";
 import {  UserRoles } from "@/lib/validations/user";
 
 import { InvalidDataError } from "@/use-cases/errors";
 import { UserId } from "@/use-cases/types";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 
 
@@ -83,24 +85,56 @@ export async function updateUserNameFn(userId: UserId, name: string) {
     await db.update(UserTable).set({ name}).where(eq(UserTable.id, userId)).returning();
 }
 
-
-export async function getPatientEncountersByPhoneNumber(
-    phone_no:string,
-    ) {
-    const raw = await db.query.PatientTable.findFirst({
-       
-    where: (table, {eq}) => eq(table.phone_number, phone_no),
-    with: {
-      appointments: {
-        with: {
-          encounter: true,
+export const searchUser = async (query: string) => {
+  try {
+    const user = await db.query.UserTable.findFirst({
+      where: or(
+        eq(UserTable.name, query),
+        eq(UserTable.email, query),
+      ),
+      orderBy: (UserTable, { asc }) => [asc(UserTable.created_at)],
+      with: {
+        patients: {
+          with: {
+            appointments: {
+              orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
+              with: {
+                encounter: {
+                  orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
+                },
+              },
+            },
+          },
         },
-        },
-        },
-    
+      },
     });
-    
-    return raw;
-    
+
+    if (!user ) {
+      throw new Error("User not found");
     }
-    
+
+    // Destructure the first patient from the user object
+    const { patients } = user;
+    const OnlyPatient = patients;
+
+    // Map appointments from the first patient
+    const appointments = OnlyPatient.appointments.map(appointment => ({
+      ...appointment,
+      encounter: appointment.encounter, // Directly assign encounter without mapping if it's a single object
+    }));
+
+    // Return the modified user object with mapped appointments
+    return {
+      ...user,
+      patients: [
+        {
+          ...OnlyPatient,
+          appointments,
+        },
+      ],
+    };
+  } catch (error) {
+    console.error("Error searching user:", error);
+    throw error;
+  }
+};

@@ -1,10 +1,12 @@
 import db from "@/db";
 import { MedicationTable } from "@/db/schema";
-import { insertMedicationSchema, MedicationTypes,  } from "@/db/schema/medication";
+import { insertMedicationSchema } from "@/db/schema/medication";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import {  getEncounterById} from "./encouter";
+import {   getPatientEncountersByPhoneNumber} from "./encouter";
 import { eq } from 'drizzle-orm';
 import { getAppointmentsAndEncountersByPatientId } from "./appointment";
+import { NewMedicationType } from "@/lib/validations/medication";
+import { searchPatient } from "./patient";
 
 
 
@@ -14,16 +16,25 @@ export const getMedications = async () => {
 }
 
 
-  export async function createMedication(EncounterId:string, medicationData: MedicationTypes) {
-    // Step 1: Fetch the encounter
-    const encounter = await getEncounterById(EncounterId);
-  
-    if (!encounter) {
+  export async function createMedication( medicationData: NewMedicationType) {
+
+    const query = medicationData.phone_number;
+   
+    // destructure enocunter from returned data
+    
+    const patient = await searchPatient(query);
+
+    const latestEncounter = patient?.appointments[0].encounter;
+
+     
+    if (!latestEncounter) {
       throw new NotFoundError();
     }          
+    const  encounterId = latestEncounter[0].id
+
        // Now parsedData.data should conform to InsertMedicationDataType
        // Step 3: Create the medication with the (existing or new) encounterId
-       const parsedData = insertMedicationSchema.safeParse({...medicationData, encounter_id: encounter.id});
+       const parsedData = insertMedicationSchema.safeParse({...medicationData, encounter_id: encounterId});
 
        if (!parsedData.success) {
            throw new InvalidDataError();
@@ -98,6 +109,6 @@ export const deleteMedication = async (medicationId: string) => {
 }
 
 // update medication
-export const updateMedication = async (medicationId: string, medicationData: MedicationTypes) => {
+export const updateMedication = async (medicationId: string, medicationData: NewMedicationType) => {
     await db.update(MedicationTable).set(medicationData).where(eq(MedicationTable.id, medicationId)).returning();
 }

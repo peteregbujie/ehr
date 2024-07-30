@@ -1,12 +1,13 @@
 import db, { eq } from "@/db";
 import AppointmentTable, { AppointmentTypes, insertAppointmentSchema } from "@/db/schema/appointment";
-import { InvalidDataError } from "@/use-cases/errors";
+import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncountersByAppointmentId } from "./encouter";
-import { newPatientType } from "@/use-cases/appointment";
+import { NewAppointmentType } from "@/lib/validations/appointment";
+import PatientTable from "@/db/schema/patient";
 
 
 //create appointment
-export const createAppointment = async (appointmentData: newPatientType) => {
+export const createAppointment = async (appointmentData: NewAppointmentType) => {
     // Parse the input data against the schema
     const parsedData = insertAppointmentSchema.safeParse(appointmentData); 
 
@@ -27,14 +28,16 @@ export const getAllAppointments = async () => {
 //get appointment by provider
 export const getAppointmentByProviderId = async (providerId: string) => {
     return await db.query.AppointmentTable.findMany({
-        where: eq(AppointmentTable.provider_id, providerId)
+        where: eq(AppointmentTable.provider_id, providerId),
+        orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
       });
 }   
 
 //get appointment by client
 export const getAppointmentByPatientId = async (PaitentId: string) => {
     return await db.query.AppointmentTable.findMany({
-        where: eq(AppointmentTable.patient_id, PaitentId) 
+        where: eq(AppointmentTable.patient_id, PaitentId) ,
+        orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
       });
 }
 
@@ -100,3 +103,57 @@ export async function getAppointmentsAndEncountersByPatientId(patientId: string)
     return results;
   }
 
+
+export async function getAppointmentsByPhoneNumber(phoneNumber: string) {
+  const patientData = await db.query.PatientTable.findMany({where: eq(PatientTable.phone_number, phoneNumber)})
+
+const PatientId = patientData[0]?.id
+  if (!PatientId) throw new NotFoundError();
+
+  const appointments = await getAppointmentsAndEncountersByPatientId(PatientId)
+  return appointments;
+}
+
+
+export async function getPatientAppointmentsByPhoneNumber(
+  phone_number:string,
+  ) {
+  const raw = await db.query.PatientTable.findMany({
+  where: (PatientTable, {eq}) => eq(PatientTable.phone_number, phone_number),
+  with: {
+    appointments: {
+      orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
+   
+    },
+    },
+  
+  });
+  
+  return raw;
+  
+  }
+  
+
+
+export async function getPatientEncountersByPhoneNumber(
+  phone_number:string,
+  ) {
+  const raw = await db.query.PatientTable.findFirst({
+  where: (PatientTable, {eq}) => eq(PatientTable.phone_number, phone_number),
+  with: {
+    appointments: {
+      orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
+    with: {
+      encounter: {
+      orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
+    }
+    },
+    },
+    },
+  
+  });
+  
+  return raw;
+  
+  }
+  

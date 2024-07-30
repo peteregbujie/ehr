@@ -12,3 +12,5 @@ export const AppointmentSchema = z.object({
     scheduled_time: z.string().date(),
     location: z.string(),
   });
+
+  export type NewAppointmentType = z.infer<typeof AppointmentSchema>;

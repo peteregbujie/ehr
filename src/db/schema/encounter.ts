@@ -73,4 +73,5 @@ export const selectEncounterSchema = createSelectSchema(EncounterTable);
 
 export type EncounterTypes = InferSelectModel<typeof EncounterTable>
 
+
 export default EncounterTable;

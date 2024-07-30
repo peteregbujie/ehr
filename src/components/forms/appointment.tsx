@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
 import { Send, Terminal } from "lucide-react";
+import { Textarea } from "../ui/textarea";
 
 
 
@@ -140,7 +141,7 @@ export function AppointmentForm  ()  {
           <FormControl>
           <Select>
                     <SelectTrigger asChild>                     
-                      <SelectValue placeholder='Type' {...field}/>
+                      <SelectValue placeholder='Status' {...field}/>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="scheduled">Scheduled</SelectItem>
@@ -161,7 +162,7 @@ export function AppointmentForm  ()  {
         <FormItem>
           <FormLabel>Notes</FormLabel>
           <FormControl>
-            <Input placeholder="Notes" {...field} />
+          <Textarea rows={7} {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>

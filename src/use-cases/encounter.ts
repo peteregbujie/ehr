@@ -1,14 +1,15 @@
 import { createEncounter, deleteEncounter, getEncounterById, getEncountersByAppointmentId, updateEncounter,  } from "@/data-access/encouter";
 import { EncounterId,  } from "./types";
 import { EncounterTypes } from "@/db/schema/encounter";
+import { NewEncounterType } from "@/lib/validations/encounter";
 
 
 
 export async function createEncounterUseCase(
-    encounterData: EncounterTypes,
-    AppointmentId: string
+    encounterData: NewEncounterType,
+    
 ) {
-    await createEncounter(encounterData, AppointmentId)         
+    await createEncounter(encounterData)         
 }
 
 export async function updateEcnounterUseCase(

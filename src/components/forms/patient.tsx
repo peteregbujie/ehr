@@ -22,6 +22,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { NewPatientSchema } from "@/lib/validations/patient"
+import { Textarea } from "../ui/textarea"
 
 
 
@@ -141,6 +142,19 @@ export function PatientForm() {
               </FormItem>
             )}
           />
+             <FormField
+          control={form.control}
+          name="phone_number"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
           <FormField
             control={form.control}
             name="email"
@@ -323,7 +337,7 @@ export function PatientForm() {
               <FormItem>
                 <FormLabel>Social History</FormLabel>
                 <FormControl>
-                  <Input placeholder="Social History" {...field} />
+                <Textarea rows={7} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -336,7 +350,7 @@ export function PatientForm() {
               <FormItem>
                 <FormLabel>Past Medical History</FormLabel>
                 <FormControl>
-                  <Input placeholder="Past Medical History" {...field} />
+                <Textarea rows={7} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -349,7 +363,7 @@ export function PatientForm() {
               <FormItem>
                 <FormLabel>Family Medical History</FormLabel>
                 <FormControl>
-                  <Input placeholder="Family Medical History" {...field} />
+                <Textarea rows={7} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -395,19 +409,20 @@ export function PatientForm() {
                 </FormItem>
               )}
             />
-             <FormField
-          control={form.control}
-          name="phone_number"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormLabel>Post Title</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          
+        <FormField
+control={form.control}
+name="note"
+render={({ field }) => (
+  <FormItem>
+    <FormLabel>Notes</FormLabel>
+    <FormControl>
+    <Textarea rows={7} {...field} />
+    </FormControl>
+    <FormMessage />
+  </FormItem>
+)}
+/>
 
             <Button disabled={isPending} type="submit" className="w-full">
               {isPending ? "Saving..." : "Save"}
