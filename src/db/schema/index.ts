@@ -30,6 +30,6 @@ export { VitalSignRelations, default as VitalSignTable } from "./vitalsign";
 
 export { PatientRelations, default as PatientTable, bloodTypes, marital_status, preferred_language } from "./patient";
 
-export { ProcedureRelations, default as ProcedureTable } from "./procedure";
+export { ProcedureRelations, default as ProcedureTable, procedure_status } from "./procedure";
 
 export { default as AddressTable, AddressRelations } from "./address";

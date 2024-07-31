@@ -5,10 +5,11 @@
 import db from "@/db";
 import { ProcedureTable } from "@/db/schema";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import { getEncounterById,  } from "./encouter";
+import { getEncounterById, getPatientLatestEncounterId,  } from "./encouter";
 import { eq } from 'drizzle-orm';
 import { getAppointmentsAndEncountersByPatientId,  getAppointmentsAndEncountersByProviderId } from "./appointment";
 import { insertProcedureSchema, ProcedureTypes } from "@/db/schema/procedure";
+import { NewProcedureType } from "@/lib/validations/procedure";
 
 
 
@@ -18,24 +19,21 @@ export const getProcedure = async () => {
 }
 
 
-  export async function createProcedure(EncounterId:string, procedureData: ProcedureTypes) {
+  export async function createProcedure(procedureData: NewProcedureType) {
     // Step 1: Fetch the encounter
-    const encounter = await getEncounterById(EncounterId);
-  
-    if (!encounter) {
-      throw new NotFoundError();
-    }          
+    const query = procedureData.phone_number;
+   
+        
+    const encounterId = getPatientLatestEncounterId(query);        
      
-       const parsedData = insertProcedureSchema.safeParse(procedureData);
+       const parsedData = insertProcedureSchema.safeParse({...procedureData, encounter_id: encounterId});
 
        if (!parsedData.success) {
            throw new InvalidDataError();
        }
    
        // Now parsedData.data should conform to InsertProcedureDataType
-      await db.insert(ProcedureTable).values(parsedData.data).returning();
-
-  
+      await db.insert(ProcedureTable).values(parsedData.data).returning(); 
 
        
   }

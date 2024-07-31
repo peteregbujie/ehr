@@ -1,6 +1,7 @@
 
 import { createProcedure, deleteProcedure, getProceduresByPatientId, getProceduresByProviderId, getProcedure, getProcedureByEncounterId, updateProcedure } from "@/data-access/procedure";
 import { ProcedureTypes } from "@/db/schema/procedure";
+import { NewProcedureType } from "@/lib/validations/procedure";
 
 
 
@@ -15,8 +16,8 @@ export const getProcedureByPatientIdUseCase = async (patientId: string) => {
 }
 
 // create Procedure use case
-export const createProcedureUseCase = async (enounterId: string, procedureData: ProcedureTypes) => {
-    return await createProcedure(enounterId, procedureData)
+export const createProcedureUseCase = async ( procedureData: NewProcedureType) => {
+    return await createProcedure( procedureData)
 }
 
 

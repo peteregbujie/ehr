@@ -41,7 +41,7 @@ export const AllergiesRelations = relations(AllergiesTable, ({ one }) => ({
  }),
 }));
 
-export const insertAllergiesSchema = createInsertSchema(AllergiesTable);
+export const insertAllergySchema = createInsertSchema(AllergiesTable);
 
 export const selectAllergiesSchema = createSelectSchema(AllergiesTable);
 

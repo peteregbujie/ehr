@@ -5,23 +5,27 @@
 import db, { eq } from "@/db";
 import InsuranceTable, { insertInsuranceSchema, InsuranceTypes } from "@/db/schema/insurance";
 import { getPatientById } from "./patient";
-import { NotFoundError } from "@/use-cases/errors";
+import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
+import { NewInsuranceType } from "@/lib/validations/insurance";
+import { getPatientLatestEncounterId } from "./encouter";
 
-export async function CreateInsurance (patientId: string, insuranceData: InsuranceTypes) {
+export async function CreateInsurance ( insuranceData: NewInsuranceType) {
    // find patient by id
-   const patient = await getPatientById(patientId);
-   if (!patient) {
-     throw new NotFoundError();
-   }
+  
+   const query = insuranceData.phone_number;
+      
+    
+   const encounterId = getPatientLatestEncounterId(query);
+   
 
-   const parsedData = insertInsuranceSchema.safeParse(insuranceData);
+   const parsedData = insertInsuranceSchema.safeParse({...insuranceData, encounter_id: encounterId});
 
    if (!parsedData.success) {
     // Handle parse failure, possibly throw an error or log it
-    throw new Error('Invalid insurance data');
+    throw new InvalidDataError();
 }
 
-   await db.insert(InsuranceTable).values({ ...parsedData.data, patient_id: patientId }).returning();
+   await db.insert(InsuranceTable).values(parsedData.data  ).returning();
 
 }
 

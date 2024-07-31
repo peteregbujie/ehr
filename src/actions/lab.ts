@@ -11,9 +11,10 @@ export const createLabAction = isProviderProcedure
   .input(    
     NewLabSchema   
   )
-  .handler(async ({ input: { phone_number, lab_name, date_ordered, lab_code, result, result_status, result_date, unit, note } }) => {
+  .handler(async ({ input: { phone_number, lab_name, date_ordered, lab_code, result,  result_date, unit, status,  note } }) => {
     await createLabUseCase({
-      phone_number, lab_name, date_ordered, lab_code, result, result_status, result_date, unit, note
+      phone_number, lab_name, date_ordered, lab_code, result, result_date, unit, note,
+      status
     });
     revalidatePath("/dashboard/provider");
   });

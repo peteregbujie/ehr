@@ -3,9 +3,10 @@
 import  { InsuranceTypes } from "@/db/schema/insurance";
 
 import { CreateInsurance, DeleteInsurance, getInsuranceById, UpdateInsurance } from "@/data-access/insurance";
+import { NewInsuranceType } from "@/lib/validations/insurance";
 
-export const CreateInsuranceUseCase = async (patientId: string, insuranceData: InsuranceTypes) => {
-  const insurance = await CreateInsurance(patientId,insuranceData );
+export const CreateInsuranceUseCase = async ( insuranceData: NewInsuranceType) => {
+  const insurance = await CreateInsurance(insuranceData );
   return insurance;
 
     }
