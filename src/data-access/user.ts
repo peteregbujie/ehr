@@ -7,6 +7,7 @@ import {  UserRoles } from "@/lib/validations/user";
 import { InvalidDataError } from "@/use-cases/errors";
 import { UserId } from "@/use-cases/types";
 import { eq, or } from "drizzle-orm";
+import { cache } from "react";
 
 
 
@@ -85,7 +86,7 @@ export async function updateUserNameFn(userId: UserId, name: string) {
     await db.update(UserTable).set({ name}).where(eq(UserTable.id, userId)).returning();
 }
 
-export const searchUser = async (query: string) => {
+export const searchUser = cache(async (query: string) => {
   try {
     const user = await db.query.UserTable.findFirst({
       where: or(
@@ -137,4 +138,4 @@ export const searchUser = async (query: string) => {
     console.error("Error searching user:", error);
     throw error;
   }
-};
+});

@@ -4,10 +4,12 @@
 import db from "@/db";
 import { LabTable } from "@/db/schema";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import { getEncounterById } from "./encouter";
+import { getEncounterById, getPatientLatestEncounterId } from "./encouter";
 import { eq } from 'drizzle-orm';
 import { getAppointmentsAndEncountersByPatientId, getAppointmentByPatientId, getAppointmentsAndEncountersByProviderId } from "./appointment";
 import { insertLabSchema, LabTypes } from "@/db/schema/labs";
+import { searchPatient } from "./patient";
+import { NewLabType } from "@/lib/validations/lab";
 
 
 
@@ -18,22 +20,21 @@ export const getLab = async () => {
 }
 
 
-  export async function createLab(EncounterId:string, labData: LabTypes) {
-    // Step 1: Fetch the encounter
-    const encounter = await getEncounterById(EncounterId);
-  
-    if (!encounter) {
-      throw new NotFoundError();
-    }          
+  export async function createLab( labData: NewLabType) {
+
+    const query = labData.phone_number;
+      
+    
+   const encounterId = getPatientLatestEncounterId(query);
+   
        // Now parsedData.data should conform to InsertLabDataType
-       // Step 3: Create the lab with the (existing or new) encounterId
-       const parsedData = insertLabSchema.safeParse({...labData, encounter_id: encounter.id});
+       const parsedData = insertLabSchema.safeParse({...labData, encounter_id: encounterId});
 
        if (!parsedData.success) {
            throw new InvalidDataError();
        }
    
-       // Now parsedData.data should conform to InsertLabDataType
+       // Now parsedData.data should conform to InsertMedicationDataType
        await db.insert(LabTable).values(parsedData.data).returning();
 
        
@@ -41,7 +42,7 @@ export const getLab = async () => {
 
   // get lab for an encounter
 
-  export async function getLabByEncounterId(encounterId: string): Promise<any[]> {
+  export async function getLabByEncounterId(encounterId: string){
     const lab = await db.query.LabTable.findMany({
       where: eq(LabTable.encounter_id, encounterId), 
     });
@@ -51,8 +52,6 @@ export const getLab = async () => {
 
 
 
-  // get lab for a patient
-  // New function to get labs by patient ID, reusing the abstraction
 export async function getLabsByPatientId(patientId: string) {
     const Encounters = await getAppointmentsAndEncountersByPatientId(patientId);
   

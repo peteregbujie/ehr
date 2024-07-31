@@ -2,9 +2,10 @@
 
 import { createVitalSign, deleteVitalSign, getVitalSignById, updateVitalSign } from "@/data-access/vitalsign";
 import { VitalSignTypes } from "@/db/schema/vitalsign";
+import { NewVitalSignType } from "@/lib/validations/vitalsign";
 
- export async function createVitalSignUseCase (enounterId: string, vitalSignData: VitalSignTypes) {
-    return await createVitalSign(enounterId, vitalSignData)
+ export async function createVitalSignUseCase ( vitalSignData: NewVitalSignType) {
+    return await createVitalSign( vitalSignData)
 }
 
 

@@ -1,10 +1,10 @@
 
 import db from "@/db";
 import PatientTable, { insertPatientSchema, PatientTypes } from "@/db/schema/patient";
-import UserTable from "@/db/schema/user";
 import { InvalidDataError} from "@/use-cases/errors";
 import { PatientId } from "@/use-cases/types";
-import { eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { cache } from "react";
 
 
 
@@ -77,7 +77,7 @@ export const getPatientById = async (patientId: PatientId) => {
 }
 
 
-export const searchPatient = async (phone_number: string) => {
+export const searchPatient = cache(async (phone_number: string) => {
     const patient = await db.query.PatientTable.findFirst({
         where: eq(PatientTable.phone_number, phone_number),
         orderBy: (PatientTable, { asc }) => [asc(PatientTable.created_at)],  
@@ -101,6 +101,6 @@ if(patient){
     return { ...rest, appointments: appointmentsWithEncounters };
 }
 return null;
-}    
+}  )  
 
 

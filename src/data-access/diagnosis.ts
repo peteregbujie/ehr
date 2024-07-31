@@ -5,7 +5,7 @@
 import db from "@/db";
 import { DiagnosisTable } from "@/db/schema";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import { getEncounterById, getEncountersByAppointmentId } from "./encouter";
+import { getEncounterById, getEncountersByAppointmentId, getPatientLatestEncounterId } from "./encouter";
 import { eq } from 'drizzle-orm';
 import { getAppointmentsAndEncountersByPatientId,  getAppointmentsAndEncountersByProviderId } from "./appointment";
 import { DiagnosisTypes, insertDiagnosisSchema } from "@/db/schema/diagnosis";
@@ -46,18 +46,7 @@ export const getDiagnosis = async () => {
   export async function createDiagnosis( diagnosisData: NewDiagnosisType) {
 
     const query = diagnosisData.phone_number;
-   
-    // destructure enocunter from returned data
-    
-    const patient = await searchPatient(query);
-
-    const latestEncounter = patient?.appointments[0].encounter;
-
-     
-    if (!latestEncounter) {
-      throw new NotFoundError();
-    }          
-    const  encounterId = latestEncounter[0].id
+    const encounterId = getPatientLatestEncounterId(query);
 
        // Now parsedData.data should conform to InsertMedicationDataType
        // Step 3: Create the medication with the (existing or new) encounterId

@@ -2,19 +2,17 @@
 
 import VitalSignsTable, { insertVitalSignSchema, VitalSignTypes } from "@/db/schema/vitalsign";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import { getEncounterById } from "./encouter";
+import { getEncounterById, getPatientLatestEncounterId } from "./encouter";
 import db, { eq } from "@/db";
+import { NewVitalSignType } from "@/lib/validations/vitalsign";
+import { searchPatient } from "./patient";
 
 
-export async function createVitalSign(EncounterId:string, vitalsignnData: VitalSignTypes) {
-    // Step 1: Fetch the encounter
-    const encounter = await getEncounterById(EncounterId);
-  
-    if (!encounter) {
-      throw new NotFoundError();
-    }          
+export async function createVitalSign( vitalsignnData: NewVitalSignType) {
+  const query = vitalsignnData.phone_number;
       
-       const parsedData = insertVitalSignSchema.safeParse({...vitalsignnData, encounter_id: encounter.id});
+  const encounterId = getPatientLatestEncounterId(query);
+       const parsedData = insertVitalSignSchema.safeParse({...vitalsignnData, encounter_id: encounterId});
 
        if (!parsedData.success) {
            throw new InvalidDataError();

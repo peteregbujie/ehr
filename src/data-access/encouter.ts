@@ -5,6 +5,7 @@ import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { EncounterId } from "@/use-cases/types";
 import { getAppointmentById, getAppointmentsByPhoneNumber, getPatientAppointmentsByPhoneNumber } from "./appointment";
 import { NewEncounterType } from "@/lib/validations/encounter";
+import { searchPatient } from "./patient";
 
 
 
@@ -83,25 +84,23 @@ export const getEncountersByAppointmentId = async (appointmentId: string) => {
 
 
 
-export async function getPatientEncountersByPhoneNumber(
-    phone_no:string,
-    ) {
-    const raw = await db.query.PatientTable.findFirst({
-       
-    where: (table, {eq}) => eq(table.phone_number, phone_no),
-    with: {
-      appointments: {
-        with: {
-          encounter: {
-          orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
-          }
-        },
-        },
-        },
+export async function getPatientLatestEncounterId(phone_number: string) {
+    const patientDetails = await searchPatient(phone_number);
+
+    let latestEncounter
+        
+    if (patientDetails) {
+      // Access the latest encounter for the first appointment
+      latestEncounter = patientDetails.appointments?.[0]?.encounter;
     
-    });
+    }
     
-    return raw;
+         
+        if (!latestEncounter) {
+          throw new NotFoundError();
+        }          
+        const  encounterId = latestEncounter[0].id
     
+        return encounterId
     }
     

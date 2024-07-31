@@ -1,6 +1,7 @@
 
 import { createLab, getLabsByPatientId, getLab, getLabByEncounterId, getLabsByProviderId, deleteLab, updateLab } from "@/data-access/lab"
 import { LabTypes } from "@/db/schema/labs"
+import { NewLabType } from "@/lib/validations/lab"
 
 
 
@@ -21,8 +22,8 @@ export const getLabByProviderIdUseCase = async (providerId: string) => {
 }
 
 // create Lab use case
-export const createLabUseCase = async (enounterId: string, labData: LabTypes) => {
-    return await createLab(enounterId, labData)
+export const createLabUseCase = async ( labData: NewLabType) => {
+    return await createLab( labData)
 }
 
 
