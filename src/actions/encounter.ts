@@ -11,7 +11,7 @@ export const createEncounterAction = isProviderProcedure
   .input(    
     newEncounterSchema   
   )
-  .handler(async ({ input: { phone_number, encounter_type, date, time, chief_complaint,location, assessment_and_plan, notes } }) => {
+  .handler(async ({ input: {  encounter_type, date, time, chief_complaint,location, assessment_and_plan, notes } }) => {
     await createEncounterUseCase({
         date, time, encounter_type, chief_complaint, assessment_and_plan, notes,
         phone_number,

@@ -41,8 +41,8 @@ export function DiagnosisForm  ()  {
 
   const form = useForm<z.infer<typeof NewDiagnosisSchema>>({
     resolver: zodResolver(NewDiagnosisSchema),
-    defaultValues: {
-      phone_number: "", diagnosis_name:"",diagnosis_code:"", severity: "mild",date: "", note: ""
+          defaultValues: {
+      diagnosis_name:"",diagnosis_code:"", severity: "mild",date: "", note: ""
     },
   })
 
@@ -50,14 +50,14 @@ export function DiagnosisForm  ()  {
     values
   ) => {
     execute({
-        phone_number: values.phone_number, 
+              
         diagnosis_name: values.diagnosis_name, diagnosis_code: values.diagnosis_code, severity: values.severity, date: values.date, note: values.note, 
     });
   };
 
 
-  form.reset({
-    phone_number: "", diagnosis_name: "", diagnosis_code:"", date: "", severity: "mild",  note: "",
+       form.reset({
+    diagnosis_name: "", diagnosis_code:"", date: "", severity: "mild",  note: "",
     },
 )
 
@@ -69,19 +69,7 @@ export function DiagnosisForm  ()  {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
 
-<FormField
-control={form.control}
-name="phone_number"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Phone Number</FormLabel>
-    <FormControl>
-      <Input placeholder="Phone Number" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+      
 
 <FormField
 control={form.control}

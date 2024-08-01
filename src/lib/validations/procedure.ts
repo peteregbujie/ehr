@@ -3,7 +3,6 @@ import * as z from "zod";
 
 
 export const NewProcedureSchema = z.object({
-  phone_number: z.string().min(10).max(10),
   name: z.string(),
   description: z.string(),
   duration: z.string(),

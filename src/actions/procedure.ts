@@ -11,9 +11,9 @@ export const createProcedureAction = isProviderProcedure
   .input(    
     NewProcedureSchema   
   )
-  .handler(async ({ input: { phone_number, name, description, status, duration, date, time, note } }) => {
+  .handler(async ({ input: {  name, description, status, duration, date, time, note } }) => {
     await createProcedureUseCase({
-      phone_number, name, description, status, duration, date, time, note 
+       name, description, status, duration, date, time, note 
     });
     revalidatePath("/dashboard/provider");
   });

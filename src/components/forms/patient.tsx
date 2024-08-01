@@ -74,7 +74,7 @@ export function PatientForm() {
       email: values.email,
       gender: values.gender,
       date_of_birth: values.date_of_birth,
-      phone_number: values.phone_number,
+           
       address: values.address,
       height: values.height,
       weight: values.weight,

@@ -3,7 +3,6 @@ import { z } from "zod";
 
 
 export const newEncounterSchema = z.object({
-    phone_number: z.string().min(10).max(10),
         date: z.string().date(),
         time: z.string().time(),
         encounter_type: z.enum(["inpatient", "outpatient", "emergency"]),

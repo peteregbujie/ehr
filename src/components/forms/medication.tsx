@@ -41,8 +41,8 @@ export function MedicationForm  ()  {
 
   const form = useForm<z.infer<typeof extendedMedicationSchema>>({
     resolver: zodResolver(extendedMedicationSchema),
-    defaultValues: {
-      phone_number: "",medication_name: "", code: "", dosage: "", frequency: "", route: "oral", status: "completed", start_date: "", end_date: "", note: "",
+          defaultValues: {
+     medication_name: "", code: "", dosage: "", frequency: "", route: "oral", status: "completed", start_date: "", end_date: "", note: "",
     },
   })
 
@@ -50,14 +50,14 @@ export function MedicationForm  ()  {
     values
   ) => {
     execute({
-        phone_number: values.phone_number, 
+              
         medication_name: values.medication_name, code: values.code, dosage: values.dosage, frequency: values.frequency, route: values.route, status: values.status, note: values.note, start_date: values.start_date, end_date: values.end_date
     });
   };
 
 
-  form.reset({
-    phone_number: "",medication_name: "", code: "", dosage: "", frequency: "", route: "oral", status: "completed", start_date: "", end_date: "", note: "",
+       form.reset({
+   medication_name: "", code: "", dosage: "", frequency: "", route: "oral", status: "completed", start_date: "", end_date: "", note: "",
     },
 )
 
@@ -69,19 +69,7 @@ export function MedicationForm  ()  {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
 
-<FormField
-control={form.control}
-name="phone_number"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Phone Number</FormLabel>
-    <FormControl>
-      <Input placeholder="Phone Number" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+      
 
 <FormField
 control={form.control}

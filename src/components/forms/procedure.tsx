@@ -40,8 +40,8 @@ export function ProcedureForm  ()  {
 
   const form = useForm<z.infer<typeof NewProcedureSchema>>({
     resolver: zodResolver(NewProcedureSchema),
-    defaultValues: {
-      phone_number: "", name: "", description: "", duration: "", date: "", time: "", note: "", status: "completed",
+          defaultValues: {
+      name: "", description: "", duration: "", date: "", time: "", note: "", status: "completed",
     },
   })
 
@@ -49,14 +49,14 @@ export function ProcedureForm  ()  {
     values
   ) => {
     execute({
-        phone_number: values.phone_number, name: values.name, description: values.description, duration: values.duration, date: values.date, time: values.time, note: values.note, status: values.status
+              name: values.name, description: values.description, duration: values.duration, date: values.date, time: values.time, note: values.note, status: values.status
         
     });
   };
 
 
-  form.reset({
-    phone_number: "", name: "", description: "", duration: "", date: "", time: "", note: "", status: "completed",
+       form.reset({
+    name: "", description: "", duration: "", date: "", time: "", note: "", status: "completed",
     },
 )
 
@@ -68,19 +68,7 @@ export function ProcedureForm  ()  {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
 
-<FormField
-control={form.control}
-name="phone_number"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Phone Number</FormLabel>
-    <FormControl>
-      <Input placeholder="Phone Number" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+      
 
 
 <FormField

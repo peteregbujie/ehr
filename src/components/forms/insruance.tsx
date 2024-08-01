@@ -40,8 +40,8 @@ export function InsuranceForm  ()  {
 
   const form = useForm<z.infer<typeof NewInsuranceSchema>>({
     resolver: zodResolver(NewInsuranceSchema),
-    defaultValues: {
-      phone_number: "", insurance_provider: "", policy_number:"", group_number:""
+          defaultValues: {
+      insurance_provider: "", policy_number:"", group_number:""
     },
   })
 
@@ -49,14 +49,14 @@ export function InsuranceForm  ()  {
     values
   ) => {
     execute({
-        phone_number: values.phone_number, insurance_provider: values.insurance_provider, policy_number: values.policy_number, group_number: values.group_number
+              insurance_provider: values.insurance_provider, policy_number: values.policy_number, group_number: values.group_number
         
     });
   };
 
 
-  form.reset({
-    phone_number: "", insurance_provider:"",  policy_number:"", group_number:""
+       form.reset({
+    insurance_provider:"",  policy_number:"", group_number:""
 })
 
   return    (
@@ -67,19 +67,7 @@ export function InsuranceForm  ()  {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
 
-<FormField
-control={form.control}
-name="phone_number"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Phone Number</FormLabel>
-    <FormControl>
-      <Input placeholder="Phone Number" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+      
 <FormField
 control={form.control}
 name="insurance_provider"

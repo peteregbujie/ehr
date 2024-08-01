@@ -3,31 +3,28 @@ import { EncounterTable, PatientTable } from "@/db/schema";
 import { EncounterTypes, insertEncounterSchema } from "@/db/schema/encounter";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { EncounterId } from "@/use-cases/types";
-import { getAppointmentById, getAppointmentsByPhoneNumber, getPatientAppointmentsByPhoneNumber } from "./appointment";
+import { getAppointmentById, getAppointmentsByPhoneNumber, getPatientAppointmentsByPhoneNumber, getPatientLatestAppointment } from "./appointment";
 import { NewEncounterType } from "@/lib/validations/encounter";
 import { searchPatient } from "./patient";
+import { getCurrentUser } from "@/lib/session";
+import { searchUser } from "./user";
 
 
 
 
 export const createEncounter = async (encounterData: NewEncounterType) => {
-    // destructure the phone number from the encounter data
-    const { phone_number } = encounterData;
 
-    const appointmentResults = await getPatientAppointmentsByPhoneNumber(phone_number);
+    
+    const result = await getPatientLatestAppointment();
 
-    const { id: firstAppointmentId, provider_id, patient_id } = appointmentResults[0]?.appointments?.[0] || {};
-
-
-    if (firstAppointmentId) {
-        throw new NotFoundError();
-      }
+  
+    const { provider_id, patient_id } = result;
 
       const newEncounterData = {
         ...encounterData,
         provider_id,
         patient_id,
-        id: firstAppointmentId,
+      
       }
 
     // Parse the input data against the schema  
@@ -49,11 +46,6 @@ export const getEncounterById = async (encounterId: EncounterId) => {
     });
 
     return encounter;
-}
-
-
-export const getEncounters  = async () => { 
-    return await db.query.EncounterTable.findMany()
 }
 
 
@@ -84,23 +76,27 @@ export const getEncountersByAppointmentId = async (appointmentId: string) => {
 
 
 
-export async function getPatientLatestEncounterId(phone_number: string) {
-    const patientDetails = await searchPatient(phone_number);
+export async function getPatientLatestEncounterId() {
 
-    let latestEncounter
-        
-    if (patientDetails) {
-      // Access the latest encounter for the first appointment
-      latestEncounter = patientDetails.appointments?.[0]?.encounter;
-    
+    const currentUser = await getCurrentUser()
+
+    const email = currentUser?.email
+
+    try {
+        const user = await searchUser(email);
+        if (!user) {
+            throw new NotFoundError();
+            
+        }
+
+        const firstPatient = user.patients[0];
+const firstAppointment = firstPatient.appointments[0];
+const latestEncounterId = firstAppointment.encounter[0].id;
+       
+        return latestEncounterId;
+    } catch (error) {
+        throw new InvalidDataError();
     }
-    
-         
-        if (!latestEncounter) {
-          throw new NotFoundError();
-        }          
-        const  encounterId = latestEncounter[0].id
-    
-        return encounterId
-    }
-    
+}
+
+

@@ -42,8 +42,8 @@ export function ImmunizationForm  ()  {
 
   const form = useForm<z.infer<typeof NewImmunizationSchema>>({
     resolver: zodResolver(NewImmunizationSchema),
-    defaultValues: {
-      phone_number: "", vaccine_name: "", site: "", vaccination_date: "", vaccination_time: "",vaccinator: "",
+          defaultValues: {
+      vaccine_name: "", site: "", vaccination_date: "", vaccination_time: "",vaccinator: "",
     },
   })
 
@@ -51,14 +51,14 @@ export function ImmunizationForm  ()  {
     values
   ) => {
     execute({
-        phone_number: values.phone_number, vaccine_name: values.vaccine_name, site: values.site, vaccination_date: values.vaccination_date, vaccination_time: values.vaccination_time, vaccinator: values.vaccinator,
+              vaccine_name: values.vaccine_name, site: values.site, vaccination_date: values.vaccination_date, vaccination_time: values.vaccination_time, vaccinator: values.vaccinator,
         
     });
   };
 
 
-  form.reset({
-    phone_number: "",vaccine_name: "", site: "", vaccination_time: "", vaccination_date: "",vaccinator: "",
+       form.reset({
+   vaccine_name: "", site: "", vaccination_time: "", vaccination_date: "",vaccinator: "",
   },
     
 )
@@ -71,19 +71,7 @@ export function ImmunizationForm  ()  {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
 
-<FormField
-control={form.control}
-name="phone_number"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Phone Number</FormLabel>
-    <FormControl>
-      <Input placeholder="Phone Number" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+      
 
 <FormField
 control={form.control}

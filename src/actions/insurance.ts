@@ -12,9 +12,9 @@ export const createInsuranceAction = isAdminProcedure
   .input(    
     NewInsuranceSchema   
   )
-  .handler(async ({ input: { phone_number, insurance_provider, policy_number, group_number } }) => {
+  .handler(async ({ input: {  insurance_provider, policy_number, group_number } }) => {
     await CreateInsuranceUseCase({
-      phone_number, insurance_provider, policy_number, group_number
+       insurance_provider, policy_number, group_number
     });
     revalidatePath("/dashboard/admin");
   });

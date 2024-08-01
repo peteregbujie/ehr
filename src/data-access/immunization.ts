@@ -7,11 +7,7 @@ import db, { eq } from "@/db";
 
 
 export async function createImmunization( labData: NewImmunizationType) {
-
-    const query = labData.phone_number;
-      
-    
-   const encounterId = getPatientLatestEncounterId(query);
+  const encounterId = await getPatientLatestEncounterId();  
    
        // Now parsedData.data should conform to InsertLabDataType
        const parsedData = insertImmunizationSchema.safeParse({...labData, encounter_id: encounterId});

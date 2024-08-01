@@ -12,10 +12,7 @@ import { getPatientLatestEncounterId } from "./encouter";
 export async function CreateInsurance ( insuranceData: NewInsuranceType) {
    // find patient by id
   
-   const query = insuranceData.phone_number;
-      
-    
-   const encounterId = getPatientLatestEncounterId(query);
+   const encounterId = await getPatientLatestEncounterId();  
    
 
    const parsedData = insertInsuranceSchema.safeParse({...insuranceData, encounter_id: encounterId});

@@ -11,9 +11,9 @@ export const createMedicationAction = isProviderProcedure
   .input(    
     extendedMedicationSchema   
   )
-  .handler(async ({ input: { phone_number, medication_name, code, dosage, frequency, route, status, note, start_date, end_date} }) => {
+  .handler(async ({ input: {  medication_name, code, dosage, frequency, route, status, note, start_date, end_date} }) => {
     await createMedicationUseCase({
-      phone_number, medication_name, code, dosage, frequency, route, status, note, start_date, end_date
+       medication_name, code, dosage, frequency, route, status, note, start_date, end_date
     });
     revalidatePath("/dashboard/provider");
   });

@@ -21,10 +21,7 @@ export const getProcedure = async () => {
 
   export async function createProcedure(procedureData: NewProcedureType) {
     // Step 1: Fetch the encounter
-    const query = procedureData.phone_number;
-   
-        
-    const encounterId = getPatientLatestEncounterId(query);        
+    const encounterId = await getPatientLatestEncounterId();         
      
        const parsedData = insertProcedureSchema.safeParse({...procedureData, encounter_id: encounterId});
 

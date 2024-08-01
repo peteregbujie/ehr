@@ -11,9 +11,9 @@ export const createDiagnosisAction = isProviderProcedure
   .input(    
     NewDiagnosisSchema
   )
-  .handler(async ({ input: { phone_number,diagnosis_name, diagnosis_code, date, severity, note } }) => {
+  .handler(async ({ input: { diagnosis_name, diagnosis_code, date, severity, note } }) => {
     await createDiagnosisUseCase({
-      phone_number, diagnosis_name, diagnosis_code, date, severity, note
+       diagnosis_name, diagnosis_code, date, severity, note
     });
     revalidatePath("/dashboard/provider");
   });

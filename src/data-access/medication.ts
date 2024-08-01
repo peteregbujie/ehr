@@ -17,11 +17,7 @@ export const getMedications = async () => {
 
 
   export async function createMedication( medicationData: NewMedicationType) {
-
-    const query = medicationData.phone_number;
-   
-        
-    const encounterId = getPatientLatestEncounterId(query);
+    const encounterId = await getPatientLatestEncounterId();  
 
        // Now parsedData.data should conform to InsertMedicationDataType
        // Step 3: Create the medication with the (existing or new) encounterId

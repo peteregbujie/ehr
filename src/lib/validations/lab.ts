@@ -4,7 +4,7 @@
 import * as z from "zod";
 
 export const NewLabSchema = z.object({
-    phone_number: z.string().min(10).max(10),
+    
   lab_name: z.string(),
   date_ordered: z.string().date(),
   lab_code: z.string(),

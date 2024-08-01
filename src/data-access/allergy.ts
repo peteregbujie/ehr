@@ -7,10 +7,7 @@ import { NewAllergyType } from "@/lib/validations/allergy";
 
 export async function createAllergy( allergyData: NewAllergyType) {
 
-    const query = allergyData.phone_number;
-      
-    
-   const encounterId = getPatientLatestEncounterId(query);
+  const encounterId = await getPatientLatestEncounterId();  
    
        // Now parsedData.data should conform to InsertLabDataType
        const parsedData = insertAllergySchema.safeParse({...allergyData, encounter_id: encounterId});

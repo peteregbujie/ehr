@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const NewVitalSignSchema = z.object({
-    phone_number: z.string().min(10).max(10),
   height: z.number().min(0),
   weight: z.number().min(0),
   systolic_blood_pressure: z.number().min(0),

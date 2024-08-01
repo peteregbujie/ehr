@@ -45,8 +45,7 @@ export const getDiagnosis = async () => {
 
   export async function createDiagnosis( diagnosisData: NewDiagnosisType) {
 
-    const query = diagnosisData.phone_number;
-    const encounterId = getPatientLatestEncounterId(query);
+    const encounterId = await getPatientLatestEncounterId();  
 
        // Now parsedData.data should conform to InsertMedicationDataType
        // Step 3: Create the medication with the (existing or new) encounterId

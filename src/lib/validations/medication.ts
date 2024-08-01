@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const extendedMedicationSchema = z.object({
-    phone_number: z.string(),
     medication_name: z.string(),
     code: z.string(),
     dosage: z.string(),

@@ -9,9 +9,8 @@ import { searchPatient } from "./patient";
 
 
 export async function createVitalSign( vitalsignnData: NewVitalSignType) {
-  const query = vitalsignnData.phone_number;
-      
-  const encounterId = getPatientLatestEncounterId(query);
+  const encounterId = await getPatientLatestEncounterId();  
+  
        const parsedData = insertVitalSignSchema.safeParse({...vitalsignnData, encounter_id: encounterId});
 
        if (!parsedData.success) {

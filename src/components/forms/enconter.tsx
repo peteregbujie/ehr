@@ -42,8 +42,8 @@ export function EncounterForm  ()  {
 
   const form = useForm<z.infer<typeof newEncounterSchema>>({
     resolver: zodResolver(newEncounterSchema),
-    defaultValues: {
-      phone_number: "", date: "", time: "", encounter_type: "inpatient", location: "", assessment_and_plan: "", chief_complaint: "", notes: "",
+          defaultValues: {
+      date: "", time: "", encounter_type: "inpatient", location: "", assessment_and_plan: "", chief_complaint: "", notes: "",
     },
   })
 
@@ -51,7 +51,7 @@ export function EncounterForm  ()  {
     values
   ) => {
     execute({
-        phone_number: values.phone_number, 
+              
         date: values.date,
         time: values.time,
         encounter_type: values.encounter_type,
@@ -63,8 +63,8 @@ export function EncounterForm  ()  {
   };
 
 
-  form.reset({
-    phone_number: "", 
+       form.reset({
+    
     date: "", 
     time: "", 
     encounter_type: "inpatient", 
@@ -82,19 +82,7 @@ export function EncounterForm  ()  {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
 
-<FormField
-control={form.control}
-name="phone_number"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Phone Number</FormLabel>
-    <FormControl>
-      <Input placeholder="Phone Number" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+      
 
 <FormField
 control={form.control}

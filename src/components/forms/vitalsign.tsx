@@ -42,8 +42,8 @@ export function VitalSignForm  ()  {
 
   const form = useForm<z.infer<typeof NewVitalSignSchema>>({
     resolver: zodResolver(NewVitalSignSchema),
-    defaultValues: {
-      phone_number: "",height: 0,weight: 0,systolic_blood_pressure: 0,diastolic_blood_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_on: "",
+          defaultValues: {
+     height: 0,weight: 0,systolic_blood_pressure: 0,diastolic_blood_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_on: "",
     },
   })
 
@@ -51,14 +51,14 @@ export function VitalSignForm  ()  {
     values
   ) => {
     execute({
-        phone_number: values.phone_number, height: values.height, weight: values.weight, systolic_blood_pressure: values.systolic_blood_pressure, diastolic_blood_pressure: values.diastolic_blood_pressure, heart_rate: values.heart_rate, body_temperature: values.body_temperature, respiratory_rate: values.respiratory_rate, oxygen_saturation: values.oxygen_saturation, bmi: values.bmi, measured_on: values.measured_on
+              height: values.height, weight: values.weight, systolic_blood_pressure: values.systolic_blood_pressure, diastolic_blood_pressure: values.diastolic_blood_pressure, heart_rate: values.heart_rate, body_temperature: values.body_temperature, respiratory_rate: values.respiratory_rate, oxygen_saturation: values.oxygen_saturation, bmi: values.bmi, measured_on: values.measured_on
          
     });
   };
 
 
-  form.reset({
-    phone_number: "",height: 0,weight: 0,systolic_blood_pressure: 0,diastolic_blood_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_on: "",
+       form.reset({
+   height: 0,weight: 0,systolic_blood_pressure: 0,diastolic_blood_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_on: "",
     },
 )
 
@@ -70,19 +70,7 @@ export function VitalSignForm  ()  {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
 
-<FormField
-control={form.control}
-name="phone_number"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Phone Number</FormLabel>
-    <FormControl>
-      <Input placeholder="Phone Number" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+      
 
 
 <FormField

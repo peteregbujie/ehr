@@ -11,9 +11,9 @@ export const createAllergyAction = isProviderProcedure
   .input(    
     NewAllergySchema   
   )
-  .handler(async ({ input: { phone_number, allergen , allergy_reaction, severity, note } }) => {
+  .handler(async ({ input: {  allergen , allergy_reaction, severity, note } }) => {
     await createAllergyUseCase({
-      phone_number, allergen, allergy_reaction, severity, note
+       allergen, allergy_reaction, severity, note
     });
     revalidatePath("/dashboard/provider");
   });

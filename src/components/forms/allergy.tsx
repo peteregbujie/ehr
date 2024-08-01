@@ -40,8 +40,8 @@ export function AllergyForm  ()  {
 
   const form = useForm<z.infer<typeof NewAllergySchema>>({
     resolver: zodResolver(NewAllergySchema),
-    defaultValues: {
-      phone_number: "", allergen: "", severity: "mild", note: "", allergy_reaction:"",
+          defaultValues: {
+      allergen: "", severity: "mild", note: "", allergy_reaction:"",
     },
   })
 
@@ -49,13 +49,13 @@ export function AllergyForm  ()  {
     values
   ) => {
     execute({
-        phone_number: values.phone_number, allergen: values.allergen,  severity: values.severity, note: values.note, allergy_reaction: values.allergy_reaction
+              allergen: values.allergen,  severity: values.severity, note: values.note, allergy_reaction: values.allergy_reaction
     });
   };
 
 
-  form.reset({
-    phone_number: "", allergen: "", severity: "mild", note: "", allergy_reaction:"",
+       form.reset({
+    allergen: "", severity: "mild", note: "", allergy_reaction:"",
 })
 
   return    (
@@ -66,19 +66,7 @@ export function AllergyForm  ()  {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
 
-<FormField
-control={form.control}
-name="phone_number"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Phone Number</FormLabel>
-    <FormControl>
-      <Input placeholder="Phone Number" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+      
 
 
 <FormField

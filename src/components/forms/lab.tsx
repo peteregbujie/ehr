@@ -40,8 +40,8 @@ export function LabForm  ()  {
 
   const form = useForm<z.infer<typeof NewLabSchema>>({
     resolver: zodResolver(NewLabSchema),
-    defaultValues: {
-      phone_number: "", lab_name: "", date_ordered: "", lab_code: "", result: "", status: "completed", result_date: "", unit: "", note: "",
+          defaultValues: {
+      lab_name: "", date_ordered: "", lab_code: "", result: "", status: "completed", result_date: "", unit: "", note: "",
     },
   })
 
@@ -49,14 +49,14 @@ export function LabForm  ()  {
     values
   ) => {
     execute({
-        phone_number: values.phone_number, lab_name: values.lab_name, date_ordered: values.date_ordered, lab_code: values.lab_code, result: values.result, status: values.status, result_date: values.result_date, unit:values.unit , note :values.note
+              lab_name: values.lab_name, date_ordered: values.date_ordered, lab_code: values.lab_code, result: values.result, status: values.status, result_date: values.result_date, unit:values.unit , note :values.note
         
     });
   };
 
 
-  form.reset({
-    phone_number: "", lab_name: "", date_ordered: "", lab_code: "", result: "", status: "completed", result_date: "", unit: "", note: "",
+       form.reset({
+    lab_name: "", date_ordered: "", lab_code: "", result: "", status: "completed", result_date: "", unit: "", note: "",
     },
 )
 
@@ -68,19 +68,7 @@ export function LabForm  ()  {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 
 
-<FormField
-control={form.control}
-name="phone_number"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Phone Number</FormLabel>
-    <FormControl>
-      <Input placeholder="Phone Number" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+      
 
 <FormField
 control={form.control}

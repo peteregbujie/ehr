@@ -21,11 +21,10 @@ export const getLab = async () => {
 
 
   export async function createLab( labData: NewLabType) {
-
-    const query = labData.phone_number;
       
     
-   const encounterId = getPatientLatestEncounterId(query);
+   const encounterId = await getPatientLatestEncounterId();  
+   
    
        // Now parsedData.data should conform to InsertLabDataType
        const parsedData = insertLabSchema.safeParse({...labData, encounter_id: encounterId});

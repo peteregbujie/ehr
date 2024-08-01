@@ -4,6 +4,8 @@ import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncountersByAppointmentId } from "./encouter";
 import { NewAppointmentType } from "@/lib/validations/appointment";
 import PatientTable from "@/db/schema/patient";
+import { getCurrentUser } from "@/lib/session";
+import { searchUser } from "./user";
 
 
 //create appointment
@@ -157,3 +159,28 @@ export async function getPatientEncountersByPhoneNumber(
   
   }
   
+
+  export async function getPatientLatestAppointment() {
+
+    const currentUser = await getCurrentUser()
+
+    const email = currentUser?.email
+
+    try {
+        const user = await searchUser(email);
+        if (!user) {
+            throw new NotFoundError();
+            
+        }
+
+        const firstPatient = user.patients[0];
+const latestAppointment = firstPatient.appointments[0];
+       
+const { provider_id, patient_id } = latestAppointment 
+
+// Return the latest appointment along with provider_id and patient_id
+return { latestAppointment, provider_id, patient_id };
+    } catch (error) {
+      throw new InvalidDataError();
+    }
+}
