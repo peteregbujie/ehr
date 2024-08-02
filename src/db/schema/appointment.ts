@@ -1,6 +1,7 @@
 import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
+  numeric,
   pgEnum,
   pgTable,
   text,
@@ -12,6 +13,7 @@ import PatientTable from "./patient";
 import ProviderTable from "./provider";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import EncounterTable from "./encounter";
+import { number } from "zod";
 
 
 
@@ -32,7 +34,7 @@ const AppointmentTable = pgTable(
    .notNull()
      .references(() => ProviderTable.id, { onDelete: "cascade" }),
   scheduled_date:  date('scheduled_date'),
-   scheduled_time: time('scheduled_time'),
+  timeSlotIndex: numeric("timeSlotIndex"),
   location: varchar("location", { length: 50 }),
   type: Appointment_type('appointment_type'),
   status: Apt_Status('appointment_status').default("scheduled").notNull(),

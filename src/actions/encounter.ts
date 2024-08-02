@@ -14,7 +14,6 @@ export const createEncounterAction = isProviderProcedure
   .handler(async ({ input: {  encounter_type, date, time, chief_complaint,location, assessment_and_plan, notes } }) => {
     await createEncounterUseCase({
         date, time, encounter_type, chief_complaint, assessment_and_plan, notes,
-        phone_number,
         location
     });
     revalidatePath("/dashboard/provider");

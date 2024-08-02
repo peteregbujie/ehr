@@ -1,4 +1,4 @@
-import { createAppointment, deleteAppointment, getAllAppointments, getAppointmentById,  getAppointmentByPatientId,  getAppointmentByProviderId, updateAppointment } from "@/data-access/appointment";
+import { bookAppointment, deleteAppointment, getAllAppointments, getAppointmentById,  getAppointmentByPatientId,  getAppointmentByProviderId, getAvailableTimeSlots, updateAppointment } from "@/data-access/appointment";
 import { AppointmentTypes } from "@/db/schema/appointment";
 import { NewAppointmentType } from "@/lib/validations/appointment";
 
@@ -25,8 +25,8 @@ export async function deleteAppointmentUseCase (appointmentId: string) {
 
 // create appointment use case
 
-export async function createAppointmentUseCase (data: NewAppointmentType) {
-    return await createAppointment(data)
+export async function bookAppointmentUseCase (data: NewAppointmentType) {
+    return await bookAppointment(data)
 }
 
 // get appointment by provider use case
@@ -39,3 +39,8 @@ export async function getAppointmentByProviderIdUseCase (providerId: string) {
 export async function getAppointmentByPatientIdUseCase (patientId: string) {
     return await getAppointmentByPatientId(patientId)
 }   
+
+
+export async function getAvailableTimeSlotsUseCase (providerId: string, date: string) {
+    return await getAvailableTimeSlots(providerId, date)
+}

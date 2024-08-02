@@ -10,9 +10,9 @@ export const createImmunizationAction = isProviderProcedure
   .input(    
     NewImmunizationSchema   
   )
-  .handler(async ({ input: {  vaccine_name, site, date_administered, time_administered, administrator} }) => {
+  .handler(async ({ input: {  vaccine_name, site, vaccination_date, vaccination_time, vaccinator} }) => {
     await createImmunizationUseCase({
-       vaccine_name, site, date_administered, time_administered, administrator
+       vaccine_name, site, vaccination_date, vaccination_time, vaccinator
     });
     revalidatePath("/dashboard/provider");
   });

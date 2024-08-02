@@ -9,7 +9,7 @@ export const AppointmentSchema = z.object({
     status: z.enum(["scheduled", "cancelled", "completed"]),
     notes: z.string(),
     scheduled_date: z.string().date(),
-    scheduled_time: z.string().date(),
+    timeSlotIndex: z.number().min(0, 'Time slot is required'),
     location: z.string(),
   });
 

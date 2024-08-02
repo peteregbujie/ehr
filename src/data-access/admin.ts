@@ -1,25 +1,34 @@
 // create a provider
 
-import { createUser, getUserById,  updateUserRoleFn } from "./user";
-import { updateProvider } from "./provider";
-import { ProviderTypes } from "@/db/schema/provider";
+import {  updateUserRoleFn } from "./user";
 import { AdminTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import db from "@/db";
-
-// create a provider. if get user by id is not found, create user then. to create provider - update user role to provider and populate the other provider fields
+import { AdminTypes } from "@/db/schema/admin";
+import { NotFoundError } from "@/use-cases/errors";
 
 
 // create admin
-export const createAdmin = async (UserId: string, providerData: ProviderTypes )=>{
-    const user = await getUserById(UserId);
-    if (!user) {
-        createUser(UserId);
-    }
+export const createAdmin = async (UserId: string, adminData: AdminTypes )=>{
+   
   const updatedUser = await updateUserRoleFn(UserId, "admin");
 
-  const newAdmin = await updateProvider(updatedUser.id, providerData );
-  return { newAdmin}
+  const newAdmin = await updateAdmin(updatedUser.id, adminData );
+  return  newAdmin;
+}
+
+
+
+export const updateAdmin = async (adminId: string, adminData: AdminTypes) => {
+
+  const admin = await db.query.AdminTable.findFirst({
+      where: eq(AdminTable.id, adminId)
+    });
+
+  if (!admin) {
+      throw new NotFoundError();
+  }   
+  return await db.update(AdminTable).set(adminData).where(eq(AdminTable.id, adminId)).returning();
 }
 
 
@@ -28,3 +37,9 @@ export const deleteAdmin = async (adminId: string) => {
   await db.delete(AdminTable).where(eq(AdminTable.id, adminId)).returning();
 }
 
+// get admin by id  
+export const getAdminById = async (adminId: string) => {
+  return await db.query.AdminTable.findFirst({
+    where: eq(AdminTable.id, adminId)
+  });
+}
