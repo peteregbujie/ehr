@@ -1,6 +1,7 @@
 import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
+  uuid,
   pgEnum,
   pgTable,
   text,
@@ -19,6 +20,8 @@ import ProcedureTable from "./procedure";
 import ProviderTable from "./provider";
 import VitalSignsTable from "./vitalsign";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import MedicationTable from "./medication";
+import InsuranceTable from "./insurance";
 
 
 export const Encounter_type = pgEnum('encounter_type', ["inpatient", "outpatient", "emergency"]);
@@ -26,19 +29,18 @@ export const Encounter_type = pgEnum('encounter_type', ["inpatient", "outpatient
 const EncounterTable = pgTable(
  "encounter",
  {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  appointment_id: text("appointment_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+  appointment_id: uuid("appointment_id")
    .notNull()
    .references(() => AppointmentTable.id, { onDelete: "cascade" }),
-  date:  date('date'),
-   time: time('time'),
+  date:   timestamp(" date", { mode: "date" })
+  .notNull(),
+   time:  time('time', { withTimezone: true }).notNull(),
   encounter_type: Encounter_type('encounter_type').notNull().default('outpatient'),
-  chief_complaint: varchar("chief_complaint", { length: 2000 }),
-  assessment_and_plan: text("assessment_and_plan"),
-  notes: varchar("notes", { length: 2000 }),
-  updated_at: timestamp("updated_at", { mode: "string" })
+  chief_complaint: varchar("chief_complaint", { length: 2000 }).notNull(),
+  assessment_and_plan: text("assessment_and_plan").notNull(),
+  notes: varchar("notes", { length: 2000 }).notNull(),
+  updated_at: timestamp("updated_at", { mode: "date" })
    .notNull()
    .defaultNow(),
  },
@@ -50,10 +52,12 @@ const EncounterTable = pgTable(
 export const EncounterRelations = relations(
  EncounterTable,
   ({ one, many }) => ({
+    medications: many(MedicationTable),
     vitalSigns: many(VitalSignsTable),
-   diagnosis: many(DiagnosisTable),   
+   diagnoses: many(DiagnosisTable),   
   allergies: many(AllergiesTable),
-   procedures: many(ProcedureTable),  
+   procedures: many(ProcedureTable),
+   insurance: many(InsuranceTable),
   labs: many(LabTable),
   immunizations: many(ImmunizationTable),  
   appointment: one(AppointmentTable, {

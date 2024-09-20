@@ -1,5 +1,5 @@
 import { InferSelectModel, relations } from "drizzle-orm";
-import { pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { pgTable,uuid,text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -8,18 +8,16 @@ import PatientTable from "./patient";
 const InsuranceTable = pgTable(
  "insurance",
  {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  encounter_id: text("encounter_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+  encounter_id: uuid("encounter_id")
    .notNull()
    .references(() => EncounterTable.id, { onDelete: "cascade" }),
-   patient_id: text("patient_id")
+   patient_id: uuid("patient_id")
    .notNull()
    .references(() => PatientTable.id, { onDelete: "cascade" }),
    insurance_provider: varchar("company_name").notNull(),
-  policy_number: varchar("policy_number"),
-  group_number: varchar("group_number"),
+  policy_number: varchar("policy_number").notNull(),
+  group_number: varchar("group_number").notNull(),
  },
  (insurance) => ({
   insuranceIndex: uniqueIndex("insuranceIndex").on(insurance.id),
@@ -41,6 +39,6 @@ export const insertInsuranceSchema = createInsertSchema(InsuranceTable);
 
 export const selectInsuranceSchema = createSelectSchema(InsuranceTable);
 
-export type InsuranceTypes = InferSelectModel<typeof InsuranceTable>
+export type InsuranceType = InferSelectModel<typeof InsuranceTable>
 
 export default InsuranceTable;

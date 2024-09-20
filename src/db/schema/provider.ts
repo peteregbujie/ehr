@@ -1,29 +1,23 @@
 import { InferSelectModel, relations } from "drizzle-orm";
-import { pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text, uuid, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import AppointmentTable from "./appointment";
-import EncounterTable from "./encounter";
 import ProviderPatientTable from "./provider_patient";
 import UserTable from "./user";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
+export const provider_type = pgEnum('provider_type', ["MD",
+    "NP"]);
+
 const ProviderTable = pgTable(
  "provider",
  {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+  user_id: uuid("user_id")
    .notNull()
    .references(() => UserTable.id, { onDelete: "cascade" }),
-  specialty: varchar("specialty", { length: 2000 }),
-   license_number: varchar("license_number", { length: 20 }),
-  provider_qualification: text("provider_qualification", {
-   enum: [
-    "MD",
-    "NP",
-    
-   ],
-  }).notNull(),
+  specialty: varchar("specialty", { length: 2000 }).notNull(),
+   license_number: varchar("license_number", { length: 20 }).notNull(),
+  provider_qualification: provider_type("provider_type").default("MD").notNull(),
  },
  (provider) => ({
   providerIndex: uniqueIndex("providerIndex").on(provider.id),
@@ -32,7 +26,6 @@ const ProviderTable = pgTable(
 
 export const providerRelations = relations(ProviderTable, ({ one, many }) => ({
  appointments: many(AppointmentTable),
- encounter: many(EncounterTable),
  providers_patients: many(ProviderPatientTable),
  user: one(UserTable, {
   fields: [ProviderTable.user_id],

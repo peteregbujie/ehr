@@ -1,9 +1,11 @@
 import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
+  uuid,
   pgEnum,
   pgTable,
   text,
+  timestamp,
   uniqueIndex,
   varchar
 } from "drizzle-orm/pg-core";
@@ -16,19 +18,20 @@ export const lab_status = pgEnum('lab_status', ["pending", "completed", "cancell
 const LabTable = pgTable(
  "labs",
  {  
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-    encounter_id: text("encounter_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+    encounter_id: uuid("encounter_id")
     .notNull()
       .references(() => EncounterTable.id, { onDelete: "cascade" }),
-   test_Name: varchar("lab_name", { length: 100 }),
-   test_Code: varchar("testCode", { length: 100 }),
+   test_Name: varchar("lab_name", { length: 100 }).notNull(),
+   test_Code: varchar("testCode", { length: 100 }).notNull(),
    status: lab_status("lab_status").default("pending").notNull(),
-   comments: varchar("comments", { length: 2000 }),
-  result: varchar("lab_result", { length: 2000 }),   
-     resultDate: date("resultDate"),
-     createdAt: date("date_ordered")     
+   note: varchar("comments", { length: 2000 }).notNull(),
+  result: varchar("lab_result", { length: 2000 }).notNull(),   
+     result_Date: timestamp("result_Date", { mode: "date" })
+     .notNull(),
+     date_Ordered: timestamp("date_Ordered", { mode: "date" })
+     .notNull()
+     .defaultNow(),    
  },
  (labs) => ({
   labsIndex: uniqueIndex("labsIndex").on(labs.id),
@@ -47,6 +50,6 @@ export const insertLabSchema = createInsertSchema(LabTable);
 // Schema for selecting a encounter - can be used to validate API responses
 export const selectLabSchema = createSelectSchema(LabTable);
 
-export type LabTypes = InferSelectModel<typeof LabTable>
+export type LabType = InferSelectModel<typeof LabTable>
 
 export default LabTable;

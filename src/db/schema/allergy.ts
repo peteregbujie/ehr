@@ -1,11 +1,13 @@
 import { InferSelectModel, relations } from "drizzle-orm";
 import {
-  date,
+ 
   pgEnum,
   pgTable,
   text,
   time,
+  timestamp,
   uniqueIndex,
+  uuid,
   varchar
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
@@ -16,18 +18,20 @@ export const Severity = pgEnum('severity', ["mild","moderate", "severe"]);
 const AllergiesTable = pgTable(
  "allergy",
  {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-   encounter_id: text("encounter_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+   encounter_id: uuid("encounter_id")
    .notNull()
    .references(() => EncounterTable.id, { onDelete: "cascade" }),
-  allergen: varchar("allergen", { length: 100 }),
-  allergy_reaction: varchar("allergy_reaction", { length: 100 }),
+  allergen: varchar("allergen", { length: 100 }).notNull(),
+  allergy_reaction: varchar("allergy_reaction", { length: 100 }).notNull(),
  severity: Severity("severity").notNull(),
-  note: varchar("note", { length: 2000 }),
-  updated_At: date("updated_At").notNull(),
-  created_At: date("created_At").notNull(),
+  note: varchar("note", { length: 2000 }).notNull(),
+  updated_At: timestamp("updated_at", { mode: "date" })
+  .notNull()
+  .defaultNow(),
+  created_At: timestamp("created_at", { mode: "date" })
+  .notNull()
+  .defaultNow(),
  },
  (allergies) => ({
   allergiesIndex: uniqueIndex("allergiesIndex").on(allergies.id),
@@ -45,6 +49,6 @@ export const insertAllergySchema = createInsertSchema(AllergiesTable);
 
 export const selectAllergiesSchema = createSelectSchema(AllergiesTable);
 
-export type AllergiesTypes = InferSelectModel<typeof AllergiesTable>
+export type AllergyType = InferSelectModel<typeof AllergiesTable>
 
 export default AllergiesTable;

@@ -11,7 +11,7 @@ export {
     default as ProviderPatientTable
 } from "./provider_patient";
 
-export { default as ProviderTable, providerRelations } from "./provider";
+export { default as ProviderTable, providerRelations, provider_type } from "./provider";
 
 export { EncounterRelations, default as EncounterTable, Encounter_type } from "./encounter";
 

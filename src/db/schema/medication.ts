@@ -1,8 +1,8 @@
 import { InferSelectModel, relations } from "drizzle-orm";
-import { date, pgEnum, pgTable, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { date, uuid, pgEnum, pgTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+
 
 
 export const Med_Route = pgEnum('med_route', ["oral", "IV"]);
@@ -14,21 +14,21 @@ export const Med_Status = pgEnum('med_status', ["active", "Inactive", "suspended
 const MedicationTable = pgTable(
  "medication",
  {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-    encounter_id: text("encounter_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+    encounter_id: uuid("encounter_id")
    .notNull()
    .references(() => EncounterTable.id, { onDelete: "cascade" }),
   medication_name: varchar("medication_name", { length: 100 }).notNull(),
-  code: varchar("code", { length: 50 }),
-  dosage: varchar("dosage", { length: 100 }),
-  frequency: varchar("frequency", { length: 100 }),
+  code: varchar("code", { length: 50 }).notNull(),
+  dosage: varchar("dosage", { length: 100 }).notNull(),
+  frequency: varchar("frequency", { length: 100 }).notNull(),
   route: Med_Route("med_route").notNull(),  
   status: Med_Status("med_status").notNull(),
-  note: varchar("note", { length: 100 }),
-  start_date: date("start_date").notNull(),
-  end_date: date("end_date").notNull(),
+  note: varchar("note", { length: 100 }).notNull(),
+  start_date: timestamp("start_date", { mode: "date" })
+  .notNull(),
+  end_date: timestamp("end_date", { mode: "date" })
+  .notNull(),
  },
  (medications) => ({
   medicationsIndex: uniqueIndex("medicationsIndex").on(medications.id),

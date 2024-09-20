@@ -1,15 +1,15 @@
 import { relations } from "drizzle-orm";
-import { pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import { pgTable, primaryKey, uuid } from "drizzle-orm/pg-core";
 import PatientTable from "./patient";
 import ProviderTable from "./provider";
 
 const ProviderPatientTable = pgTable(
  "provider_patient",
  {
-  patient_id: text("patient_id")
+  patient_id: uuid("patient_id")
    .notNull()
    .references(() => PatientTable.id, { onDelete: "cascade" }),
-  provider_id: text("provider_id")
+  provider_id: uuid("provider_id")
    .notNull()
    .references(() => ProviderTable.id, { onDelete: "cascade" }),
  },

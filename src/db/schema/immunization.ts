@@ -1,9 +1,11 @@
 import { InferSelectModel, relations } from "drizzle-orm";
 import {
   date,
+  uuid,
   pgTable,
   text,
   time,
+  timestamp,
   uniqueIndex,
   varchar
 } from "drizzle-orm/pg-core";
@@ -14,17 +16,16 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 const ImmunizationTable = pgTable(
  "immunization",
  {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()), 
+  id: uuid("id").primaryKey().defaultRandom(), 
   vaccine_name: varchar("vaccine_name", { length: 100 }).notNull(),
   site: text("site").notNull(),
-  date_administered: date("date_administered").notNull(),
-  time_administered: time("time_administered").notNull(),
-  encounter_id: text("encounter_id")
+  vaccination_date: timestamp("vaccination_date", { mode: "date" })
+  .notNull(),
+  vaccination_time: time("time_administered").notNull(),
+  encounter_id: uuid("encounter_id")
    .notNull()
    .references(() => EncounterTable.id, { onDelete: "cascade" }),
-  administrator: varchar("administrator", { length: 100 }).notNull(),
+   vaccinator: varchar("administrator", { length: 100 }).notNull(),
  },
  (immunization) => ({
   immunizationIndex: uniqueIndex("immunizationIndex").on(immunization.id),
@@ -46,6 +47,6 @@ export const insertImmunizationSchema = createInsertSchema(ImmunizationTable);
 
 export const selectImmunizationSchema = createSelectSchema(ImmunizationTable);
 
-export type ImmunizationTypes = InferSelectModel<typeof ImmunizationTable>
+export type ImmunizationType = InferSelectModel<typeof ImmunizationTable>
 
 export default ImmunizationTable;

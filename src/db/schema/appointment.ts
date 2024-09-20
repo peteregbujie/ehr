@@ -1,19 +1,21 @@
 import { InferSelectModel, relations } from "drizzle-orm";
 import {
-  date,
-  numeric,
+  date, 
   pgEnum,
   pgTable,
+  smallint,
   text,
   time,
+  timestamp,
   uniqueIndex,
+  uuid,
   varchar
 } from "drizzle-orm/pg-core";
 import PatientTable from "./patient";
 import ProviderTable from "./provider";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import EncounterTable from "./encounter";
-import { number } from "zod";
+
 
 
 
@@ -23,22 +25,21 @@ export const Apt_Status = pgEnum('appointment_status', ["scheduled", "cancelled"
 const AppointmentTable = pgTable(
  "appointment",
  {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-    reason: varchar("reason", { length: 50 }),
-  patient_id: text("patient_id")
+  id: uuid("id").primaryKey().defaultRandom(),
+    reason: varchar("reason", { length: 50 }).notNull(),
+  patient_id: uuid("patient_id")
    .notNull()
    .references(() => PatientTable.id, { onDelete: "cascade" }),
-  provider_id: text("provider_id")
+  provider_id: uuid("provider_id")
    .notNull()
      .references(() => ProviderTable.id, { onDelete: "cascade" }),
-  scheduled_date:  date('scheduled_date'),
-  timeSlotIndex: numeric("timeSlotIndex"),
-  location: varchar("location", { length: 50 }),
-  type: Appointment_type('appointment_type'),
+  scheduled_date:  timestamp(" scheduled_date", { mode: "date" })
+  .notNull(),
+  timeSlotIndex: smallint("timeSlotIndex").notNull(),
+  location: varchar("location", { length: 50 }).notNull(),
+  type: Appointment_type('appointment_type').notNull(),
   status: Apt_Status('appointment_status').default("scheduled").notNull(),
-  notes: varchar("notes", { length: 500 }),
+  notes: varchar("notes", { length: 500 }).notNull(),
  },
  (appointment) => ({
   appointmentIndex: uniqueIndex("appointmentIndex").on(appointment.id),
@@ -61,6 +62,6 @@ export const insertAppointmentSchema = createInsertSchema(AppointmentTable);
 
 export const selectAppointmentSchema = createSelectSchema(AppointmentTable);
 
-export type AppointmentTypes = InferSelectModel<typeof AppointmentTable>
+export type AppointmentTypes  = InferSelectModel<typeof AppointmentTable>
 
 export default AppointmentTable;

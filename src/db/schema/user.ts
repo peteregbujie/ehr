@@ -3,6 +3,7 @@ import type { AdapterAccountType } from "next-auth/adapters";
 
 import {
   date,
+  uuid,
   integer,
   numeric,
   pgEnum,
@@ -26,20 +27,18 @@ export const gender_id = pgEnum('gender', ['male', 'female']);
 const UserTable = pgTable(
   "user",
   {
-    id: text("id")
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
-    name: varchar("name", { length: 100 }),
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 100 }).notNull(),
     role: userRoles("role").notNull().default('patient'),
-    gender: gender_id("gender"),
-    date_of_birth: date("date", { mode: "date" }),
+    gender: gender_id("gender").notNull(),
+    date_of_birth: date("date_of_birth", { mode: "date" }).notNull(),
     email: varchar("email", { length: 30 }).notNull().unique(),
     emailVerified: timestamp("emailVerified", { mode: "date" }),       
-    image: text("image"),
-    created_at: timestamp("created_at", { mode: "string" })
+    image: varchar("image", { length: 2048 }).notNull(),
+    created_at: timestamp("created_at",  { mode: "date" })
       .notNull()
       .defaultNow(),
-    updated_at: timestamp("updated_at", { mode: "string" })
+    updated_at: timestamp("updated_at", { mode: "date" })
       .notNull()
       .defaultNow(),
   },
@@ -49,15 +48,15 @@ const UserTable = pgTable(
 );
 
 export const UsersRelations = relations(UserTable, ({ one }) => ({
-  patients: one(PatientTable, {
+  patient: one(PatientTable, {
     fields: [UserTable.id],
     references: [PatientTable.id],
   }),
-  providers: one(ProviderTable, {
+  provider: one(ProviderTable, {
     fields: [UserTable.id],
     references: [ProviderTable.id],
   }),
-  admins: one(AdminTable, {
+  admin: one(AdminTable, {
     fields: [UserTable.id],
     references: [AdminTable.id],
   }),
@@ -67,7 +66,7 @@ export const UsersRelations = relations(UserTable, ({ one }) => ({
 export const AccountsTable = pgTable(
   "account",
   {
-    userId: text("userId")
+    userId: uuid("userId")
       .notNull()
       .references(() => UserTable.id, { onDelete: "cascade" }),
     type: text("type").$type<AdapterAccountType>().notNull(),
@@ -89,8 +88,8 @@ export const AccountsTable = pgTable(
 )
 
 export const SessionsTable = pgTable("session", {
-  sessionToken: text("sessionToken").primaryKey(),
-  userId: text("userId")
+  sessionToken: uuid("sessionToken").primaryKey(),
+  userId: uuid("userId")
     .notNull()
     .references(() => UserTable.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { mode: "date" }).notNull(),
@@ -111,7 +110,9 @@ export const VerificationTokensTable = pgTable(
 )
 
 export const insertUserSchema = createInsertSchema(UserTable);
-export const selectUserSchema = createSelectSchema(UserTable);
+
+export type SelectUser = typeof UserTable.$inferSelect;
+
 
 export type UserTypes = InferSelectModel<typeof UserTable>
 

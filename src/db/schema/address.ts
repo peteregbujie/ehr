@@ -1,6 +1,6 @@
 // create a drizzle orm postgres schema for address
 
-import { numeric, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { numeric,uuid, pgTable, text, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { InferSelectModel } from "drizzle-orm";
 
@@ -9,9 +9,7 @@ import PatientTable from "./patient";
 
 
 const AddressTable = pgTable("address", {
- id: text("id") 
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+ id: uuid("id").primaryKey().defaultRandom(),
  address_line_1: varchar("address", { length: 100 }),
  address_line_2: varchar("address", { length: 100 }),
     city: varchar("city", { length: 20 }),

@@ -2,9 +2,9 @@ import { InferSelectModel, relations } from "drizzle-orm";
 import {
     numeric,
     pgTable,
-    text,
     timestamp,
-    uniqueIndex
+    uniqueIndex,
+    uuid
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
@@ -12,11 +12,9 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 const VitalSignsTable = pgTable(
   "vital_signs",
   {
-    id: text("id")
-     .primaryKey()
-     .$defaultFn(() => crypto.randomUUID()),
+    id:uuid("id").primaryKey().defaultRandom(),
     
-    encounter_id: text("encounter_id")
+    encounter_id: uuid("encounter_id")
      .notNull()
           .references(() => EncounterTable.id, { onDelete: "cascade" }),
     height: numeric("height", { precision: 3, scale: 2 }).notNull(),
@@ -34,7 +32,7 @@ const VitalSignsTable = pgTable(
     oxygen_saturation: numeric("oxygen_saturation", { precision: 5, scale: 2 }) 
     .notNull(), 
     bmi: numeric("bmi", { precision: 5, scale: 2 }).notNull(),
-    measured_at: timestamp("measured_at").notNull(),
+    measured_at: timestamp("measured_at", { mode: "date" }).notNull(),
   },
   (vitalSigns) => ({
     encounterIndex: uniqueIndex("encounter__id__idx").on(vitalSigns.encounter_id),
@@ -51,7 +49,7 @@ export const VitalSignRelations = relations(VitalSignsTable, ({ one }) => ({
  
 }));
 
-export type VitalSignTypes = InferSelectModel<typeof VitalSignsTable>
+export type VitalSignsType = InferSelectModel<typeof VitalSignsTable>
 
 export const insertVitalSignSchema = createInsertSchema(VitalSignsTable);
 
