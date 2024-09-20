@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
+import ReactQueryProvider from "@/lib/QueryClientProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -21,12 +22,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  
+
+
   return (
     <html lang="en">
       <body className={inter.className}>
         <SessionProvider>
           <NavBar />
+          <ReactQueryProvider>
           {children}
+          </ReactQueryProvider>
           <Toaster />
         </SessionProvider>
       </body>
