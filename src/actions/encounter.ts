@@ -16,5 +16,5 @@ export const createEncounterAction = isProviderProcedure
         date, time, encounter_type, chief_complaint, assessment_and_plan, notes,
         location
     });
-    revalidatePath("/dashboard/provider");
+    revalidatePath("/provider");
   });

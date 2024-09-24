@@ -15,5 +15,5 @@ export const createAllergyAction = isProviderProcedure
     await createAllergyUseCase({
        allergen, allergy_reaction, severity, note
     });
-    revalidatePath("/dashboard/provider");
+    revalidatePath("/provider");
   });

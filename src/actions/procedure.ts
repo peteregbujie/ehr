@@ -15,5 +15,5 @@ export const createProcedureAction = isProviderProcedure
     await createProcedureUseCase({
        name, description, status, duration, date, time, note 
     });
-    revalidatePath("/dashboard/provider");
+    revalidatePath("/provider");
   });

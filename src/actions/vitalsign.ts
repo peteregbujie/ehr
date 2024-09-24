@@ -13,8 +13,8 @@ export const createVitalSignAction = isProviderProcedure
   )
   .handler(async ({ input: {  height, weight, systolic_blood_pressure, diastolic_blood_pressure, heart_rate, body_temperature, respiratory_rate, oxygen_saturation, bmi, measured_on } }) => {
     await createVitalSignUseCase({
-        phone_number, height, weight, systolic_blood_pressure, diastolic_blood_pressure, heart_rate, body_temperature, respiratory_rate, oxygen_saturation, bmi, measured_on
+        height, weight, systolic_blood_pressure, diastolic_blood_pressure, heart_rate, body_temperature, respiratory_rate, oxygen_saturation, bmi, measured_on
         
     });
-    revalidatePath("/dashboard/provider");
+    revalidatePath("/provider");
   });

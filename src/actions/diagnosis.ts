@@ -1,4 +1,3 @@
-
 import {  isProviderProcedure } from "@/lib/safe-action";
 import { createDiagnosisUseCase } from "@/use-cases/diagnosis";
 
@@ -15,5 +14,5 @@ export const createDiagnosisAction = isProviderProcedure
     await createDiagnosisUseCase({
        diagnosis_name, diagnosis_code, date, severity, note
     });
-    revalidatePath("/dashboard/provider");
+    revalidatePath("/provider");
   });

@@ -1,3 +1,4 @@
+
 import { NewImmunizationSchema } from "@/lib/immunization";
 import {  isProviderProcedure } from "@/lib/safe-action";
 import { createImmunizationUseCase } from "@/use-cases/immunization";
@@ -14,5 +15,5 @@ export const createImmunizationAction = isProviderProcedure
     await createImmunizationUseCase({
        vaccine_name, site, vaccination_date, vaccination_time, vaccinator
     });
-    revalidatePath("/dashboard/provider");
+    revalidatePath("/provider");
   });

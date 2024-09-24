@@ -16,5 +16,5 @@ export const createInsuranceAction = isAdminProcedure
     await CreateInsuranceUseCase({
        insurance_provider, policy_number, group_number
     });
-    revalidatePath("/dashboard/admin");
+    revalidatePath("/admin");
   });

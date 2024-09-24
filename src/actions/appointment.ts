@@ -1,3 +1,4 @@
+
 import { isAdminProcedure } from "@/lib/safe-action";
 import { AppointmentSchema } from "@/lib/validations/appointment";
 import { bookAppointmentUseCase } from "@/use-cases/appointment";
@@ -10,9 +11,9 @@ export const bookAppointmentAction = isAdminProcedure
   .input(
     AppointmentSchema
   )
-  .handler(async ({ input: {  reason, patient_id, provider_id, type, status, notes, scheduled_date, timeSlotIndex, location } }) => {
+  .handler(async ({ input: {  reason,  provider_id, type, status, notes, scheduled_date, timeSlotIndex, location } }) => {
     await bookAppointmentUseCase( {
-        reason, patient_id, provider_id, type, status, notes, scheduled_date, timeSlotIndex, location,
+        reason, provider_id, type, status, notes, scheduled_date, timeSlotIndex, location,
     });
-    revalidatePath("/dashboard/admin");
+    revalidatePath("/admin");
   });

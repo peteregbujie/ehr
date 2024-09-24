@@ -2,7 +2,7 @@ import { isAdminProcedure } from "@/lib/safe-action"
 import { NewPatientSchema } from "@/lib/validations/patient";
 import { createPatientUseCase } from "@/use-cases/patient";
 import { revalidatePath } from "next/cache";
-import { z } from "zod"
+
 
 
 export const createPatientAction = isAdminProcedure
@@ -29,7 +29,7 @@ export const createPatientAction = isAdminProcedure
         family_medical_history,
         blood_type,
         primary_care_physician,
-        preferred_language, note }
+        preferred_language, notes }
        }) => {
         await createPatientUseCase( {
           full_name,
@@ -51,7 +51,7 @@ export const createPatientAction = isAdminProcedure
           blood_type,
           primary_care_physician,
           preferred_language,
-          note
+          notes
         });
-        revalidatePath("/dashboard/admin");
+        revalidatePath("/patients");
       });
