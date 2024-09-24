@@ -3,12 +3,11 @@
  
 import db from "@/db";
 import { LabTable } from "@/db/schema";
-import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import { getEncounterById, getPatientLatestEncounterId } from "./encouter";
+import { InvalidDataError,  } from "@/use-cases/errors";
+import {  getPatientLatestEncounterId } from "./encouter";
 import { eq } from 'drizzle-orm';
-import { getAppointmentsAndEncountersByPatientId, getAppointmentByPatientId, getAppointmentsAndEncountersByProviderId } from "./appointment";
-import { insertLabSchema, LabTypes } from "@/db/schema/labs";
-import { searchPatient } from "./patient";
+import { getAppointmentsAndEncountersByPatientId,  getAppointmentsAndEncountersByProviderId } from "./appointment";
+import { insertLabSchema, LabType } from "@/db/schema/labs";
 import { NewLabType } from "@/lib/validations/lab";
 
 
@@ -95,7 +94,7 @@ export async function getLabsByPatientId(patientId: string) {
 
 
   // update lab
-  export const updateLab = async (labId: string, labData: LabTypes) => {
+  export const updateLab = async (labId: string, labData: LabType) => {
     await db.update(LabTable).set(labData).where(eq(LabTable.id, labId)).returning();
   }
   

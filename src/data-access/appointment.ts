@@ -5,9 +5,11 @@ import { getEncountersByAppointmentId } from "./encouter";
 import { NewAppointmentType } from "@/lib/validations/appointment";
 import PatientTable from "@/db/schema/patient";
 import { getCurrentUser } from "@/lib/session";
-import { searchUser } from "./user";
-import { parseISO, formatISO, getDay } from 'date-fns';
+import { searchCurrentUser } from "./user";
+import { parseISO,  getDay } from 'date-fns';
 import { eq, and  } from 'drizzle-orm';
+import { getPatientIdByEmail } from "./patient";
+import { ProviderTable, UserTable } from "@/db/schema";
 
 
 const workingHours = [
@@ -26,12 +28,17 @@ const workingHours = [
 //create appointment
 export const bookAppointment = async (appointmentData: NewAppointmentType) => { 
 
-  const { patient_id, provider_id, scheduled_date, reason,  location, timeSlotIndex,  type, status, notes } = appointmentData;
-
-  const parsedDate = parseISO(scheduled_date);
-  const dayOfWeek = getDay(parsedDate);
+  const {  provider_id, scheduled_date,  timeSlotIndex, appointmentId } = appointmentData;
 
  
+  const scheduledDateString = scheduled_date.toISOString();
+  const parsedDate = parseISO(scheduledDateString);
+  const dayOfWeek = getDay(parsedDate);
+  const dateObj = new Date(parsedDate);
+
+  // Format the date as YYYY-MM-DD for PostgreSQL compatibility
+const formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+
 
   // Check if the appointment falls within the provider's working hours
   if (dayOfWeek < 1 || dayOfWeek > 6) {
@@ -39,29 +46,36 @@ export const bookAppointment = async (appointmentData: NewAppointmentType) => {
   }
 
  // Check if the time slot is already booked
-  const existingAppointments = await db.select().from(AppointmentTable).where(
-    and(
-      eq(AppointmentTable.provider_id, provider_id),
-      eq(AppointmentTable.timeSlotIndex, String(timeSlotIndex)),
-      eq(AppointmentTable.scheduled_date, formatISO(parsedDate, { representation: 'date' }),),
-    )
-  );
+ const existingAppointments = await db.select().from(AppointmentTable).where(
+  and(
+    eq(AppointmentTable.provider_id, provider_id),
+    eq(AppointmentTable.timeSlotIndex, +timeSlotIndex),
+    eq(AppointmentTable.scheduled_date, scheduled_date),
+  )
+);
 
   if (existingAppointments.length > 0) {
     throw new Error('The selected time slot is already booked.');
   }
+const patientID = await getPatientIdByEmail()
+
+if (appointmentId) {
+  await db.update(AppointmentTable).set({
+    ...appointmentData, 
+    patient_id: patientID,
+    scheduled_date: parsedDate,
+    timeSlotIndex: +timeSlotIndex,
+    
+  }).where(eq(AppointmentTable.id, appointmentId)).returning();
+}
 
 
   const appointment = await db.insert(AppointmentTable).values({
-    patient_id: patient_id,
-    provider_id: provider_id,
-    scheduled_date: formatISO(parsedDate, { representation: 'date' }),
-    timeSlotIndex: String(timeSlotIndex),
-    reason: reason,
-    type: type,
-    status: status,
-    notes: notes,
-    location: location
+    ...appointmentData, 
+    patient_id: patientID,
+    scheduled_date: parsedDate,
+    timeSlotIndex: +timeSlotIndex,
+    
   }).returning();
 
   return appointment;
@@ -78,18 +92,19 @@ export async function getAvailableTimeSlots(providerId: string, date: string) {
   if (dayOfWeek < 1 || dayOfWeek > 6) {
     throw new Error('Provider only works Monday to Saturday.');
   }
+  const dateObj = new Date(parsedDate);
 
   // Fetch booked time slots
   const bookedSlots = await db.select().from(AppointmentTable).where(
     and(
       eq(AppointmentTable.provider_id, providerId),      
-      eq(AppointmentTable.scheduled_date, formatISO(parsedDate, { representation: 'date' }),),
+      eq(AppointmentTable.scheduled_date, dateObj)
     )
 );
 
   // Get available slots
   const bookedSlotIndexes = bookedSlots.map(slot => slot.timeSlotIndex);
-  const availableSlots = workingHours.filter(slot => !bookedSlotIndexes.includes(slot.slot.toString()));
+  const availableSlots = workingHours.filter(slot => !bookedSlotIndexes.includes(slot.slot));
 
   return availableSlots;
 }
@@ -110,9 +125,9 @@ export const getAppointmentByProviderId = async (providerId: string) => {
 }   
 
 //get appointment by client
-export const getAppointmentByPatientId = async (PaitentId: string) => {
+export const getAppointmentByPatientId = async (PatentId: string) => {
     return await db.query.AppointmentTable.findMany({
-        where: eq(AppointmentTable.patient_id, PaitentId) ,
+        where: eq(AppointmentTable.patient_id, PatentId) ,
         orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
       });
 }
@@ -142,6 +157,21 @@ export const updateAppointment = async (appointmentId: string, appointmentData: 
 //delete appointment
 export const deleteAppointment = async (appointmentId: string) => {
     await db.delete(AppointmentTable).where(eq(AppointmentTable.id, appointmentId)).returning();
+}
+
+
+// reschedule appointment
+export const rescheduleAppointment = async (appointmentId: string, appointmentData: AppointmentTypes) => {
+    // Parse the input data against the schema  
+    const parsedData = insertAppointmentSchema.safeParse(appointmentData);
+
+    if (!parsedData.success) {
+        throw new InvalidDataError();
+    }
+
+    // Now parsedData.data should conform to InsertAppointmentDataType  
+    await db.update(AppointmentTable).set(parsedData.data).where(eq(AppointmentTable.id, appointmentId)).returning();
+
 }
 
 
@@ -241,13 +271,13 @@ export async function getPatientEncountersByPhoneNumber(
     const email = currentUser?.email
 
     try {
-        const user = await searchUser(email);
+        const user = await searchCurrentUser(email);
         if (!user) {
             throw new NotFoundError();
             
         }
 
-        const firstPatient = user.patients[0];
+        const firstPatient = user.patient;
 const latestAppointment = firstPatient.appointments[0];
        
 const { provider_id, patient_id } = latestAppointment 
@@ -261,24 +291,15 @@ return { latestAppointment, provider_id, patient_id };
 
 
 
+export async function getProviderNameByAppointmentId(appointmentId: string) {
+  const result = await db.select({
+    providerName: UserTable.name,
+  })
+  .from(AppointmentTable)
+  .innerJoin(ProviderTable, eq(AppointmentTable.provider_id, ProviderTable.id))
+  .innerJoin(UserTable, eq(ProviderTable.user_id, UserTable.id))
+  .where(eq(AppointmentTable.id, appointmentId))
+  .execute();
 
-/* export const getAvailableTimeSlots = async (providerId:string, date:string) => {
-  try {
-    
-    const bookedSlots = await db.query.AppointmentTable.findMany({
-      where: and(
-        eq(AppointmentTable.provider_id, providerId),
-        eq(AppointmentTable.scheduled_date, date)
-      )
-    });
-
-    const bookedSlotIndexes = bookedSlots.map(slot => slot.timeSlotIndex);
-    const availableSlots = workingHours.filter(slot => !bookedSlotIndexes.includes(slot.slot.toString()));
-
-    return availableSlots;
-   
-  } catch (error) {
-    throw new NotFoundError();
-  }
-};
- */
+  return result[0]?.providerName;
+}

@@ -1,11 +1,12 @@
 // create vital sign function
 
-import VitalSignsTable, { insertVitalSignSchema, VitalSignTypes } from "@/db/schema/vitalsign";
-import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import { getEncounterById, getPatientLatestEncounterId } from "./encouter";
-import db, { eq } from "@/db";
+import VitalSignsTable, { insertVitalSignSchema, VitalSignsType } from "@/db/schema/vitalsign";
+import { InvalidDataError} from "@/use-cases/errors";
+import {  getPatientLatestEncounterId } from "./encouter";
+import db from "@/db";
 import { NewVitalSignType } from "@/lib/validations/vitalsign";
 import { searchPatient } from "./patient";
+import { eq } from "drizzle-orm";
 
 
 export async function createVitalSign( vitalsignnData: NewVitalSignType) {
@@ -25,7 +26,7 @@ export async function createVitalSign( vitalsignnData: NewVitalSignType) {
 
 
   // update vital sign function
-  export const updateVitalSign = async (vitalSignId: string, vitalSignData: VitalSignTypes) => {
+  export const updateVitalSign = async (vitalSignId: string, vitalSignData: VitalSignsType) => {
 
     const parsedData = insertVitalSignSchema.safeParse(vitalSignData);
 

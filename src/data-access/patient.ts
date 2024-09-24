@@ -1,17 +1,19 @@
 
 import db from "@/db";
 import PatientTable, { insertPatientSchema, PatientTypes } from "@/db/schema/patient";
-import { InvalidDataError} from "@/use-cases/errors";
+import { getCurrentUser } from "@/lib/session";
+import { InvalidDataError, NotFoundError} from "@/use-cases/errors";
 import { PatientId } from "@/use-cases/types";
 import { eq } from "drizzle-orm";
 import { cache } from "react";
+import { getUserByEmail } from "./user";
+import { UserTable } from "@/db/schema";
 
 
 
- type SanitizedinsertPatientSchema = Omit<PatientTypes, "id"| "created_at"| "updated_at">
 
 
-export const createPatient = async (data: SanitizedinsertPatientSchema, trx = db) => {
+export const createPatient = async (data: Partial<Omit<PatientTypes, 'id'>> & { id: string }, trx = db) => {
     // Parse the input data against the schema
     const parsedData = insertPatientSchema.safeParse(data);
 
@@ -19,33 +21,15 @@ export const createPatient = async (data: SanitizedinsertPatientSchema, trx = db
         throw new InvalidDataError();
     }
 
-    // Now parsedData.data should conform to InsertPatientDataType
-    const {notes, height, weight, occupation, family_medical_history, user_id, marital_status, emergency_contact_name, emergency_contact_number, emergency_contact_relationship, blood_type, socialHistory, past_medical_history, primary_care_physician, preferred_language, address} = parsedData.data
-    // Now parsedData.data should conform to InsertPatientDataType
-
-    const newPatientData = {
-        height: height,
-        weight: weight,
-        occupation: occupation,
-        address: address,
-        user_id: user_id,
-        marital_status: marital_status,
-        emergency_contact_name: emergency_contact_name,
-        emergency_contact_number: emergency_contact_number,
-        emergency_contact_relationship: emergency_contact_relationship,
-        blood_type: blood_type,
-        socialHistory: socialHistory ,
-        past_medical_history: past_medical_history,
-        family_medical_history: family_medical_history,
-        primary_care_physician: primary_care_physician,
-        preferred_language: preferred_language,
-        note: notes,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-    }
+    const newPatientData: Omit<PatientTypes, 'id'> = {
+        ...parsedData.data,
+        preferred_language: parsedData.data.preferred_language || "English",
+        created_at: new Date(),
+updated_at: new Date(),
+    };
 
     await trx.insert(PatientTable).values(newPatientData).returning();
-}
+};
 
 export const updatePatient = async (patientId: string, data: PatientTypes) => {
     // Parse the input data against the schema
@@ -104,3 +88,39 @@ return null;
 }  )  
 
 
+
+
+export const getPatientIdByEmail = async () => {
+const currentUser = await getCurrentUser()
+const user = await getUserByEmail(currentUser?.email)
+
+if (!user) {
+   throw new NotFoundError();
+   }
+
+const patient = await db.query.PatientTable.findFirst({
+    where: eq(PatientTable.user_id, user?.id),
+
+})
+if (!patient) {
+    throw new NotFoundError();
+}
+return patient.id
+}
+
+
+
+export async function getPatientWithName(patientId: string) {
+    return db.select({
+      patientId: PatientTable.id,
+      name: UserTable.name, 
+      date_of_birth: UserTable.date_of_birth       
+    })
+    .from(PatientTable)
+    .innerJoin(UserTable, eq(PatientTable.user_id, UserTable.id))
+    .where(eq(PatientTable.id, patientId))
+    .execute();
+  }
+
+
+  
