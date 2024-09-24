@@ -23,14 +23,18 @@ import { LoaderButton } from "@/components/loader-button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { NewPatientSchema } from "@/lib/validations/patient"
 import { Textarea } from "../ui/textarea"
+import { PatientFormProps } from "@/types"
 
 
 
-export function PatientForm() {    
+export default function PatientForm({ onClose }: PatientFormProps) {
+  
+
  
   const { isPending, execute,  error } = useServerAction(createPatientAction, {
     onSuccess() {
-        toast.success("Patient has been created.");      
+        toast.success("Patient has been created.");  
+        onClose();    
     },
     onError() {
         toast.error("Something went wrong.", {
@@ -62,7 +66,7 @@ export function PatientForm() {
       blood_type: "O positive",
       primary_care_physician: "",
       preferred_language: "English",
-      note: "",
+      notes: "",
     },
   })
 
@@ -74,7 +78,7 @@ export function PatientForm() {
       email: values.email,
       gender: values.gender,
       date_of_birth: values.date_of_birth,
-           
+      phone_number: values.phone_number,           
       address: values.address,
       height: values.height,
       weight: values.weight,
@@ -89,7 +93,7 @@ export function PatientForm() {
       blood_type: values.blood_type,
       primary_care_physician: values.primary_care_physician,
       preferred_language: values.preferred_language,
-      note: values.note,
+      notes: values.notes,
     });
   };
 
@@ -113,7 +117,7 @@ export function PatientForm() {
         blood_type: "O positive",
         primary_care_physician: "",
         preferred_language: "English",   
-        note: "",
+        notes: "",
       })
 
 
@@ -412,7 +416,7 @@ export function PatientForm() {
           
         <FormField
 control={form.control}
-name="note"
+name="notes"
 render={({ field }) => (
   <FormItem>
     <FormLabel>Notes</FormLabel>

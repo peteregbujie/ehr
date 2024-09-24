@@ -26,12 +26,13 @@ import { Textarea } from "../ui/textarea";
 
 
 
-export function EncounterForm  ()  {
+export function EncounterForm  ({onSuccess}: {onSuccess: () => void})  {
 
     
   const { isPending, execute,  error } = useServerAction(createEncounterAction, {
     onSuccess() {
-        toast.success("Encounter has been created.");      
+        toast.success("Encounter has been created.");     
+        onSuccess(); 
     },
     onError() {
         toast.error("Something went wrong.", {
@@ -211,4 +212,4 @@ render={({ field }) => (
   </Form>
   </>
 );
-};
+}

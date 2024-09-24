@@ -22,15 +22,18 @@ import { Send, Terminal } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { extendedMedicationSchema } from "@/lib/validations/medication";
 
+interface MedicationFormProps {
+  onSuccess: () => void;
+}
 
 
-
-export function MedicationForm  ()  {
+export function MedicationForm  ({ onSuccess }:MedicationFormProps)  {
 
     
   const { isPending, execute,  error } = useServerAction(createMedicationAction, {
     onSuccess() {
-        toast.success("Medication has been created.");      
+        toast.success("Medication has been created.");    
+        onSuccess();  
     },
     onError() {
         toast.error("Something went wrong.", {

@@ -22,14 +22,17 @@ import { Textarea } from "../ui/textarea";
 import { NewLabSchema } from "@/lib/validations/lab";
 
 
+interface LabFormProps {
+  onSuccess: () => void; // Define the onSuccess prop
+}
 
-
-export function LabForm  ()  {
+export function LabForm  ({ onSuccess }: LabFormProps) {
 
     
   const { isPending, execute,  error } = useServerAction(createLabAction, {
     onSuccess() {
-        toast.success("Lab has been created.");      
+        toast.success("Lab has been created.");    
+        onSuccess();  
     },
     onError() {
         toast.error("Something went wrong.", {
@@ -41,7 +44,7 @@ export function LabForm  ()  {
   const form = useForm<z.infer<typeof NewLabSchema>>({
     resolver: zodResolver(NewLabSchema),
           defaultValues: {
-      lab_name: "", date_ordered: "", lab_code: "", result: "", status: "completed", result_date: "", unit: "", note: "",
+      test_Name: "", date_Ordered: new Date(), test_Code: "", result: "", status: "completed", result_Date: new Date(), note: "",
     },
   })
 
@@ -49,14 +52,14 @@ export function LabForm  ()  {
     values
   ) => {
     execute({
-              lab_name: values.lab_name, date_ordered: values.date_ordered, lab_code: values.lab_code, result: values.result, status: values.status, result_date: values.result_date, unit:values.unit , note :values.note
+              test_Name: values.test_Name, date_Ordered: values.date_Ordered, test_Code: values.test_Code, result: values.result, status: values.status, result_Date: values.result_Date,  note :values.note
         
     });
   };
 
 
        form.reset({
-    lab_name: "", date_ordered: "", lab_code: "", result: "", status: "completed", result_date: "", unit: "", note: "",
+    test_Name: "", date_Ordered: new Date(), test_Code: "", result: "", status: "completed", result_Date: new Date(),  note: "",
     },
 )
 
@@ -72,7 +75,7 @@ export function LabForm  ()  {
 
 <FormField
 control={form.control}
-name="lab_name"
+name="test_Name"
 render={({ field }) => (
   <FormItem>
     <FormLabel>Lab Name</FormLabel>
@@ -86,10 +89,10 @@ render={({ field }) => (
 
 <FormField
 control={form.control}
-name="lab_code"
+name="test_Code"
 render={({ field }) => (
   <FormItem>
-    <FormLabel>lab_code</FormLabel>
+    <FormLabel>test_Code</FormLabel>
     <FormControl>
       <Input placeholder="Lab Code" {...field} />
     </FormControl>
@@ -154,12 +157,12 @@ render={({ field }) => (
 
 <FormField
 control={form.control}
-name="date_ordered"
+name="date_Ordered"
 render={({ field }) => (
   <FormItem>
     <FormLabel>Date Ordered</FormLabel>
     <FormControl>
-      <Input type="date" placeholder="Date Ordered" {...field} />
+      <Input type="date" placeholder="Date Ordered" {...{...field, value: field.value.toISOString().split('T')[0]}} />
     </FormControl>
     <FormMessage />
   </FormItem>
@@ -167,12 +170,12 @@ render={({ field }) => (
 />
 <FormField
 control={form.control}
-name="result_date"
+name="result_Date"
 render={({ field }) => (
   <FormItem>
     <FormLabel>Result Date</FormLabel>
     <FormControl>
-      <Input type="date" placeholder="Result Date" {...field} />
+      <Input type="date" placeholder="Result Date" {...{...field, value: field.value.toISOString().split('T')[0]}} />
     </FormControl>
     <FormMessage />
   </FormItem>
@@ -180,19 +183,6 @@ render={({ field }) => (
 />
 
 
-<FormField
-control={form.control}
-name="unit"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Unit</FormLabel>
-    <FormControl>
-      <Input  {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
 
 
 

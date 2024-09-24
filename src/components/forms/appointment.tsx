@@ -11,7 +11,7 @@ import {
   } from "@/components/ui/form"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select,  SelectItem  } from "@/components/ui/select";
 import { useServerAction } from "zsa-react";
 import { AppointmentSchema } from "@/lib/validations/appointment";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,9 +26,9 @@ import { getAvailableTimeSlotsUseCase } from "@/use-cases/appointment";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
-import { format, parseISO  } from "date-fns"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
 import { getAllProvidersUseCase } from "@/use-cases/provider";
+import { getAppointmentById } from "@/data-access/appointment";
 
 
 
@@ -43,33 +43,82 @@ interface Slot {
 }
 
 
+interface AppointmentFormProps {
+  appointmentId?: string;
+  onSuccess?: () => void;
+}
 
 
-
-export function AppointmentForm  ()  {
+export function AppointmentForm  ({ appointmentId, onSuccess }: AppointmentFormProps)  {
   const [providers, setProviders] = useState<Provider[]>([]);;
 
   const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
-    
-  const { isPending, execute,  error } = useServerAction(bookAppointmentAction, {
-    onSuccess() {
-        toast.success("Appointment has been booked.");      
-    },
-    onError() {
-        toast.error("Something went wrong.", {
-            description: "Your Appointment was not booked. Please try again.",
-          })
-    },
-  })
+   
 
   
 
   const form = useForm<z.infer<typeof AppointmentSchema>>({
     resolver: zodResolver(AppointmentSchema),
-    defaultValues: {
-        reason: "", patient_id: "",provider_id: "", type: "new_patient", status: "scheduled", notes: "",scheduled_date: "", timeSlotIndex: availableSlots[0].slot,location: "",
+    defaultValues: async () => {
+      try {
+        if (appointmentId) {
+          const data = await getAppointmentById(appointmentId);
+          if (!data) {
+            throw new Error('No appointment data found');
+          }
+    
+          return {
+            reason: data.reason,
+            provider_id: data.provider_id,
+            type: data.type,
+            status: data.status,
+            notes: data.notes,
+            scheduled_date: new Date(data.scheduled_date),
+            timeSlotIndex: String(data.timeSlotIndex),
+            location: data.location,
+            appointmentId: appointmentId,
+          };
+        }
+        return { 
+          reason: "", 
+          provider_id: "", 
+          type: "new_patient", 
+          status: "scheduled", 
+          notes: "",
+          scheduled_date: new Date(), 
+          timeSlotIndex: availableSlots[0].slot.toString(),
+          location: ""
+        };
+      } catch (error) {
+        console.error('Error fetching appointment data:', error);
+        return {
+          reason: "",
+          provider_id: "",
+          type: "new_patient",
+          status: "scheduled", 
+          notes: "",
+          scheduled_date: new Date(),
+          timeSlotIndex: availableSlots[0].slot.toString(),
+          location: "",
+          };
+      }
     },
-  })
+  });
+
+
+   
+  const { isPending, execute,  error } = useServerAction(bookAppointmentAction, {   onSuccess() {
+    toast.success("Appointment has been booked.");      
+    if (onSuccess) {
+      onSuccess();
+    }
+},
+onError() {
+    toast.error("Something went wrong.", {
+        description: "Your Appointment was not booked. Please try again.",
+      })
+},
+})
 
   const providerId = form.watch('provider_id');
   const date = form.watch('scheduled_date');
@@ -95,7 +144,7 @@ export function AppointmentForm  ()  {
   useEffect(() => {
     const fetchAvailableSlots = async () => {
       if (providerId && date) {
-        const slots = await getAvailableTimeSlotsUseCase(providerId, date);
+        const slots = await getAvailableTimeSlotsUseCase(providerId, date.toISOString().split('T')[0]);
         setAvailableSlots(slots);
       }
     };
@@ -107,13 +156,13 @@ export function AppointmentForm  ()  {
     values
   ) => {
     execute({
-        reason: values.reason, provider_id: values.provider_id, patient_id: values.patient_id, type: values.type, status: values.status, notes: values.notes, scheduled_date: values.scheduled_date, timeSlotIndex: values.timeSlotIndex, location: values.location,
+        reason: values.reason, provider_id: values.provider_id, type: values.type, status: values.status, notes: values.notes, scheduled_date: values.scheduled_date, timeSlotIndex: values.timeSlotIndex, location: values.location,
        
     });
   };
 
     form.reset({       
-        reason: "", patient_id: "",provider_id: "", type: "new_patient", status: "scheduled", notes: "",scheduled_date: "", timeSlotIndex: availableSlots[0].slot, location: "",
+        reason: "", provider_id: "", type: "new_patient", status: "scheduled", notes: "",scheduled_date: new Date(), timeSlotIndex: availableSlots[0].slot.toString(), location: "",
       })
 
   return (
@@ -137,19 +186,7 @@ export function AppointmentForm  ()  {
       )}
     />
     
-    <FormField
-      control={form.control}
-      name="patient_id"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Patient ID</FormLabel>
-          <FormControl>
-            <Input placeholder="Patient ID" {...field} />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+    
     
     <FormField
           control={form.control}
@@ -273,7 +310,7 @@ export function AppointmentForm  ()  {
                       )}
                     >
                       {field.value ? (
-                        format(field.value, "PPP")
+                        field.value, "PPP"
                       ) : (
                         <span>Pick a date</span>
                       )}
@@ -284,7 +321,7 @@ export function AppointmentForm  ()  {
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={field.value ? parseISO(field.value) : undefined}
+                    selected={field.value ? field.value : undefined}
                     onSelect={field.onChange}
                     disabled={(date) =>
                       date < new Date() || date < new Date("2024-12-31")

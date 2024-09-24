@@ -23,14 +23,17 @@ import { Textarea } from "../ui/textarea";
 import { NewDiagnosisSchema } from "@/lib/validations/diagnosis";
 
 
+interface DiagnosisFormProps {
+  onSuccess: () => void; // Define the onSuccess prop
+}
 
-
-export function DiagnosisForm  ()  {
+export function DiagnosisForm  ({ onSuccess }: DiagnosisFormProps)  {
 
     
   const { isPending, execute,  error } = useServerAction(createDiagnosisAction, {
     onSuccess() {
-        toast.success("Diagnosis has been created.");      
+        toast.success("Diagnosis has been created.");   
+        onSuccess();   
     },
     onError() {
         toast.error("Something went wrong.", {
@@ -175,4 +178,4 @@ render={({ field }) => (
   </Form>
   </>
 );
-};
+}
