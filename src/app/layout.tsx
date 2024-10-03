@@ -5,7 +5,9 @@ import type { Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
-import ReactQueryProvider from "@/lib/QueryClientProvider";
+import { Suspense } from "react";
+import { Loader } from "lucide-react";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -27,16 +29,17 @@ export default function RootLayout({
 
 
   return (
+    <SessionProvider>
     <html lang="en">
-      <body className={inter.className}>
-        <SessionProvider>
-          <NavBar />
-          <ReactQueryProvider>
+      <body className={inter.className}>       
+          <NavBar />          
+          <Suspense fallback={<Loader />}>
           {children}
-          </ReactQueryProvider>
-          <Toaster />
-        </SessionProvider>
+          </Suspense>
+        
+          <Toaster />        
       </body>
     </html>
+    </SessionProvider>
   );
 }
