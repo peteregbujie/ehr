@@ -65,13 +65,25 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ CREATE TYPE "public"."procedure_status" AS ENUM('completed', 'incomplete', 'cancelled');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ CREATE TYPE "public"."provider_type" AS ENUM('MD', 'NP');
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  CREATE TYPE "public"."role" AS ENUM('patient', 'admin', 'provider');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "account" (
-	"userId" text NOT NULL,
+	"userId" uuid NOT NULL,
 	"type" text NOT NULL,
 	"provider" text NOT NULL,
 	"providerAccountId" text NOT NULL,
@@ -85,105 +97,117 @@ CREATE TABLE IF NOT EXISTS "account" (
 	CONSTRAINT "account_provider_providerAccountId_pk" PRIMARY KEY("provider","providerAccountId")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "address" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"address" varchar(100),
+	"city" varchar(20),
+	"state" varchar(20),
+	"zip_code" numeric(5, 0),
+	"country" text
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "admin" (
-	"id" text PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "allergy" (
-	"id" text PRIMARY KEY NOT NULL,
-	"encounter_id" text NOT NULL,
-	"allergen" varchar(100),
-	"allergy_reaction" varchar(100),
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"encounter_id" uuid NOT NULL,
+	"allergen" varchar(100) NOT NULL,
+	"allergy_reaction" varchar(100) NOT NULL,
 	"severity" "severity" NOT NULL,
-	"note" varchar(2000),
-	"updated_At" date NOT NULL,
-	"created_At" date NOT NULL
+	"note" varchar(2000) NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "appointment" (
-	"id" text PRIMARY KEY NOT NULL,
-	"patient_id" text NOT NULL,
-	"provider_id" text NOT NULL,
-	"scheduled_date" date,
-	"scheduled_time" time,
-	"location" varchar(50),
-	"appointment_type" "appointment_type",
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"reason" varchar(50) NOT NULL,
+	"patient_id" uuid NOT NULL,
+	"provider_id" uuid NOT NULL,
+	" scheduled_date" timestamp NOT NULL,
+	"timeSlotIndex" smallint NOT NULL,
+	"location" varchar(50) NOT NULL,
+	"appointment_type" "appointment_type" NOT NULL,
 	"appointment_status" "appointment_status" DEFAULT 'scheduled' NOT NULL,
-	"notes" varchar(500)
+	"notes" varchar(500) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "diagnosis" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"diagnosis_name" varchar(50) NOT NULL,
 	"diagnosis_code" varchar(50) NOT NULL,
-	"encounter_id" text NOT NULL,
+	"encounter_id" uuid NOT NULL,
 	"severity" "severity" NOT NULL,
 	"description" varchar(2000),
-	"updated_At" date NOT NULL,
-	"created_At" date NOT NULL
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "encounter" (
-	"id" text PRIMARY KEY NOT NULL,
-	"appointment_id" text NOT NULL,
-	"date" date,
-	"time" time,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"appointment_id" uuid NOT NULL,
+	" date" timestamp NOT NULL,
+	"time" time with time zone NOT NULL,
 	"encounter_type" "encounter_type" DEFAULT 'outpatient' NOT NULL,
-	"chief_complaint" varchar(2000),
-	"assessment_and_plan" text,
-	"notes" varchar(2000),
+	"chief_complaint" varchar(2000) NOT NULL,
+	"assessment_and_plan" text NOT NULL,
+	"notes" varchar(2000) NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "immunization" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"vaccine_name" varchar(100) NOT NULL,
 	"site" text NOT NULL,
-	"date_administered" date NOT NULL,
+	"vaccination_date" timestamp NOT NULL,
 	"time_administered" time NOT NULL,
-	"encounter_id" text NOT NULL,
+	"encounter_id" uuid NOT NULL,
 	"administrator" varchar(100) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "insurance" (
-	"id" text PRIMARY KEY NOT NULL,
-	"patient_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"encounter_id" uuid NOT NULL,
+	"patient_id" uuid NOT NULL,
 	"company_name" varchar NOT NULL,
-	"policy_number" varchar,
-	"group_number" varchar,
-	"phone_number" varchar
+	"policy_number" varchar NOT NULL,
+	"group_number" varchar NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "labs" (
-	"id" text PRIMARY KEY NOT NULL,
-	"encounter_id" text NOT NULL,
-	"lab_name" varchar(100),
-	"testCode" varchar(100),
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"encounter_id" uuid NOT NULL,
+	"lab_name" varchar(100) NOT NULL,
+	"testCode" varchar(100) NOT NULL,
 	"lab_status" "lab_status" DEFAULT 'pending' NOT NULL,
-	"comments" varchar(2000),
-	"lab_result" varchar(2000),
-	"resultDate" date,
-	"date_ordered" date
+	"comments" varchar(2000) NOT NULL,
+	"lab_result" varchar(2000) NOT NULL,
+	"result_Date" timestamp NOT NULL,
+	"date_Ordered" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "medication" (
-	"id" text PRIMARY KEY NOT NULL,
-	"encounter_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"encounter_id" uuid NOT NULL,
 	"medication_name" varchar(100) NOT NULL,
-	"code" varchar(50),
-	"dosage" varchar(100),
-	"frequency" varchar(100),
+	"code" varchar(50) NOT NULL,
+	"dosage" varchar(100) NOT NULL,
+	"frequency" varchar(100) NOT NULL,
 	"med_route" "med_route" NOT NULL,
 	"med_status" "med_status" NOT NULL,
-	"note" varchar(100),
-	"start_date" date NOT NULL,
-	"end_date" date NOT NULL
+	"note" varchar(100) NOT NULL,
+	"start_date" timestamp NOT NULL,
+	"end_date" timestamp NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "patient" (
-	"id" text PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"phone_number" numeric(10) NOT NULL,
+	"address_id" uuid NOT NULL,
 	"height" numeric(3, 2) NOT NULL,
 	"weight" numeric(3) NOT NULL,
 	"occupation" varchar(50) NOT NULL,
@@ -191,63 +215,59 @@ CREATE TABLE IF NOT EXISTS "patient" (
 	"emergency_contact_name" varchar(50) NOT NULL,
 	"emergency_contact_relationship" varchar(50) NOT NULL,
 	"emergency_contact_number" numeric(10) NOT NULL,
-	"social_history" varchar(2000),
-	"past_surgeries" varchar(2000),
-	"family_history" varchar(2000),
+	"social_history" varchar(2000) NOT NULL,
+	"past_surgeries" varchar(2000) NOT NULL,
+	"family_history" varchar(2000) NOT NULL,
 	"blood_type" "blood_types" NOT NULL,
-	"provider_id" text NOT NULL,
+	"provider_id" uuid NOT NULL,
 	"preferred_language" "preferred_language" DEFAULT 'English' NOT NULL,
 	" created_at" timestamp DEFAULT now() NOT NULL,
-	"notes" varchar(2000)
+	"notes" varchar(2000) NOT NULL,
+	CONSTRAINT "patient_phone_number_unique" UNIQUE("phone_number")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "procedure" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"procedure_name" varchar NOT NULL,
-	"procedure_description" varchar,
-	"procedure_cost" numeric NOT NULL,
+	"procedure_description" varchar NOT NULL,
 	"procedure_duration" time NOT NULL,
 	"procedure_date" date NOT NULL,
-	"encounter_id" text NOT NULL
+	"procedure_status" "procedure_status" DEFAULT 'completed' NOT NULL,
+	"procedure_note" varchar NOT NULL,
+	"encounter_id" uuid NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "provider_patient" (
-	"patient_id" text NOT NULL,
-	"provider_id" text NOT NULL,
+	"patient_id" uuid NOT NULL,
+	"provider_id" uuid NOT NULL,
 	CONSTRAINT "provider_patient_patient_id_provider_id_pk" PRIMARY KEY("patient_id","provider_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "provider" (
-	"id" text PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL,
-	"specialty" varchar(2000),
-	"license_number" varchar(20),
-	"provider_qualification" text NOT NULL
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"specialty" varchar(2000) NOT NULL,
+	"license_number" varchar(20) NOT NULL,
+	"provider_type" "provider_type" DEFAULT 'MD' NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "session" (
-	"sessionToken" text PRIMARY KEY NOT NULL,
-	"userId" text NOT NULL,
+	"sessionToken" uuid PRIMARY KEY NOT NULL,
+	"userId" uuid NOT NULL,
 	"expires" timestamp NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user" (
-	"id" text PRIMARY KEY NOT NULL,
-	"name" varchar(100),
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" varchar(100) NOT NULL,
+	"role" "role" DEFAULT 'patient' NOT NULL,
 	"gender" "gender" NOT NULL,
-	"date" date,
-	"phone_number" numeric(10),
+	"date_of_birth" date NOT NULL,
 	"email" varchar(30) NOT NULL,
 	"emailVerified" timestamp,
-	"role" "role" DEFAULT 'patient' NOT NULL,
-	"address" varchar(100),
-	"city" varchar(20),
-	"state" varchar(20),
-	"zip_code" numeric(5, 0),
-	"image" text,
+	"image" varchar(2048) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "user_phone_number_unique" UNIQUE("phone_number"),
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -259,8 +279,8 @@ CREATE TABLE IF NOT EXISTS "verificationToken" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "vital_signs" (
-	"id" text PRIMARY KEY NOT NULL,
-	"encounter_id" text NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"encounter_id" uuid NOT NULL,
 	"height" numeric(3, 2) NOT NULL,
 	"weight" numeric(3) NOT NULL,
 	"systolic_pressure" numeric(5, 2) NOT NULL,
@@ -322,7 +342,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "insurance" ADD CONSTRAINT "insurance_patient_id_encounter_id_fk" FOREIGN KEY ("patient_id") REFERENCES "public"."encounter"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "insurance" ADD CONSTRAINT "insurance_encounter_id_encounter_id_fk" FOREIGN KEY ("encounter_id") REFERENCES "public"."encounter"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "insurance" ADD CONSTRAINT "insurance_patient_id_patient_id_fk" FOREIGN KEY ("patient_id") REFERENCES "public"."patient"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -341,6 +367,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "patient" ADD CONSTRAINT "patient_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "patient" ADD CONSTRAINT "patient_address_id_address_id_fk" FOREIGN KEY ("address_id") REFERENCES "public"."address"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

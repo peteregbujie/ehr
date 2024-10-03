@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1721000640534,
-      "tag": "0000_abandoned_union_jack",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1721258903325,
-      "tag": "0001_chunky_talon",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1721693497980,
-      "tag": "0002_next_galactus",
+      "when": 1726633632751,
+      "tag": "0000_uneven_dakota_north",
       "breakpoints": true
     }
   ]

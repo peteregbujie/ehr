@@ -1,5 +1,5 @@
 {
-  "id": "5b1b7199-4e26-45ce-a2c9-ea79c0b74a1a",
+  "id": "1a4ab797-6d3f-4c6a-8ca6-e22ed7895402",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -10,7 +10,7 @@
       "columns": {
         "userId": {
           "name": "userId",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -102,19 +102,67 @@
       },
       "uniqueConstraints": {}
     },
+    "public.address": {
+      "name": "address",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "city": {
+          "name": "city",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "state": {
+          "name": "state",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "zip_code": {
+          "name": "zip_code",
+          "type": "numeric(5, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "country": {
+          "name": "country",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "public.admin": {
       "name": "admin",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         }
@@ -144,13 +192,14 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "encounter_id": {
           "name": "encounter_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -158,13 +207,13 @@
           "name": "allergen",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "allergy_reaction": {
           "name": "allergy_reaction",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "severity": {
           "name": "severity",
@@ -177,19 +226,21 @@
           "name": "note",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
-        },
-        "updated_At": {
-          "name": "updated_At",
-          "type": "date",
-          "primaryKey": false,
           "notNull": true
         },
-        "created_At": {
-          "name": "created_At",
-          "type": "date",
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {
@@ -233,46 +284,53 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "reason": {
+          "name": "reason",
+          "type": "varchar(50)",
+          "primaryKey": false,
           "notNull": true
         },
         "patient_id": {
           "name": "patient_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
         "provider_id": {
           "name": "provider_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "scheduled_date": {
-          "name": "scheduled_date",
-          "type": "date",
+        " scheduled_date": {
+          "name": " scheduled_date",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "scheduled_time": {
-          "name": "scheduled_time",
-          "type": "time",
+        "timeSlotIndex": {
+          "name": "timeSlotIndex",
+          "type": "smallint",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "location": {
           "name": "location",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "appointment_type": {
           "name": "appointment_type",
           "type": "appointment_type",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "appointment_status": {
           "name": "appointment_status",
@@ -286,7 +344,7 @@
           "name": "notes",
           "type": "varchar(500)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {
@@ -343,9 +401,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "diagnosis_name": {
           "name": "diagnosis_name",
@@ -361,7 +420,7 @@
         },
         "encounter_id": {
           "name": "encounter_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -378,17 +437,19 @@
           "primaryKey": false,
           "notNull": false
         },
-        "updated_At": {
-          "name": "updated_At",
-          "type": "date",
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "now()"
         },
-        "created_At": {
-          "name": "created_At",
-          "type": "date",
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {
@@ -432,27 +493,28 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "appointment_id": {
           "name": "appointment_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "date": {
-          "name": "date",
-          "type": "date",
+        " date": {
+          "name": " date",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "time": {
           "name": "time",
-          "type": "time",
+          "type": "time with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "encounter_type": {
           "name": "encounter_type",
@@ -466,19 +528,19 @@
           "name": "chief_complaint",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "assessment_and_plan": {
           "name": "assessment_and_plan",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "notes": {
           "name": "notes",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
@@ -529,9 +591,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "vaccine_name": {
           "name": "vaccine_name",
@@ -545,9 +608,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "date_administered": {
-          "name": "date_administered",
-          "type": "date",
+        "vaccination_date": {
+          "name": "vaccination_date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         },
@@ -559,7 +622,7 @@
         },
         "encounter_id": {
           "name": "encounter_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -611,13 +674,20 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "encounter_id": {
+          "name": "encounter_id",
+          "type": "uuid",
+          "primaryKey": false,
           "notNull": true
         },
         "patient_id": {
           "name": "patient_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -631,19 +701,13 @@
           "name": "policy_number",
           "type": "varchar",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "group_number": {
           "name": "group_number",
           "type": "varchar",
           "primaryKey": false,
-          "notNull": false
-        },
-        "phone_number": {
-          "name": "phone_number",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {
@@ -664,10 +728,23 @@
         }
       },
       "foreignKeys": {
-        "insurance_patient_id_encounter_id_fk": {
-          "name": "insurance_patient_id_encounter_id_fk",
+        "insurance_encounter_id_encounter_id_fk": {
+          "name": "insurance_encounter_id_encounter_id_fk",
           "tableFrom": "insurance",
           "tableTo": "encounter",
+          "columnsFrom": [
+            "encounter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "insurance_patient_id_patient_id_fk": {
+          "name": "insurance_patient_id_patient_id_fk",
+          "tableFrom": "insurance",
+          "tableTo": "patient",
           "columnsFrom": [
             "patient_id"
           ],
@@ -687,13 +764,14 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "encounter_id": {
           "name": "encounter_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -701,13 +779,13 @@
           "name": "lab_name",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "testCode": {
           "name": "testCode",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "lab_status": {
           "name": "lab_status",
@@ -721,25 +799,26 @@
           "name": "comments",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "lab_result": {
           "name": "lab_result",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "resultDate": {
-          "name": "resultDate",
-          "type": "date",
+        "result_Date": {
+          "name": "result_Date",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "date_ordered": {
-          "name": "date_ordered",
-          "type": "date",
+        "date_Ordered": {
+          "name": "date_Ordered",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {
@@ -783,13 +862,14 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "encounter_id": {
           "name": "encounter_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -803,19 +883,19 @@
           "name": "code",
           "type": "varchar(50)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "dosage": {
           "name": "dosage",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "frequency": {
           "name": "frequency",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "med_route": {
           "name": "med_route",
@@ -835,17 +915,17 @@
           "name": "note",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "start_date": {
           "name": "start_date",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         },
         "end_date": {
           "name": "end_date",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         }
@@ -891,13 +971,26 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
-          "type": "text",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone_number": {
+          "name": "phone_number",
+          "type": "numeric(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address_id": {
+          "name": "address_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -948,19 +1041,19 @@
           "name": "social_history",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "past_surgeries": {
           "name": "past_surgeries",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "family_history": {
           "name": "family_history",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "blood_type": {
           "name": "blood_type",
@@ -971,7 +1064,7 @@
         },
         "provider_id": {
           "name": "provider_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -994,7 +1087,7 @@
           "name": "notes",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {
@@ -1028,6 +1121,19 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
+        "patient_address_id_address_id_fk": {
+          "name": "patient_address_id_address_id_fk",
+          "tableFrom": "patient",
+          "tableTo": "address",
+          "columnsFrom": [
+            "address_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
         "patient_provider_id_provider_id_fk": {
           "name": "patient_provider_id_provider_id_fk",
           "tableFrom": "patient",
@@ -1043,7 +1149,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "patient_phone_number_unique": {
+          "name": "patient_phone_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "phone_number"
+          ]
+        }
+      }
     },
     "public.procedure": {
       "name": "procedure",
@@ -1051,9 +1165,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "procedure_name": {
           "name": "procedure_name",
@@ -1064,12 +1179,6 @@
         "procedure_description": {
           "name": "procedure_description",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "procedure_cost": {
-          "name": "procedure_cost",
-          "type": "numeric",
           "primaryKey": false,
           "notNull": true
         },
@@ -1085,9 +1194,23 @@
           "primaryKey": false,
           "notNull": true
         },
+        "procedure_status": {
+          "name": "procedure_status",
+          "type": "procedure_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'completed'"
+        },
+        "procedure_note": {
+          "name": "procedure_note",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
         "encounter_id": {
           "name": "encounter_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         }
@@ -1133,13 +1256,13 @@
       "columns": {
         "patient_id": {
           "name": "patient_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
         "provider_id": {
           "name": "provider_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         }
@@ -1190,13 +1313,14 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1204,19 +1328,21 @@
           "name": "specialty",
           "type": "varchar(2000)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "license_number": {
           "name": "license_number",
           "type": "varchar(20)",
           "primaryKey": false,
-          "notNull": false
-        },
-        "provider_qualification": {
-          "name": "provider_qualification",
-          "type": "text",
-          "primaryKey": false,
           "notNull": true
+        },
+        "provider_type": {
+          "name": "provider_type",
+          "type": "provider_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'MD'"
         }
       },
       "indexes": {
@@ -1260,13 +1386,13 @@
       "columns": {
         "sessionToken": {
           "name": "sessionToken",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
           "notNull": true
         },
         "userId": {
           "name": "userId",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1302,15 +1428,24 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "name": "name",
           "type": "varchar(100)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'patient'"
         },
         "gender": {
           "name": "gender",
@@ -1319,17 +1454,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "date": {
-          "name": "date",
+        "date_of_birth": {
+          "name": "date_of_birth",
           "type": "date",
           "primaryKey": false,
-          "notNull": false
-        },
-        "phone_number": {
-          "name": "phone_number",
-          "type": "numeric(10)",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "email": {
           "name": "email",
@@ -1343,43 +1472,11 @@
           "primaryKey": false,
           "notNull": false
         },
-        "role": {
-          "name": "role",
-          "type": "role",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'patient'"
-        },
-        "address": {
-          "name": "address",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "city": {
-          "name": "city",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "state": {
-          "name": "state",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "zip_code": {
-          "name": "zip_code",
-          "type": "numeric(5, 0)",
-          "primaryKey": false,
-          "notNull": false
-        },
         "image": {
           "name": "image",
-          "type": "text",
+          "type": "varchar(2048)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -1416,13 +1513,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "user_phone_number_unique": {
-          "name": "user_phone_number_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "phone_number"
-          ]
-        },
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
@@ -1474,13 +1564,14 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "encounter_id": {
           "name": "encounter_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1686,6 +1777,23 @@
         "Vietnamese",
         "Mandarin",
         "Portuguese"
+      ]
+    },
+    "public.procedure_status": {
+      "name": "procedure_status",
+      "schema": "public",
+      "values": [
+        "completed",
+        "incomplete",
+        "cancelled"
+      ]
+    },
+    "public.provider_type": {
+      "name": "provider_type",
+      "schema": "public",
+      "values": [
+        "MD",
+        "NP"
       ]
     },
     "public.role": {
