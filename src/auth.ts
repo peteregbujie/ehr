@@ -1,3 +1,4 @@
+
 import db from "@/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth from "next-auth";
@@ -10,12 +11,13 @@ import { UserRoles } from "./lib/validations/user";
 
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: DrizzleAdapter(db) as Adapter,
+  adapter: DrizzleAdapter(db) ,
   session: { strategy: "jwt" },
   pages: {
-    signIn: "/",
+    signIn: "/login",
 
   },
+  secret: process.env.AUTH_SECRET,
 
 
   callbacks: {
