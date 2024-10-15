@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -23,34 +23,44 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { MoreHorizontal, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { MoreHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { deleteUserUseCase } from '@/use-cases/user';
-import { SelectUser, SelectPatient } from '@/types';
+import { SelectUser, SelectPatient, SelectAppointment, SelectEncounter, patientsTableProps } from '@/types';
 import Link from 'next/link';
+
+
 
 export default function PatientsTable({
   users,
   offset,
-  totalUsers
-}: {
-  users: SelectUser[];
-  offset: number;
-  totalUsers: number;
-}) {
+  totalUsers,
+}: patientsTableProps) {
+
+  const [currentOffset, setCurrentOffset] = useState(offset);
   const router = useRouter();
   const patientsPerPage = 5;
 
-  const prevPage = () => router.back();
-  const nextPage = () => router.push(`/?offset=${offset + patientsPerPage}`, { scroll: false });
+
+
+  const prevPage = () => {
+    if (currentOffset > 0) {
+      setCurrentOffset(currentOffset - patientsPerPage);
+    }
+  };
+  
+  const nextPage = () => {
+    if (currentOffset + patientsPerPage < totalUsers) {
+      router.push(`/?offset=${currentOffset + patientsPerPage}`, { scroll: false });
+    }
+  };
+
 
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+      <CardHeader className="bg-black text-white">
         <div className="flex justify-between items-center">
           <div>
             <CardTitle className="text-2xl font-bold">Patients</CardTitle>
@@ -58,31 +68,15 @@ export default function PatientsTable({
               Manage your patients
             </CardDescription>
           </div>
-          {/* <Button className="bg-white text-blue-600 hover:bg-blue-50">
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add Patient
-          </Button> */}
+         
         </div>
       </CardHeader>
       <CardContent className="p-6">
-        {/* <div className="flex justify-between items-center mb-4">
-          <div className="relative w-64">
-            <Input
-              type="text"
-              placeholder="Search patients..."
-              className="pl-10 pr-4 py-2 w-full"
-            />
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-          <div className="space-x-2">
-            <Button variant="outline">Export</Button>
-            <Button variant="outline">Filter</Button>
-          </div>
-        </div> */}
+        
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-100">
-              <TableHead className="w-[60px]">ID</TableHead>
+              
               <TableHead>Name</TableHead>
               <TableHead className="hidden md:table-cell">Gender</TableHead>
               <TableHead>Date of Birth</TableHead>
@@ -94,20 +88,21 @@ export default function PatientsTable({
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id} className="hover:bg-gray-50">
-                <TableCell className="font-medium">{user.id}</TableCell>
+               
                 <TableCell className="font-medium">{user.name}</TableCell>
                 <TableCell className="hidden md:table-cell">
                 <Badge variant={user.gender === 'male' ? 'default' : 'secondary'}>
                     {user.gender}
                   </Badge>
                 </TableCell>
-                <TableCell>{user.date_of_birth.toLocaleDateString()}</TableCell>
+                <TableCell> {new Date(user.date_of_birth).toLocaleDateString()}</TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {(user.patient as SelectPatient).appointments[0]?.scheduled_date.toLocaleDateString() || 'N/A'}
-                </TableCell>
-                <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
-                  {(user.patient as SelectPatient).appointments[0]?.reason || 'N/A'}
-                </TableCell>
+  {(user.patient?.appointments?.[0].scheduled_date.toLocaleDateString()) || 'N/A'}
+</TableCell>
+<TableCell className="hidden lg:table-cell max-w-[200px] truncate">
+  {users?.[0].patient?.appointments?.[0].reason || 'N/A'}
+</TableCell>
+
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
