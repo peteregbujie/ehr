@@ -37,8 +37,8 @@ export default async function seed(db: DbType) {
      status: lab.status as "pending" | "completed" | "cancelled",
      note: lab.note,
      result: lab.result,
-     result_Date: lab.result_Date,
-     date_Ordered: lab.date_Ordered,
+     result_Date: new Date(lab.result_Date),
+     date_Ordered: new Date(lab.date_Ordered),
 
      
    }));

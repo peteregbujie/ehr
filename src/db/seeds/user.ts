@@ -10,22 +10,22 @@ import { UserTable } from "@/db/schema";
 
 
 export default async function seed( db:  DbType) {
- for (const user of users) {
- /*   const validatedRole = user.role === "patient" || user.role === "admin" || user.role === "provider"
-     ? user.role
-     : "patient"; // Default to "patient" if the role is invalid */
-
-     await db.insert(UserTable)
-     .values({
-       ...user,       
-       role: user.role as "patient" | "admin" | "provider",
-       date_of_birth: user.date_of_birth,
-       emailVerified: user.emailVerified ,
-       created_at: user.created_at,
-       updated_at: user.updated_at,
-       gender: user.gender as "male" | "female"
-     }).returning();
- }
+ 
+  await db.insert(UserTable)
+  .values(users.map((user) => ({
+    name: user.name,
+    role: user.role as "patient" | "admin" | "provider",
+    emailVerified: new Date(user.emailVerified),
+    id: user.id,
+    gender: user.gender as "male" | "female",
+    date_of_birth: new Date(user.date_of_birth),
+    email: user.email,
+    image: user.image,
+    created_at: new Date(user.created_at),
+    updated_at: new Date(user.updated_at),
+  })))
+  .returning();
+ 
 }
 
 

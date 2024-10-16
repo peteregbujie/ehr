@@ -39,8 +39,8 @@ export default async function seed(db: DbType) {
      route: medication.route as "oral" | "IV",
      status: medication.status as "active" | "Inactive" | "suspended" | "completed",
      note: medication.note,
-     start_date: medication.start_date,
-     end_date: medication.end_date,
+     start_date: new Date(medication.start_date),
+     end_date: new Date(medication.end_date),
 
      
    }));

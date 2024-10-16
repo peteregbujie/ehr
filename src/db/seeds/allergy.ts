@@ -31,16 +31,19 @@ export default async function seed( db: DbType) {
    })
  );
  const filteredAllergies = preparedAllergies
- .filter((allergy) => allergy !== null && allergy !== undefined)
- .map((allergy) => ({
-   encounter_id: allergy.encounter_id,
-   allergen: allergy.allergen,
-   allergy_reaction: allergy.allergy_reaction,
-   severity: allergy.severity as  "mild" | "moderate" | "severe",
-   note: allergy.note,
-   created_At: allergy.created_At,
- }));
+  .filter((allergy) => allergy !== null && allergy !== undefined)
+  .map((allergy) => ({
+    encounter_id: allergy.encounter_id,
+    allergen: allergy.allergen,
+    allergy_reaction: allergy.allergy_reaction,
+    severity: allergy.severity as "mild" | "moderate" | "severe",
+    note: allergy.note,
+    created_At: new Date(allergy.created_At),
+  }));
 
-await db.insert(AllergiesTable).values(filteredAllergies);
- 
+if (filteredAllergies.length > 0) {
+  await db.insert(AllergiesTable).values(filteredAllergies);
+} else {
+  console.log('No allergies to insert');
+}
 }

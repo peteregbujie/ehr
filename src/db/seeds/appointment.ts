@@ -7,7 +7,7 @@ import { AppointmentTypes } from "../schema/appointment";
 export default async function seed(db: DbType) {
 
   const appointmentData = appointments.map(async (appointment) => {
-    const scheduledDate = new Date(appointment.scheduled_date).toISOString();
+    const scheduledDate = new Date(appointment.scheduled_date);
     const patient = await db.query.PatientTable.findFirst({
       where: eq(PatientTable.id, appointment.patient_id),
     });

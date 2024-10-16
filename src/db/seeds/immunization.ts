@@ -34,7 +34,7 @@ export default async function seed(db: DbType) {
      encounter_id: immunization.encounter_id,
      vaccine_name: immunization.vaccine_name,
      site: immunization.site,
-     vaccination_date: immunization.vaccination_date,
+     vaccination_date: new Date(immunization.vaccination_date),
      vaccination_time: immunization.vaccination_time,
      vaccinator: immunization.vaccinator,
    

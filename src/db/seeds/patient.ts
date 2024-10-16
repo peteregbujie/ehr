@@ -18,8 +18,8 @@ export default async function seed(db: DbType) {
       return {
         ...patient,
         address: foundAddress.id,
-        created_at: new Date().toISOString(), // Convert Date to ISO string
-        updated_at: new Date().toISOString(),
+        created_at: new Date(), 
+        updated_at: new Date(),
         weight: patient.weight.toString(),
         marital_status: patient.marital_status as PatientTypes["marital_status"],
         blood_type: patient.blood_type as PatientTypes["blood_type"],

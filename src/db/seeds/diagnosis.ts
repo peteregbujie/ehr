@@ -36,8 +36,8 @@ export default async function seed(db: DbType) {
       note: diagnosis.note,
       diagnosis_name: diagnosis.diagnosis_name,
       diagnosis_code: diagnosis.diagnosis_code,
-      created_At: diagnosis.created_At,
-      updated_At: diagnosis.updated_At,
+      created_At: new Date(diagnosis.created_At),
+      updated_At: new Date(diagnosis.updated_At),
     
 
       

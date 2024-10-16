@@ -41,7 +41,7 @@ export default async function seed(db: DbType) {
     respiratory_rate: vitalSign.respiratory_rate.toString(), 
     oxygen_saturation: vitalSign.oxygen_saturation,
     bmi: vitalSign.bmi,
-    measured_at: vitalSign.measured_at,
+    measured_at: new Date(vitalSign.measured_at),
   }));
 
 await db.insert(VitalSignTable).values(filteredVitalSigns);

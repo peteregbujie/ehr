@@ -14,8 +14,8 @@ export default async function seed(db: DbType) {
 
       if (appointmentId) {
         return { ...encounter, appointment_id: appointmentId.id,
-         date: new Date(encounter.date).toISOString(),
-         updated_at: new Date(encounter.updated_at).toISOString(),
+         date: new Date(encounter.date),
+         updated_at: new Date(encounter.updated_at),
          encounter_type: encounter.encounter_type as EncounterTypes["encounter_type"],
         };
       } else {
