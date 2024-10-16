@@ -11,9 +11,9 @@ export const bookAppointmentAction = isAdminProcedure
   .input(
     AppointmentSchema
   )
-  .handler(async ({ input: {  reason,  provider_id, type, status, notes, scheduled_date, timeSlotIndex, location } }) => {
+  .handler(async ({ input: {  reason,  provider_id, type, status, notes, scheduled_date, timeSlotIndex, location, patient_id } }) => {
     await bookAppointmentUseCase( {
-        reason, provider_id, type, status, notes, scheduled_date, timeSlotIndex, location,
+        reason, provider_id, type, status, notes, scheduled_date, timeSlotIndex, location, patient_id
     });
     revalidatePath("/admin");
   });
