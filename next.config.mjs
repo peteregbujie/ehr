@@ -1,5 +1,14 @@
-/** @type {import('next').NextConfig} */
+
+
 const nextConfig = {
+  
+  experimental: {
+    ppr: true,
+    reactCompiler: true,
+    serverActions: {
+      bodySizeLimit: '5mb',
+    },
+  },
     output: "standalone",
       images: {
     remotePatterns: [
@@ -8,6 +17,7 @@ const nextConfig = {
       },
     ],
   },
+ 
 };
 
 export default nextConfig;
