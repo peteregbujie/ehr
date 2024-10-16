@@ -1,10 +1,10 @@
 import { InferSelectModel, relations } from "drizzle-orm";
 
 import {
+  decimal,
   numeric,
   pgEnum,
   pgTable,
-  text,
   timestamp,
   uniqueIndex,
   uuid,
@@ -47,8 +47,8 @@ const PatientTable = pgTable(
     address: uuid("address_id")
         .notNull()
         .references(() => AddressTable.id, { onDelete: "cascade" }),
-    height: numeric("height", { precision: 3, scale: 2 }).notNull(),
-    weight: numeric("weight", { precision: 3 }).notNull(),
+    height: numeric("height", { precision: 4, scale: 2 }).notNull(),
+    weight: numeric("weight", { precision: 5, scale: 2 }).notNull(),
     occupation: varchar("occupation", { length: 50 }).notNull(),
     marital_status: marital_status("marital_status").notNull(),
     emergency_contact_name: varchar("emergency_contact_name", {
@@ -64,14 +64,12 @@ const PatientTable = pgTable(
     past_medical_history: varchar("past_surgeries", { length: 2000 }).notNull(),
     family_medical_history: varchar("family_history", { length: 2000 }).notNull(),
     blood_type: bloodTypes("blood_type").notNull(),
-    primary_care_physician: uuid("provider_id")
-      .notNull()
-      .references(() => ProviderTable.id, { onDelete: "cascade" }),
+    primary_care_physician: uuid("provider_id").notNull().references(() => ProviderTable.id, { onDelete: "cascade" }),
     preferred_language: preferred_language("preferred_language").notNull().default('English'),
     created_at: timestamp(" created_at", { mode: "date" })
       .notNull()
       .defaultNow(),
-    updated_at: timestamp(" created_at", { mode: "date" })
+    updated_at: timestamp(" updated_at", { mode: "date" })
       .notNull()
       .defaultNow(),
 

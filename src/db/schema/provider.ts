@@ -1,5 +1,5 @@
 import { InferSelectModel, relations } from "drizzle-orm";
-import { pgEnum, pgTable, text, uuid, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable,  uuid, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import AppointmentTable from "./appointment";
 import ProviderPatientTable from "./provider_patient";
 import UserTable from "./user";

@@ -29,9 +29,9 @@ const UserTable = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: varchar("name", { length: 100 }).notNull(),
-    role: userRoles("role").notNull().default('patient'),
-    gender: gender_id("gender").notNull(),
-    date_of_birth: date("date_of_birth", { mode: "date" }).notNull(),
+    role: userRoles("role").notNull().default('admin'),
+    gender: gender_id("gender").notNull().default('male'),
+    date_of_birth: date("date_of_birth", { mode: "date" }).notNull().default(new Date("1990-01-01")),
     email: varchar("email", { length: 30 }).notNull().unique(),
     emailVerified: timestamp("emailVerified", { mode: "date" }),       
     image: varchar("image", { length: 2048 }).notNull(),
