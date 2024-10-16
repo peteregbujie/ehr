@@ -8,7 +8,7 @@ import { migrate } from "drizzle-orm/neon-http/migrator";
 
 import { config } from "dotenv";
 
-config({ path: ".env.local" });
+config({ path: ".env" });
 
 const sql = neon(process.env.DATABASE_URL!);
 

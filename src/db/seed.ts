@@ -4,14 +4,10 @@ import * as schema from "@/db/schema";
 import * as seeds from './seeds';
 
 
-/* if (!process.env.DB_SEEDING) {
-  throw new Error('You must set DB_SEEDING to "true" when running seeds');
-}
- */
 
 async function resetTable(db: DbType, table: Table) {
   return db.execute(
-    sql.raw(`TRUNCATE TABLE ${getTableName(table)} RESTART IDENTITY CASCADE`)
+    sql.raw(`TRUNCATE TABLE "${getTableName(table)}" RESTART IDENTITY CASCADE`)
   );
 }
 
@@ -20,8 +16,8 @@ async function main() {
 for (const table of [
       schema.UserTable,
       schema.AddressTable,
-      schema.PatientTable,
       schema.ProviderTable,
+      schema.PatientTable,    
       schema.AdminTable,
       schema.AppointmentTable,    
       schema.EncounterTable,     
@@ -36,15 +32,15 @@ for (const table of [
       schema.ImmunizationTable,
      
     ]) {
-      console.log(`Resetting table: ${table}`);
+      console.log(`Resetting table: ${getTableName(table)}`);
             await resetTable(db, table);
     }  
     console.log('Seeding data');
   await seeds.user(db);
   await seeds.address(db);
+  await seeds.provider(db);
   await seeds.patient(db);
   await seeds.admin(db);
-  await seeds.provider(db);
   await seeds.appointment(db);
   await seeds.encounter(db);
   await seeds.allergy(db);
