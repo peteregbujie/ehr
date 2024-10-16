@@ -2,7 +2,8 @@ import { NewImmunizationType } from "@/lib/immunization";
 import { getPatientLatestEncounterId } from "./encouter";
 import { InvalidDataError } from "@/use-cases/errors";
 import ImmunizationTable, { insertImmunizationSchema } from "@/db/schema/immunization";
-import db, { eq } from "@/db";
+import db from "@/db";
+import { eq } from "drizzle-orm";
 
 
 

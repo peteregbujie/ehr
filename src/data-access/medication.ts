@@ -97,5 +97,7 @@ export const deleteMedication = async (medicationId: string) => {
 
 // update medication
 export const updateMedication = async (medicationId: string, medicationData: NewMedicationType) => {
-    await db.update(MedicationTable).set(medicationData).where(eq(MedicationTable.id, medicationId)).returning();
+  const startDate = new Date(medicationData.start_date);
+  const endDate = new Date(medicationData.end_date);
+  await db.update(MedicationTable).set({ ...medicationData, start_date: startDate, end_date: endDate }).where(eq(MedicationTable.id, medicationId)).returning();
 }

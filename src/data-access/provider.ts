@@ -3,11 +3,13 @@ import db from "@/db";
 import ProviderTable, { ProviderTypes } from "@/db/schema/provider";
 import {  NotFoundError } from "@/use-cases/errors";
 import { ProviderId } from "@/use-cases/types";
-import { eq } from "drizzle-orm";
+import { eq, ilike } from "drizzle-orm";
 import {  getUserById, updateUserRoleFn } from "./user";
-import UserTable from "@/db/schema/user";
+import UserTable, { UserTypes } from "@/db/schema/user";
 import { cache } from "react";
-import { SelectAppointment, SelectEncounter} from "@/types";
+import { SelectAppointment, SelectEncounter, SelectProvider, SelectUser} from "@/types";
+import { AppointmentTypes } from "@/db/schema/appointment";
+import { EncounterTypes } from "@/db/schema/encounter";
 
 
 
@@ -174,6 +176,7 @@ export async function getProviderWithName(providerId: string) {
 
 
 export async function getProviderIdByUserId(userId: string) {
+
   try {
     const provider = await db.query.ProviderTable.findFirst({
       where: eq(ProviderTable.user_id, userId),
@@ -182,9 +185,9 @@ export async function getProviderIdByUserId(userId: string) {
       },
     });
 
-    if (!provider) {
+   if (!provider) {
       throw new Error(`Provider not found for user ID: ${userId}`);
-    }
+    } 
 
     return provider;
 
@@ -193,3 +196,73 @@ export async function getProviderIdByUserId(userId: string) {
     throw error;
   }
 }
+
+
+
+
+export const getProviderData = cache(async (query: string): Promise<{user: SelectUser, provider: SelectProvider, appointments: SelectAppointment[], encounters: SelectEncounter[]}> => { 
+  try {
+    const user = await db.query.UserTable.findFirst({
+      where: 
+        eq(UserTable.id, query),
+      
+      
+      orderBy: (UserTable, { asc }) => [asc(UserTable.created_at)],
+      with: {
+        provider: {
+          with: {
+            appointments: {
+              orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
+              with: {
+                encounter: {
+                  orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
+                  with: {
+                    medications: true,
+                    vitalSigns: true,
+                    diagnoses: true,
+                    allergies: true,
+                    procedures: true,
+                    labs: true,
+                    immunizations: true,
+                    insurance: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user ) {
+      throw new Error("User not found");
+    }
+
+
+    const encounters = user.provider?.appointments.flatMap(appointment =>
+      appointment.encounter.map(encounter => ({
+        ...encounter,
+        medications: encounter.medications,
+        vitalSigns: encounter.vitalSigns,
+        diagnoses: encounter.diagnoses,
+        allergies: encounter.allergies,
+        procedures: encounter.procedures,
+        labs: encounter.labs,
+        immunizations: encounter.immunizations,
+        insurance: encounter.insurance,
+      }))
+    );
+
+   
+    return {
+      user,
+      provider: user.provider,
+      appointments: user.provider?.appointments,
+      encounters,
+      
+    };
+  } catch (error) {
+    console.error("Error searching user:", error);
+    throw error;
+  }
+}); 

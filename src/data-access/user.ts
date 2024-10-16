@@ -1,4 +1,11 @@
+
+
 import db from "@/db";
+import { AdminTypes } from "@/db/schema/admin";
+import { AppointmentTypes } from "@/db/schema/appointment";
+import { EncounterTypes } from "@/db/schema/encounter";
+import { PatientTypes } from "@/db/schema/patient";
+import { ProviderTypes } from "@/db/schema/provider";
 
 import UserTable, {  insertUserSchema,  UserTypes } from "@/db/schema/user";
 import {  UserRoles } from "@/lib/validations/user";
@@ -6,7 +13,43 @@ import {  SelectAppointment, SelectEncounter, SelectPatient, SelectProvider, Sel
 import { InvalidDataError } from "@/use-cases/errors";
 import { UserId } from "@/use-cases/types";
 import { eq, ilike, or , count} from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
+
+
+
+
+
+
+export type UserWithRelations = UserTypes & {
+  patient?: PatientTypes & {
+    appointments?: (AppointmentTypes & {
+      encounter?: EncounterTypes[];
+    })[];
+  };
+  provider?: ProviderTypes & {
+    appointments?: (AppointmentTypes & {
+      encounter?: EncounterTypes[];
+    })[];
+  };
+  admin?: AdminTypes;
+ };
+ 
+ interface UserWithRelationsResult {
+  result: UserWithRelations[];
+  newOffset: number | null;
+  totalUsers: number;
+}
+
+
+
+type UserData = UserTypes & {
+  patient?: PatientTypes & {
+    appointments?: (AppointmentTypes & {
+      encounter?: EncounterTypes[];
+    })[];
+  };  
+ };
 
 export type userUpdateType =  Pick<UserTypes,  "email">
 
@@ -33,24 +76,6 @@ export async function createUser(data: SanitizedinsertUserSchema, trx = db) {
 }
 
 
-export async function getUserByEmail(email: string) {
-    const user = await db.query.UserTable.findFirst({
-        where: eq(UserTable.email, email),
-    });
-
-    return user;
-}
-
-
-
-export async function getUserById(userId: UserId) {
-    const user = await db.query.UserTable.findFirst({
-        where: eq(UserTable.id, userId),
-    });
-
-    return user;
-}
-
 
 export async function updateUser(userId: UserId, data: userUpdateType) {
     // Parse the input data against the schema
@@ -68,10 +93,6 @@ export async function deleteUser(userId: UserId) {
     await db.delete(UserTable).where(eq(UserTable.id, userId));
 }
 
-export async function getUsers() {
-    const users = await db.query.UserTable.findMany();
-    return users;
-}
 
 
 // change user role
@@ -90,13 +111,35 @@ export async function updateUserNameFn(userId: UserId, name: string) {
     
 }
 
- export const searchCurrentUser = cache(async (query: string): Promise<{user: SelectUser, patient: SelectPatient, appointments: SelectAppointment[], encounters: SelectEncounter[]}> => { 
+// get patient by email. look up the user by email then get the patient
+export async function getPatientIdByEmail(email: string) {
+    const user = await db.query.UserTable.findFirst({
+        where: eq(UserTable.email, email),
+        with: {
+            patient: true
+        }
+    })
+    return user?.patient
+}
+
+
+// get user by email
+export async function getUserByEmail(email: string) {
+    const user = await db.query.UserTable.findFirst({
+        where: eq(UserTable.email, email),
+    })
+    return user
+}
+ export const searchUser = cache(async (query: string): Promise<{user: SelectUser, patient: SelectPatient, appointments: SelectAppointment[], encounters: SelectEncounter[]}> => { 
   try {
     const user = await db.query.UserTable.findFirst({
       where: or(
-        eq(UserTable.name, query),
-        eq(UserTable.email, query),
-      ),
+        ilike(UserTable.name, `%${query}%`),
+        ilike(UserTable.email, `%${query}%`),
+        eq(UserTable.id, query),
+
+      ),      
+      
       orderBy: (UserTable, { asc }) => [asc(UserTable.created_at)],
       with: {
         patient: {
@@ -129,7 +172,7 @@ export async function updateUserNameFn(userId: UserId, name: string) {
     }
 
 
-    const encounters = user.patient.appointments.flatMap(appointment =>
+    const encounters = user.patient?.appointments.flatMap(appointment =>
       appointment.encounter.map(encounter => ({
         ...encounter,
         medications: encounter.medications,
@@ -147,7 +190,7 @@ export async function updateUserNameFn(userId: UserId, name: string) {
     return {
       user,
       patient: user.patient,
-      appointments: user.patient.appointments,
+      appointments: user.patient?.appointments,
       encounters,
       
     };
@@ -158,69 +201,15 @@ export async function updateUserNameFn(userId: UserId, name: string) {
 }); 
 
 
-export const getUser = cache(async (query: string, offset: number) => {
-  try {
-    const whereCondition = query 
-      ? or(
-          ilike(UserTable.name, `%${query}%`),
-          ilike(UserTable.email, `%${query}%`)
-        ) 
-      : undefined;
 
-    const users: SelectUser[] = await db.query.UserTable.findMany({
-      where: whereCondition,
-      orderBy: (UserTable, { asc }) => [asc(UserTable.created_at)],
-      with: {
-        patient: {
-          with: {
-            appointments: {
-              orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
-              with: {
-                encounter: {
-                  orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
-                  with: {
-                    medications: true,
-                    vitalSigns: true,
-                    diagnoses: true,
-                    allergies: true,
-                    procedures: true,
-                    labs: true,
-                    immunizations: true,
-                    insurance: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      limit: query ? 1000 : 5,
-      offset: query ? undefined : offset,
-    });
-
-    const totalUsersResult = query ? users.length : await db.select({ count: count() }).from(UserTable);
-    const totalUsers = query ? totalUsersResult : Array.isArray(totalUsersResult) ? totalUsersResult[0]?.count || 0 : 0;
-    const newOffset = query ? null : (users.length >= 5 ? offset + 5 : null);
-
-    return {
-      users,
-      newOffset,
-      totalUsers,
-    };
-  } catch (error) {
-    console.error("Error searching user:", error);
-    throw error;
-  }
-});
-
-
-
-// get all users  
-export const getAllUsers = cache(async (): Promise<{
+// Get All User
+export const getUsers =  unstable_cache(async (): Promise<{
   users: SelectUser[],
   patients: SelectPatient[],
-  providers: SelectProvider[],
-  appointments: SelectAppointment[]
+  appointments: SelectAppointment[],
+  encounters: SelectEncounter[],
+  totalUsers: number,
+  newOffset: number | null
 }> => { 
   try {
     const users = await db.query.UserTable.findMany({
@@ -248,31 +237,46 @@ export const getAllUsers = cache(async (): Promise<{
             },
           },
         },
-        provider: true,
-        admin: true,
+        
       },
+      limit: 10,
+      offset: 0,
     });
+
+    const totalUsersResult =  await db.select({ count: count() }).from(UserTable);
+    const totalUsers =  Array.isArray(totalUsersResult) ? totalUsersResult[0]?.count || 0 : 0;
+    const newOffset =  (users.length >= 5 ? 0 + 5 : null);
 
     if (!users || users.length === 0) {
       throw new Error("No users found");
     }
 
-    const patients = users
-      .filter(user => user.role === "patient" && user.patient)
-      .map(user => user.patient) as SelectPatient[];
-
-      const providers = users
-      .filter(user => user.role === "provider" && user.provider)
-      .map(user => ({ ...user.provider, appointments: [] })) as SelectProvider[];
+    const patients = users.map(user => user.patient);
 
     const appointments = users
-      .flatMap(user => user.patient?.appointments ?? []) as SelectAppointment[];
+      .flatMap(user => user.patient?.appointments ?? []) ;
 
     return {
       users,
-      patients,
-      providers,
+      patients,    
       appointments,
+      encounters: appointments.flatMap(appointment =>
+        appointment.encounter.map(encounter => ({
+          ...encounter,
+          medications: encounter.medications,
+          vitalSigns: encounter.vitalSigns,
+          diagnoses: encounter.diagnoses,
+          allergies: encounter.allergies,
+          procedures: encounter.procedures,
+          labs: encounter.labs,
+          immunizations: encounter.immunizations,
+          insurance: encounter.insurance,
+        }))
+      ),
+
+      totalUsers,
+      newOffset
+
     };
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -283,3 +287,38 @@ export const getAllUsers = cache(async (): Promise<{
 
 
 
+
+// Get Searched User
+
+export const getUserById = async (userId: string): Promise<UserData> => {
+  const user = await db.query.UserTable.findFirst({
+    where: eq(UserTable.id, userId),
+    with: {
+      patient: {
+        with: {
+          appointments: {
+            with: {
+              encounter: {
+                with: {
+                  vitalSigns: true,
+                  insurance: true,
+                  diagnoses: true,
+                  procedures: true,
+                  medications: true,
+                  allergies: true,
+                  labs: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    throw new Error(`User not found with ID ${userId}`);
+  }
+
+  return user;
+};

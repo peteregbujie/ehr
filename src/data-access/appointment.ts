@@ -5,10 +5,10 @@ import { getEncountersByAppointmentId } from "./encouter";
 import { NewAppointmentType } from "@/lib/validations/appointment";
 import PatientTable from "@/db/schema/patient";
 import { getCurrentUser } from "@/lib/session";
-import { searchCurrentUser } from "./user";
+import { getPatientIdByEmail, searchUser } from "./user";
 import { parseISO,  getDay } from 'date-fns';
 import { eq, and  } from 'drizzle-orm';
-import { getPatientIdByEmail } from "./patient";
+
 import { ProviderTable, UserTable } from "@/db/schema";
 
 
@@ -28,9 +28,11 @@ const workingHours = [
 //create appointment
 export const bookAppointment = async (appointmentData: NewAppointmentType) => { 
 
-  const {  provider_id, scheduled_date,  timeSlotIndex, appointmentId } = appointmentData;
+  const {  provider_id, scheduled_date,  timeSlotIndex, appointmentId, patient_id
+  } = appointmentData;
 
  
+
   const scheduledDateString = scheduled_date.toISOString();
   const parsedDate = parseISO(scheduledDateString);
   const dayOfWeek = getDay(parsedDate);
@@ -57,12 +59,13 @@ const formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1)
   if (existingAppointments.length > 0) {
     throw new Error('The selected time slot is already booked.');
   }
-const patientID = await getPatientIdByEmail()
+
+
 
 if (appointmentId) {
   await db.update(AppointmentTable).set({
     ...appointmentData, 
-    patient_id: patientID,
+    patient_id: patient_id,
     scheduled_date: parsedDate,
     timeSlotIndex: +timeSlotIndex,
     
@@ -72,7 +75,7 @@ if (appointmentId) {
 
   const appointment = await db.insert(AppointmentTable).values({
     ...appointmentData, 
-    patient_id: patientID,
+    patient_id: patient_id,
     scheduled_date: parsedDate,
     timeSlotIndex: +timeSlotIndex,
     
@@ -271,7 +274,7 @@ export async function getPatientEncountersByPhoneNumber(
     const email = currentUser?.email
 
     try {
-        const user = await searchCurrentUser(email);
+        const user = await searchUser(email);
         if (!user) {
             throw new NotFoundError();
             

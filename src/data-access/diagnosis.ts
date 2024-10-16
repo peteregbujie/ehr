@@ -8,7 +8,7 @@ import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncounterById, getEncountersByAppointmentId, getPatientLatestEncounterId } from "./encouter";
 import { eq } from 'drizzle-orm';
 import { getAppointmentsAndEncountersByPatientId,  getAppointmentsAndEncountersByProviderId } from "./appointment";
-import { DiagnosisTypes, insertDiagnosisSchema } from "@/db/schema/diagnosis";
+import { DiagnosisType, insertDiagnosisSchema } from "@/db/schema/diagnosis";
 import { getLabByEncounterId } from "./lab";
 import { searchPatient } from "./patient";
 import { NewDiagnosisType } from "@/lib/validations/diagnosis";
@@ -115,6 +115,6 @@ export async function getDiagnosesByPatientId(patientId: string) {
   }
 
   // update diagnosis
-  export const updateDiagnosis = async (diagnosisId: string, diagnosisData: DiagnosisTypes) => {
+  export const updateDiagnosis = async (diagnosisId: string, diagnosisData: DiagnosisType) => {
     await db.update(DiagnosisTable).set(diagnosisData).where(eq(DiagnosisTable.id, diagnosisId)).returning();
   }

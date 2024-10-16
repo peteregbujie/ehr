@@ -2,8 +2,9 @@
 import { getPatientLatestEncounterId } from "./encouter";
 import { InvalidDataError } from "@/use-cases/errors";
 import AllergyTable,{ insertAllergySchema }  from "@/db/schema/allergy";
-import db, { eq } from "@/db";
+import db from "@/db";
 import { NewAllergyType } from "@/lib/validations/allergy";
+import { eq } from "drizzle-orm";
 
 export async function createAllergy( allergyData: NewAllergyType) {
 

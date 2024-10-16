@@ -1,12 +1,12 @@
 
 import db from "@/db";
 import PatientTable, { insertPatientSchema, PatientTypes } from "@/db/schema/patient";
-import { getCurrentUser } from "@/lib/session";
-import { InvalidDataError, NotFoundError} from "@/use-cases/errors";
+
+import { InvalidDataError} from "@/use-cases/errors";
 import { PatientId } from "@/use-cases/types";
 import { eq } from "drizzle-orm";
 import { cache } from "react";
-import { getUserByEmail } from "./user";
+
 import { UserTable } from "@/db/schema";
 
 
@@ -89,24 +89,6 @@ return null;
 
 
 
-
-export const getPatientIdByEmail = async () => {
-const currentUser = await getCurrentUser()
-const user = await getUserByEmail(currentUser?.email)
-
-if (!user) {
-   throw new NotFoundError();
-   }
-
-const patient = await db.query.PatientTable.findFirst({
-    where: eq(PatientTable.user_id, user?.id),
-
-})
-if (!patient) {
-    throw new NotFoundError();
-}
-return patient.id
-}
 
 
 

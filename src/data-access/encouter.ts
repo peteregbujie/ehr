@@ -3,11 +3,11 @@ import { EncounterTable, PatientTable } from "@/db/schema";
 import { EncounterTypes, insertEncounterSchema } from "@/db/schema/encounter";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { EncounterId } from "@/use-cases/types";
-import { getAppointmentById, getAppointmentsByPhoneNumber, getPatientAppointmentsByPhoneNumber, getPatientLatestAppointment } from "./appointment";
+import {  getPatientLatestAppointment } from "./appointment";
 import { NewEncounterType } from "@/lib/validations/encounter";
-import { searchPatient } from "./patient";
+
 import { getCurrentUser } from "@/lib/session";
-import { searchCurrentUser } from "./user";
+import { searchUser } from "./user";
 import { eq } from "drizzle-orm";
 import { SelectAppointment } from "@/types";
 
@@ -85,7 +85,7 @@ export async function getPatientLatestEncounterId() {
     const email = currentUser?.email
 
     try {
-        const user = await searchCurrentUser(email);
+        const user = await searchUser(email);
         if (!user) {
             throw new NotFoundError();
             

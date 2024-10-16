@@ -2,12 +2,13 @@
 
 // create insurance function. insurance is a related table to patient
 
-import db, { eq } from "@/db";
-import InsuranceTable, { insertInsuranceSchema, InsuranceTypes } from "@/db/schema/insurance";
+import db  from "@/db";
+import InsuranceTable, { insertInsuranceSchema, InsuranceType } from "@/db/schema/insurance";
 import { getPatientById } from "./patient";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { NewInsuranceType } from "@/lib/validations/insurance";
 import { getPatientLatestEncounterId } from "./encouter";
+import { eq } from "drizzle-orm";
 
 export async function CreateInsurance ( insuranceData: NewInsuranceType) {
    // find patient by id
@@ -28,7 +29,7 @@ export async function CreateInsurance ( insuranceData: NewInsuranceType) {
 
 
 // update insurance function
-export async function UpdateInsurance (insuranceId: string, insuranceData: InsuranceTypes) {
+export async function UpdateInsurance (insuranceId: string, insuranceData: InsuranceType) {
 
     const parsedData = insertInsuranceSchema.safeParse(insuranceData);
 
