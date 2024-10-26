@@ -1,7 +1,8 @@
 
 import { createLab, getLabsByPatientId, getLab, getLabByEncounterId, getLabsByProviderId, deleteLab, updateLab } from "@/data-access/lab"
-import { LabTypes } from "@/db/schema/labs"
+import { LabType } from "@/db/schema/labs"
 import { NewLabType } from "@/lib/validations/lab"
+import { ExtendedUser } from "@/types/next-auth"
 
 
 
@@ -22,7 +23,11 @@ export const getLabByProviderIdUseCase = async (providerId: string) => {
 }
 
 // create Lab use case
-export const createLabUseCase = async ( labData: NewLabType) => {
+export const createLabUseCase = async (user: ExtendedUser, labData: NewLabType) => {
+ 
+  if (user && user.role !== "provider") {
+    throw new Error("Only providers can create diagnoses");
+  }
     return await createLab( labData)
 }
 
@@ -39,6 +44,6 @@ export const createLabUseCase = async ( labData: NewLabType) => {
 
 
   // update lab use case
-  export const updateLabUseCase = async (labId: string, labData: LabTypes) => {
+  export const updateLabUseCase = async (labId: string, labData: LabType) => {
     return await updateLab(labId, labData)
   }

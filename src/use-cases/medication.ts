@@ -1,5 +1,6 @@
 import { createMedication, getMedicationsByPatientId, getMedications, getMedicationsByEncounterId, deleteMedication, updateMedication } from "@/data-access/medication";
 import { NewMedicationType } from "@/lib/validations/medication";
+import { ExtendedUser } from "@/types/next-auth";
 
 
 
@@ -14,7 +15,12 @@ export const getMedicationsByPatientIdUseCase = async (patientId: string) => {
 }
 
 // create Medication use case
-export const createMedicationUseCase = async ( medicationData: NewMedicationType) => {
+export const createMedicationUseCase = async (user: ExtendedUser, medicationData: NewMedicationType) => {
+ 
+  if (user && user.role !== "provider") {
+    throw new Error("Only providers can create diagnoses");
+  }
+
     return await createMedication( medicationData)
 }
 

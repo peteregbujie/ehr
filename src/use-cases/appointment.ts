@@ -1,6 +1,7 @@
 import { bookAppointment, deleteAppointment, getAllAppointments, getAppointmentById,  getAppointmentByPatientId,  getAppointmentByProviderId, getAvailableTimeSlots, updateAppointment } from "@/data-access/appointment";
 import { AppointmentTypes } from "@/db/schema/appointment";
 import { NewAppointmentType } from "@/lib/validations/appointment";
+import { ExtendedUser } from "@/types/next-auth";
 
 
 // get all appointments use case
@@ -25,7 +26,11 @@ export async function deleteAppointmentUseCase (appointmentId: string) {
 
 // create appointment use case
 
-export async function bookAppointmentUseCase (data: NewAppointmentType) {
+export async function bookAppointmentUseCase (user: ExtendedUser, data: NewAppointmentType) {
+    if (user && user.role !== "provider") {
+        throw new Error("Only providers can create diagnoses");
+      }
+
     return await bookAppointment(data)
 }
 

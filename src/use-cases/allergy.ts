@@ -1,7 +1,11 @@
 import { createAllergy, deleteAllergy } from "@/data-access/allergy"
 import { NewAllergyType } from "@/lib/validations/allergy"
+import { ExtendedUser } from "@/types/next-auth"
 
-export const createAllergyUseCase = async (allergyData: NewAllergyType) => {
+export const createAllergyUseCase = async (user: ExtendedUser, allergyData: NewAllergyType) => {
+    if (user && user.role !== "provider") {
+        throw new Error("Only providers can create diagnoses");
+      }
     return await createAllergy( allergyData)
 }
 

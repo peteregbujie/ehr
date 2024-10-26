@@ -1,7 +1,8 @@
 
 import {deleteDiagnosis, getDiagnosesByPatientId, getDiagnosesByProviderId, getDiagnosis, getDiagnosisByEncounterId, updateDiagnosis, createDiagnosis } from "@/data-access/diagnosis";
-import { DiagnosisTypes } from "@/db/schema/diagnosis";
+import { DiagnosisType } from "@/db/schema/diagnosis";
 import { NewDiagnosisType } from "@/lib/validations/diagnosis";
+import { ExtendedUser } from "@/types/next-auth";
 
 
 
@@ -16,7 +17,11 @@ export const getDiagnosisByPatientIdUseCase = async (patientId: string) => {
 }
 
 // create Diagnosis use case
-export const createDiagnosisUseCase = async (diagnosisData: NewDiagnosisType) => {
+export const createDiagnosisUseCase = async (user: ExtendedUser, diagnosisData: NewDiagnosisType) => {
+ 
+  if (user && user.role !== "provider") {
+    throw new Error("Only providers can create diagnoses");
+  }
     return await createDiagnosis( diagnosisData)
 }
 
@@ -37,7 +42,7 @@ export const createDiagnosisUseCase = async (diagnosisData: NewDiagnosisType) =>
   }
 
   // update diagnosis use case
-  export const updateDiagnosisUseCase = async (diagnosisId: string, diagnosisData: DiagnosisTypes) => {
+  export const updateDiagnosisUseCase = async (diagnosisId: string, diagnosisData: DiagnosisType) => {
     return await updateDiagnosis(diagnosisId, diagnosisData)
   }
   

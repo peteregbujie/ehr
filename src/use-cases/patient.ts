@@ -5,13 +5,20 @@ import { PatientId } from "./types";
 import { PatientTypes } from "@/db/schema/patient";
 import { NewPatientType } from "@/lib/validations/patient";
 import { createAddress } from "@/data-access/address";
+import db from "@/db";
+import { ExtendedUser } from "@/types/next-auth";
 
 
 
 
 export async function createPatientUseCase(
-    data: NewPatientType
+    user: ExtendedUser,  data: Partial<Omit<NewPatientType, 'id'>> & { id?: string },
+  trx = db
 ) {
+
+    if (user && user.role !== "admin") {
+        throw new Error("Only providers can create diagnoses");
+      }
     const { 
         full_name,
         email,
@@ -32,16 +39,23 @@ export async function createPatientUseCase(
         blood_type,
         primary_care_physician,
         preferred_language,
-        note } = data;
+        notes } = data;
 
         
 
-    const userData = {
-        full_name,
-        email,
-        date_of_birth,
-        gender
-    }
+        const userData = {
+            full_name: full_name || '',
+            email: email || '',
+            date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
+            gender: gender || ''
+        } as {
+            full_name: string;
+            email: string;
+            date_of_birth: Date | null; // Adjusted to allow for null
+            gender: string
+        }
+
+
 const patientData = {
     phone_number,
     height,
@@ -57,15 +71,34 @@ const patientData = {
     blood_type,
     primary_care_physician,
     preferred_language,
-    note 
+    notes
+} as {
+    phone_number: string;
+    height: string;
+    weight: string;
+    occupation: string;
+    marital_status: string;
+    emergency_contact_name: string;
+    emergency_contact_relationship: string;
+    emergency_contact_number: string;
+    socialHistory: string;
+    past_medical_history: string;
+    family_medical_history: string;
+    blood_type: string;
+    primary_care_physician: string;
+    preferred_language: string;
+    notes: string;
 }
 
 const addressData = {
-    address_line_1: address
+    address_line_1: address as string,
 }
 
+const userEmail = email as string
+
+
       // Check if email already exists
-      let existingUser = await getUserByEmail(email);
+      let existingUser = await getUserByEmail(userEmail);
 
       let user_id: string;
   
@@ -74,18 +107,25 @@ const addressData = {
         user_id = existingUser.id;
       } else {        
         await createTransaction(async (trx) => {
-            await createUser({...userData, name: full_name, date_of_birth: new Date(date_of_birth)}, trx);
-
-            const addressResult = await createAddress(addressData);
-            const addressId = addressResult.id;
-
-            await createPatient({
-                ...patientData, user_id, notes: note, address: addressId
-               
-            }, trx);
+            const newUserData =  await createUser({...userData, name: userData.full_name,gender: gender as "male" | "female", date_of_birth: new Date(date_of_birth!)}, trx);
+            if (newUserData.length > 0) {
+                const newUser_id = newUserData[0].id;
+                const addressResult = await createAddress(addressData);
+                const addressId = addressResult.id;
+                   
+               const newPatient = await createPatient({
+                   ...patientData, user_id: newUser_id, address: addressId,
+                   
+               } as any, trx);
+                return newPatient;
+            } else {
+                throw new Error('Failed to create user');
+            }
+         
+                      
         });
     }
-
+ 
    
 }
     

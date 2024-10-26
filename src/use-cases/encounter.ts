@@ -2,13 +2,18 @@ import { createEncounter, deleteEncounter, getEncounterById, getEncountersByAppo
 import { EncounterId,  } from "./types";
 import { EncounterTypes } from "@/db/schema/encounter";
 import { NewEncounterType } from "@/lib/validations/encounter";
+import { ExtendedUser } from "@/types/next-auth";
 
 
 
 export async function createEncounterUseCase(
-    encounterData: NewEncounterType,
+user: ExtendedUser, encounterData: NewEncounterType,
     
 ) {
+    if (user && user.role !== "provider") {
+        throw new Error("Only providers can create diagnoses");
+      }
+      
     await createEncounter(encounterData)         
 }
 

@@ -1,7 +1,8 @@
 
 import { createProcedure, deleteProcedure, getProceduresByPatientId, getProceduresByProviderId, getProcedure, getProcedureByEncounterId, updateProcedure } from "@/data-access/procedure";
-import { ProcedureTypes } from "@/db/schema/procedure";
+import { ProcedureType } from "@/db/schema/procedure";
 import { NewProcedureType } from "@/lib/validations/procedure";
+import { ExtendedUser } from "@/types/next-auth";
 
 
 
@@ -16,7 +17,11 @@ export const getProcedureByPatientIdUseCase = async (patientId: string) => {
 }
 
 // create Procedure use case
-export const createProcedureUseCase = async ( procedureData: NewProcedureType) => {
+export const createProcedureUseCase = async ( user: ExtendedUser, procedureData: NewProcedureType) => {
+  
+  if (user && user.role !== "provider") {
+    throw new Error("Only providers can create diagnoses");
+  }
     return await createProcedure( procedureData)
 }
 
@@ -37,7 +42,7 @@ export const createProcedureUseCase = async ( procedureData: NewProcedureType) =
   }
 
   // update procedure use case
-  export const updateProcedureUseCase = async (procedureId: string, procedureData: ProcedureTypes) => {
+  export const updateProcedureUseCase = async (procedureId: string, procedureData: ProcedureType) => {
     return await updateProcedure(procedureId, procedureData)
   }
   
