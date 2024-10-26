@@ -1,20 +1,22 @@
 
-import {  isProviderProcedure } from "@/lib/safe-action";
+import {  authenticatedAction } from "@/lib/safe-action";
 import { NewLabSchema } from "@/lib/validations/lab";
 import { createLabUseCase } from "@/use-cases/lab";
 import { revalidatePath } from "next/cache";
+import { useServerPath } from "@/lib/utils";
 
 
 
-export const createLabAction = isProviderProcedure
+export const createLabAction = authenticatedAction
   .createServerAction()
   .input(    
     NewLabSchema   
   )
-  .handler(async ({ input: {   test_Name, date_Ordered, test_Code, result,  result_Date,  status,  note } }) => {
-    await createLabUseCase({
+  .handler(async ({ ctx,input: {   test_Name, date_Ordered, test_Code, result,  result_Date,  status,  note } }) => {
+    const { path } = useServerPath();
+    await createLabUseCase(ctx.user, {
       test_Name, date_Ordered, test_Code, result, result_Date, note,
       status
     });
-    revalidatePath("/provider");
+    revalidatePath(`/patient/${path}`);
   });

@@ -1,16 +1,17 @@
-import { isAdminProcedure } from "@/lib/safe-action"
+import { authenticatedAction } from "@/lib/safe-action"
 import { NewPatientSchema } from "@/lib/validations/patient";
 import { createPatientUseCase } from "@/use-cases/patient";
 import { revalidatePath } from "next/cache";
+import { useServerPath } from "@/lib/utils";
 
 
 
-export const createPatientAction = isAdminProcedure
+export const createPatientAction = authenticatedAction
     .createServerAction()
     .input(
              NewPatientSchema
       )
-      .handler(async ({ input:         {      
+      .handler(async ({ ctx,input:         {      
         full_name,
         email,
         gender,
@@ -31,7 +32,8 @@ export const createPatientAction = isAdminProcedure
         primary_care_physician,
         preferred_language, notes }
        }) => {
-        await createPatientUseCase( {
+        const { path } = useServerPath();
+        await createPatientUseCase( ctx.user,{
           full_name,
           email,
           gender,
@@ -53,5 +55,5 @@ export const createPatientAction = isAdminProcedure
           preferred_language,
           notes
         });
-        revalidatePath("/patients");
+        revalidatePath(`/patient/${path}`);
       });
