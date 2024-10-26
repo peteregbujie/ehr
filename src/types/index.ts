@@ -1,39 +1,92 @@
-// Define an interface for the structure of the data returned by searchPatient
-interface PatientWithAppointments {
-    appointments: Appointment[];
-  }
+import { AdminTypes } from "@/db/schema/admin";
+import { AllergyType } from "@/db/schema/allergy";
+import { AppointmentTypes } from "@/db/schema/appointment";
+import { DiagnosisType } from "@/db/schema/diagnosis";
+import { EncounterTypes } from "@/db/schema/encounter";
+import { ImmunizationType } from "@/db/schema/immunization";
+import { InsuranceType } from "@/db/schema/insurance";
+import { LabType } from "@/db/schema/labs";
+import { MedicationType } from "@/db/schema/medication";
+import { PatientTypes } from "@/db/schema/patient";
+import { ProcedureType } from "@/db/schema/procedure";
+import { ProviderTypes } from "@/db/schema/provider";
+import { UserTypes } from "@/db/schema/user";
+import { VitalSignsType } from "@/db/schema/vitalsign";
+
+
+
+
+
+export interface SelectEncounter extends EncounterTypes {
+
+  medications: MedicationType[]; // If an encounter can have multiple medications
+  diagnoses: DiagnosisType[]; // Assuming an encounter can have multiple diagnoses
+  vitalSigns: VitalSignsType[];
+  labs: LabType[];
+  immunizations: ImmunizationType[];
+  allergies: AllergyType[];
+
+  insurance: InsuranceType[];
+
+  procedures: ProcedureType[];  
+}
+
+
+export interface SelectAppointment extends AppointmentTypes {
+  encounter: SelectEncounter[];
+}
+
+
+export interface SelectPatient  extends PatientTypes{
+  appointments: SelectAppointment[];
+}
+
+export interface SelectUser extends UserTypes {
+  patient?: SelectPatient;
+  provider?: SelectProvider;
+  admin?: AdminTypes;
+}
+
+
+
+export interface SelectProvider extends ProviderTypes{
+ appointments?: SelectAppointment[];
   
-  interface Appointment {
-    encounters: Encounter[];
-  }
   
-  interface Encounter {
-    // Define properties of an Encounter here
-  }
+}
+
+
+export interface SelectProviderPatient {
+  patient_id: "";
+  provider_id: "";
+
+  // Relationships
+}
+
+export interface CurrentUserResponse {
+  user: UserTypes;
   
-  // Assuming MedicationTypes is already defined elsewhere
-  interface MedicationTypes {
-    // Define properties of MedicationTypes here
-  }
+}
+
+export interface SearchResponse {
+  users: SelectUser[];
+  newOffset: number | null;
+  totalUsers: number;
+}
+
+export type SearchError = {
+  message?: string;
+};
 
 
 
-  type SearchPatientResult = {
-    id: string;
-    first_name: string;
-    last_name: string;
-    phone_number: string;
-    primary_care_physician: string;
-    preferred_language: string;
-    note: string;
-    created_at: string;
-    updated_at: string;
-    appointments: {
-      scheduled_date: string;
-      encounter: {
-        date: string;
-      };
-    }[];
-  };
+export  interface PatientFormProps {
+  onClose: () => void; // Function type for onClose
+}
 
 
+export interface DashboardProps {
+  users:SelectUser[]
+  offset: number;
+  totalUsers: number;
+}
