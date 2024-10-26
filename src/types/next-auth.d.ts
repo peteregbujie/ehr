@@ -1,17 +1,18 @@
 
-import { UserRoles } from "@/lib/validations/user";
+import { UserTable } from "@/db/schema";
 import { User } from "next-auth";
 import { JWT } from "next-auth/jwt";
 
 export type ExtendedUser = User & {
-  role: UserRoles;
-  id: string;
-  email: string;
+  role: (typeof UserTable.$inferSelect)["role"];
+  id: (typeof UserTable.$inferSelect)["id"];
+  email: (typeof UserTable.$inferSelect)["email"];
 };
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role: UserRoles;
+    role: (typeof UserTable.$inferSelect)["role"];
+    id: (typeof UserTable.$inferSelect)["id"];
   }
 }
 
