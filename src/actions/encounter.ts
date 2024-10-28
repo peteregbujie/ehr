@@ -1,22 +1,21 @@
 
 import {  authenticatedAction } from "@/lib/safe-action";
-import { newEncounterSchema } from "@/lib/validations/encounter";
 import { createEncounterUseCase } from "@/use-cases/encounter";
 import { revalidatePath } from "next/cache";
 import { useServerPath } from "@/lib/utils";
+import { insertEncounterSchema } from "@/db/schema/encounter";
 
 
 
 export const createEncounterAction = authenticatedAction
   .createServerAction()
   .input(    
-    newEncounterSchema   
+    insertEncounterSchema   
   )
-  .handler(async ({ ctx, input: {  encounter_type, date, time, chief_complaint,location, assessment_and_plan, notes } }) => {
-    const { path } = useServerPath();
+  .handler(async ({ ctx, input: {  encounter_type, date, time, chief_complaint,appointment_id, assessment_and_plan, notes } }) => {
+    const { path } = await useServerPath();
     await createEncounterUseCase(ctx.user, {
-        date, time, encounter_type, chief_complaint, assessment_and_plan, notes,
-        location
+        date, time, encounter_type, chief_complaint, assessment_and_plan, notes, appointment_id
     });
     revalidatePath(`/patient/${path}`);
   });

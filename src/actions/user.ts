@@ -1,7 +1,8 @@
 
-import { updateUser } from "@/data-access/user"
+import { getUsers, updateUser } from "@/data-access/user"
 import { authenticatedAction } from "@/lib/safe-action"
 import { z } from "zod"
+
 
 
 export const updateEmail = authenticatedAction 
@@ -21,3 +22,6 @@ export const updateEmail = authenticatedAction
 
     return input.newEmail
   })
+
+
+ 

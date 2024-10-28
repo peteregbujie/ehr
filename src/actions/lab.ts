@@ -13,7 +13,7 @@ export const createLabAction = authenticatedAction
     NewLabSchema   
   )
   .handler(async ({ ctx,input: {   test_Name, date_Ordered, test_Code, result,  result_Date,  status,  note } }) => {
-    const { path } = useServerPath();
+    const { path } = await useServerPath();
     await createLabUseCase(ctx.user, {
       test_Name, date_Ordered, test_Code, result, result_Date, note,
       status

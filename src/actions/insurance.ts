@@ -13,7 +13,7 @@ export const createInsuranceAction = authenticatedAction
     NewInsuranceSchema   
   )
   .handler(async ({ ctx, input: {  insurance_provider, policy_number, group_number } }) => {
-    const { path } = useServerPath();
+    const { path } = await useServerPath();
     await CreateInsuranceUseCase(ctx.user,{
        insurance_provider, policy_number, group_number
     });

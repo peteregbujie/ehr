@@ -32,7 +32,7 @@ export const createPatientAction = authenticatedAction
         primary_care_physician,
         preferred_language, notes }
        }) => {
-        const { path } = useServerPath();
+        const { path } = await useServerPath();
         await createPatientUseCase( ctx.user,{
           full_name,
           email,
