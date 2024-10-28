@@ -1,26 +1,8 @@
 
-import { createLab, getLabsByPatientId, getLab, getLabByEncounterId, getLabsByProviderId, deleteLab, updateLab } from "@/data-access/lab"
-import { LabType } from "@/db/schema/labs"
-import { NewLabType } from "@/lib/validations/lab"
+import { createLab,  deleteLab, updateLab } from "@/data-access/lab"
+import { LabType, NewLabType } from "@/db/schema/labs"
 import { ExtendedUser } from "@/types/next-auth"
 
-
-
-export async function getLabUseCase() {
-    return await getLab()
-}
-
-
-// get Labs By Patient Id use case
-export const getLabByPatientIdUseCase = async (patientId: string) => {
-    return await getLabsByPatientId(patientId)
-}
-
-
-// get lab by provider id use case
-export const getLabByProviderIdUseCase = async (providerId: string) => {
-    return await getLabsByProviderId(providerId)
-}
 
 // create Lab use case
 export const createLabUseCase = async (user: ExtendedUser, labData: NewLabType) => {
@@ -32,12 +14,7 @@ export const createLabUseCase = async (user: ExtendedUser, labData: NewLabType) 
 }
 
 
-  // get labs for an encounter use case
-  export const getLabForEncounterUseCase = async (encounterId: string) => {
-    return await getLabByEncounterId(encounterId)
-  }
-
-  // delete lab use case
+// delete lab use case
   export const deleteLabUseCase = async (labId: string) => {
     return await deleteLab(labId)
   }

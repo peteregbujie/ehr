@@ -1,5 +1,5 @@
-import { createMedication, getMedicationsByPatientId, getMedications, getMedicationsByEncounterId, deleteMedication, updateMedication } from "@/data-access/medication";
-import { NewMedicationType } from "@/lib/validations/medication";
+import { createMedication,  getMedications,  deleteMedication, updateMedication } from "@/data-access/medication";
+import { NewMedicationType } from "@/db/schema/medication";
 import { ExtendedUser } from "@/types/next-auth";
 
 
@@ -8,11 +8,6 @@ export async function getMedicationUseCase() {
     return await getMedications()
 }
 
-
-// get Medications By Patient Id use case
-export const getMedicationsByPatientIdUseCase = async (patientId: string) => {
-    return await getMedicationsByPatientId(patientId)
-}
 
 // create Medication use case
 export const createMedicationUseCase = async (user: ExtendedUser, medicationData: NewMedicationType) => {
@@ -24,11 +19,6 @@ export const createMedicationUseCase = async (user: ExtendedUser, medicationData
     return await createMedication( medicationData)
 }
 
-
-  // get medications for an encounter use case
-  export const getMedicationsForEncounterUseCase = async (encounterId: string) => {
-    return await getMedicationsByEncounterId(encounterId)
-  }
 
   // delete medication use case
   export const deleteMedicationUseCase = async (medicationId: string) => {

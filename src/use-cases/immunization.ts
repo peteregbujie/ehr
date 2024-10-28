@@ -1,5 +1,5 @@
 import { createImmunization } from "@/data-access/immunization"
-import { NewImmunizationType } from "@/lib/validations/immunization"
+import { NewImmunizationType } from "@/db/schema/immunization";
 import { ExtendedUser } from "@/types/next-auth";
 
 // create Immunization use case

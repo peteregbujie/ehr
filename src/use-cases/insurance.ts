@@ -1,12 +1,12 @@
 // create insurance use case
 
-import  { InsuranceType } from "@/db/schema/insurance";
+import  { InsuranceType, newInsuranceType } from "@/db/schema/insurance";
 
 import { CreateInsurance, DeleteInsurance, getInsuranceById, UpdateInsurance } from "@/data-access/insurance";
-import { NewInsuranceType } from "@/lib/validations/insurance";
+import { selectInsuranceSchema } from "@/db/schema/insurance";
 import { ExtendedUser } from "@/types/next-auth";
 
-export const CreateInsuranceUseCase = async ( user: ExtendedUser, insuranceData: NewInsuranceType) => {
+export const CreateInsuranceUseCase = async ( user: ExtendedUser, insuranceData: newInsuranceType) => {
   if (user && user.role !== "provider") {
     throw new Error("Only providers can create diagnoses");
   }
@@ -18,8 +18,8 @@ export const CreateInsuranceUseCase = async ( user: ExtendedUser, insuranceData:
 
     // update insurance use case
 
-    export const UpdateInsuranceUseCase = async (insuranceId: string, insuranceData: InsuranceType) => {   
-      const insurance = await UpdateInsurance(insuranceId,insuranceData );
+    export const UpdateInsuranceUseCase = async ( insuranceData: InsuranceType) => {   
+      const insurance = await UpdateInsurance(insuranceData );
       return insurance;
     }
     

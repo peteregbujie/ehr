@@ -1,5 +1,6 @@
 import { createAllergy, deleteAllergy } from "@/data-access/allergy"
-import { NewAllergyType } from "@/lib/validations/allergy"
+import { NewAllergyType } from "@/db/schema/allergy";
+
 import { ExtendedUser } from "@/types/next-auth"
 
 export const createAllergyUseCase = async (user: ExtendedUser, allergyData: NewAllergyType) => {
