@@ -1,3 +1,5 @@
+"use client"
+
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -13,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select,  SelectItem  } from "@/components/ui/select";
 import { useServerAction } from "zsa-react";
-import { AppointmentSchema } from "@/lib/validations/appointment";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { bookAppointmentAction } from "@/actions/appointment";
 import { toast } from "sonner";
@@ -29,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
 import { getAllProvidersUseCase } from "@/use-cases/provider";
 import { getAppointmentById } from "@/data-access/appointment";
+import { insertAppointmentSchema } from "@/db/schema/appointment";
 
 
 
@@ -45,11 +48,12 @@ interface Slot {
 
 interface AppointmentFormProps {
   appointmentId?: string;
+  patientId: string;
   onSuccess?: () => void;
 }
 
 
-export function AppointmentForm  ({ appointmentId, onSuccess }: AppointmentFormProps)  {
+export function AppointmentForm  ({ appointmentId, onSuccess, patientId }: AppointmentFormProps)  {
   const [providers, setProviders] = useState<Provider[]>([]);;
 
   const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
@@ -57,8 +61,8 @@ export function AppointmentForm  ({ appointmentId, onSuccess }: AppointmentFormP
 
   
 
-  const form = useForm<z.infer<typeof AppointmentSchema>>({
-    resolver: zodResolver(AppointmentSchema),
+  const form = useForm<z.infer<typeof insertAppointmentSchema>>({
+    resolver: zodResolver(insertAppointmentSchema),
     defaultValues: async () => {
       try {
         if (appointmentId) {
@@ -74,9 +78,11 @@ export function AppointmentForm  ({ appointmentId, onSuccess }: AppointmentFormP
             status: data.status,
             notes: data.notes,
             scheduled_date: new Date(data.scheduled_date),
-            timeSlotIndex: String(data.timeSlotIndex),
+            timeSlotIndex: Number(data.timeSlotIndex),
             location: data.location,
-            appointmentId: appointmentId,
+            patient_id: patientId,
+            
+            
           };
         }
         return { 
@@ -86,8 +92,12 @@ export function AppointmentForm  ({ appointmentId, onSuccess }: AppointmentFormP
           status: "scheduled", 
           notes: "",
           scheduled_date: new Date(), 
-          timeSlotIndex: availableSlots[0].slot.toString(),
-          location: ""
+          timeSlotIndex: availableSlots[0].slot,
+          location: "",
+          patient_id: patientId,
+          
+          
+
         };
       } catch (error) {
         console.error('Error fetching appointment data:', error);
@@ -98,8 +108,10 @@ export function AppointmentForm  ({ appointmentId, onSuccess }: AppointmentFormP
           status: "scheduled", 
           notes: "",
           scheduled_date: new Date(),
-          timeSlotIndex: availableSlots[0].slot.toString(),
+          timeSlotIndex: availableSlots[0].slot,
           location: "",
+          patient_id: patientId,
+        
           };
       }
     },
@@ -152,17 +164,30 @@ onError() {
   }, [providerId, date]);
   
 
-  const onSubmit: SubmitHandler<z.infer<typeof AppointmentSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof insertAppointmentSchema>> = (
     values
   ) => {
-    execute({
-        reason: values.reason, provider_id: values.provider_id, type: values.type, status: values.status, notes: values.notes, scheduled_date: values.scheduled_date, timeSlotIndex: values.timeSlotIndex, location: values.location,
-       
-    });
+    const appointmentData = {
+      id:"",
+      reason: values.reason,
+      provider_id: values.provider_id,
+      type: values.type,
+      status: values.status,
+      notes: values.notes,
+      scheduled_date: values.scheduled_date,
+      timeSlotIndex: values.timeSlotIndex,
+      location: values.location,
+      patient_id: patientId,
+    };
+  
+    if (appointmentId) {
+      appointmentData.id = appointmentId;
+    }
+  
+    execute(appointmentData);
   };
-
     form.reset({       
-        reason: "", provider_id: "", type: "new_patient", status: "scheduled", notes: "",scheduled_date: new Date(), timeSlotIndex: availableSlots[0].slot.toString(), location: "",
+        reason: "", provider_id: "", type: "new_patient", status: "scheduled", notes: "",scheduled_date: new Date(), timeSlotIndex: availableSlots[0].slot, location: "", patient_id: patientId,
       })
 
   return (
@@ -298,7 +323,7 @@ onError() {
           name="scheduled_date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date of birth</FormLabel>
+              <FormLabel>Date</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -326,7 +351,7 @@ onError() {
                     disabled={(date) =>
                       date < new Date() || date < new Date("2024-12-31")
                     }
-                    initialFocus
+                    
                   />
                 </PopoverContent>
               </Popover>

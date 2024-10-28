@@ -17,21 +17,25 @@ import { createVitalSignAction } from "@/actions/vitalsign";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
-import { Send, Terminal } from "lucide-react";
+import { CalendarIcon, Send, Terminal } from "lucide-react";
 
-import { Textarea } from "../ui/textarea";
-import { NewVitalSignSchema } from "@/lib/validations/vitalsign";
+import { EncounterProps } from "@/types";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { cn } from "@/lib/utils";
+import { Calendar } from "../ui/calendar";
+import { selectVitalSignSchema } from "@/db/schema/vitalsign";
 
 
 
 
 
-export function VitalSignForm  ()  {
+export function VitalSignForm  ({ onSuccess, encounterId }: EncounterProps)  {
 
     
   const { isPending, execute,  error } = useServerAction(createVitalSignAction, {
     onSuccess() {
-        toast.success("VitalSign has been recorded.");      
+        toast.success("VitalSign has been recorded.");  
+        onSuccess();    
     },
     onError() {
         toast.error("Something went wrong.", {
@@ -40,25 +44,25 @@ export function VitalSignForm  ()  {
     },
   })
 
-  const form = useForm<z.infer<typeof NewVitalSignSchema>>({
-    resolver: zodResolver(NewVitalSignSchema),
+  const form = useForm<z.infer<typeof selectVitalSignSchema>>({
+    resolver: zodResolver(selectVitalSignSchema),
           defaultValues: {
-     height: 0,weight: 0,systolic_blood_pressure: 0,diastolic_blood_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_on: "",
+     height: 0,weight: 0,systolic_pressure: 0,diastolic_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_at: new Date(),
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof NewVitalSignSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof selectVitalSignSchema>> = (
     values
   ) => {
     execute({
-              height: values.height, weight: values.weight, systolic_blood_pressure: values.systolic_blood_pressure, diastolic_blood_pressure: values.diastolic_blood_pressure, heart_rate: values.heart_rate, body_temperature: values.body_temperature, respiratory_rate: values.respiratory_rate, oxygen_saturation: values.oxygen_saturation, bmi: values.bmi, measured_on: values.measured_on
+              height: values.height, weight: values.weight, systolic_pressure: values.systolic_pressure, diastolic_pressure: values.diastolic_pressure, heart_rate: values.heart_rate, body_temperature: values.body_temperature, respiratory_rate: values.respiratory_rate, oxygen_saturation: values.oxygen_saturation, bmi: values.bmi, measured_on: values.measured_at, encounter_id: encounterId
          
     });
   };
 
 
        form.reset({
-   height: 0,weight: 0,systolic_blood_pressure: 0,diastolic_blood_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_on: "",
+   height: 0,weight: 0,systolic_pressure: 0,diastolic_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_at: new Date(),
     },
 )
 
@@ -103,7 +107,7 @@ render={({ field }) => (
 
 <FormField
 control={form.control}
-name="systolic_blood_pressure"
+name="systolic_pressure"
 render={({ field }) => (
   <FormItem>
     <FormLabel>Systolic Blood Pressure</FormLabel>
@@ -117,7 +121,7 @@ render={({ field }) => (
 
 <FormField
 control={form.control}
-name="diastolic_blood_pressure"
+name="diastolic_pressure"
 render={({ field }) => (
   <FormItem>
     <FormLabel>Diastolic Blood Pressure</FormLabel>
@@ -199,20 +203,49 @@ render={({ field }) => (
 )}
 />
 
-<FormField
-control={form.control}
-name="measured_on"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Measured On</FormLabel>
-    <FormControl>
-      <Input type="date" placeholder="Measured On" {...field}  />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
 
+<FormField
+          control={form.control}
+          name="measured_at"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date of birth</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        field.value, "PPP"
+                      ) : (
+                        <span>Measured On</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? field.value : undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date() || date < new Date("2024-12-31")
+                    }
+                    
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
 
 

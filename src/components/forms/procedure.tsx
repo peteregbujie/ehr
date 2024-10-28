@@ -19,17 +19,19 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
 import { Send, Terminal } from "lucide-react";
 import { Textarea } from "../ui/textarea";
-import { NewProcedureSchema } from "@/lib/validations/procedure";
+import { selectProcedureSchema } from "@/lib/validations/procedure";
+import { EncounterProps } from "@/types";
 
 
 
 
-export function ProcedureForm  ()  {
+export function ProcedureForm  ({ onSuccess, encounterId }: EncounterProps)  {
 
     
   const { isPending, execute,  error } = useServerAction(createProcedureAction, {
     onSuccess() {
-        toast.success("Procedure has been created.");      
+        toast.success("Procedure has been created.");     
+        onSuccess(); 
     },
     onError() {
         toast.error("Something went wrong.", {
@@ -38,18 +40,18 @@ export function ProcedureForm  ()  {
     },
   })
 
-  const form = useForm<z.infer<typeof NewProcedureSchema>>({
-    resolver: zodResolver(NewProcedureSchema),
+  const form = useForm<z.infer<typeof selectProcedureSchema>>({
+    resolver: zodResolver(selectProcedureSchema),
           defaultValues: {
       name: "", description: "", duration: "", date: "", time: "", note: "", status: "completed",
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof NewProcedureSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof selectProcedureSchema>> = (
     values
   ) => {
     execute({
-              name: values.name, description: values.description, duration: values.duration, date: values.date, time: values.time, note: values.note, status: values.status
+              name: values.name, description: values.description, duration: values.duration, date: values.date, time: values.time, note: values.note, status: values.status, encounter_id: encounterId
         
     });
   };

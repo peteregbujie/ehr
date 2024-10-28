@@ -18,15 +18,19 @@ import { createEncounterAction } from "@/actions/encounter";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
-import { Send, Terminal } from "lucide-react";
-import { newEncounterSchema } from "@/lib/validations/encounter";
+import { CalendarIcon, Send, Terminal } from "lucide-react";
+
 import { Textarea } from "../ui/textarea";
+import { insertEncounterSchema } from "@/db/schema/encounter";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Calendar } from "../ui/calendar";
+import { cn } from "@/lib/utils";
 
 
 
 
 
-export function EncounterForm  ({onSuccess}: {onSuccess: () => void})  {
+export function EncounterForm  ({onSuccess, appointmentId }: {onSuccess: () => void, appointmentId: string})  {
 
     
   const { isPending, execute,  error } = useServerAction(createEncounterAction, {
@@ -41,35 +45,33 @@ export function EncounterForm  ({onSuccess}: {onSuccess: () => void})  {
     },
   })
 
-  const form = useForm<z.infer<typeof newEncounterSchema>>({
-    resolver: zodResolver(newEncounterSchema),
+  const form = useForm<z.infer<typeof insertEncounterSchema>>({
+    resolver: zodResolver(insertEncounterSchema),
           defaultValues: {
-      date: "", time: "", encounter_type: "inpatient", location: "", assessment_and_plan: "", chief_complaint: "", notes: "",
+      date: new Date(), time: "", encounter_type: "inpatient",  assessment_and_plan: "", chief_complaint: "", notes: "",
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof newEncounterSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof insertEncounterSchema>> = (
     values
   ) => {
-    execute({
-              
+    execute({              
         date: values.date,
         time: values.time,
         encounter_type: values.encounter_type,
-        location: values.location,
         assessment_and_plan: values.assessment_and_plan,
         chief_complaint: values.chief_complaint,
-        notes: values.notes,       
+        notes: values.notes,  
+        appointment_id:appointmentId,     
     });
   };
 
 
        form.reset({
     
-    date: "", 
+    date: new Date(), 
     time: "", 
     encounter_type: "inpatient", 
-    location: "", 
     assessment_and_plan: "", 
     chief_complaint: "", 
     notes: "",
@@ -153,18 +155,49 @@ render={({ field }) => (
 />
 
 <FormField
-control={form.control}
-name="date"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Date</FormLabel>
-    <FormControl>
-      <Input type="date" placeholder="date" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        field.value, "PPP"
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? field.value : undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date() || date < new Date("2024-12-31")
+                    }
+                    
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+    
+   
 
 <FormField
 control={form.control}
@@ -180,19 +213,7 @@ render={({ field }) => (
 )}
 />
 
-<FormField
-control={form.control}
-name="location"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Location</FormLabel>
-    <FormControl>
-      <Input placeholder="Location" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+
 
 <Button disabled={isPending} type="submit" className="w-full">
         {isPending ? "Saving..." : "Save"}

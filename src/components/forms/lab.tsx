@@ -20,13 +20,12 @@ import { LoaderButton } from "@/components/loader-button";
 import { Send, Terminal } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { NewLabSchema } from "@/lib/validations/lab";
+import { EncounterProps } from "@/types";
 
 
-interface LabFormProps {
-  onSuccess: () => void; // Define the onSuccess prop
-}
 
-export function LabForm  ({ onSuccess }: LabFormProps) {
+
+export function LabForm  ({ onSuccess, encounterId }: EncounterProps) {
 
     
   const { isPending, execute,  error } = useServerAction(createLabAction, {
@@ -52,7 +51,7 @@ export function LabForm  ({ onSuccess }: LabFormProps) {
     values
   ) => {
     execute({
-              test_Name: values.test_Name, date_Ordered: values.date_Ordered, test_Code: values.test_Code, result: values.result, status: values.status, result_Date: values.result_Date,  note :values.note
+              test_Name: values.test_Name, date_Ordered: values.date_Ordered, test_Code: values.test_Code, result: values.result, status: values.status, result_Date: values.result_Date,  note :values.note, encounter_id: encounterId
         
     });
   };

@@ -17,17 +17,19 @@ import { createMedicationAction } from "@/actions/medication";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
-import { Send, Terminal } from "lucide-react";
+import { CalendarIcon, Send, Terminal } from "lucide-react";
 
 import { Textarea } from "../ui/textarea";
-import { extendedMedicationSchema } from "@/lib/validations/medication";
+import { selectMedicationSchema } from "@/lib/validations/medication";
+import { EncounterProps } from "@/types";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { cn } from "@/lib/utils";
+import { Calendar } from "../ui/calendar";
 
-interface MedicationFormProps {
-  onSuccess: () => void;
-}
 
 
-export function MedicationForm  ({ onSuccess }:MedicationFormProps)  {
+
+export function MedicationForm  ({ onSuccess, encounterId }: EncounterProps)  {
 
     
   const { isPending, execute,  error } = useServerAction(createMedicationAction, {
@@ -42,25 +44,25 @@ export function MedicationForm  ({ onSuccess }:MedicationFormProps)  {
     },
   })
 
-  const form = useForm<z.infer<typeof extendedMedicationSchema>>({
-    resolver: zodResolver(extendedMedicationSchema),
+  const form = useForm<z.infer<typeof selectMedicationSchema>>({
+    resolver: zodResolver(selectMedicationSchema),
           defaultValues: {
-     medication_name: "", code: "", dosage: "", frequency: "", route: "oral", status: "completed", start_date: "", end_date: "", note: "",
+     medication_name: "", code: "", dosage: "", frequency: "", route: "oral", status: "completed", start_date: new Date(), end_date: new Date(), note: "",
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof extendedMedicationSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof selectMedicationSchema>> = (
     values
   ) => {
     execute({
               
-        medication_name: values.medication_name, code: values.code, dosage: values.dosage, frequency: values.frequency, route: values.route, status: values.status, note: values.note, start_date: values.start_date, end_date: values.end_date
+        medication_name: values.medication_name, code: values.code, dosage: values.dosage, frequency: values.frequency, route: values.route, status: values.status, note: values.note, start_date: values.start_date, end_date: values.end_date, encounter_id: encounterId
     });
   };
 
 
        form.reset({
-   medication_name: "", code: "", dosage: "", frequency: "", route: "oral", status: "completed", start_date: "", end_date: "", note: "",
+   medication_name: "", code: "", dosage: "", frequency: "", route: "oral", status: "completed", start_date: new Date(), end_date: new Date(), note: "",
     },
 )
 
@@ -167,31 +169,91 @@ render={({ field }) => (
 />
 
 <FormField
-control={form.control}
-name="start_date"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Start Date</FormLabel>
-    <FormControl>
-      <Input type="date" placeholder="date" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+          control={form.control}
+          name="start_date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date of birth</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        field.value, "PPP"
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? field.value : undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date() || date < new Date("2024-12-31")
+                    }
+                    
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
 <FormField
-control={form.control}
-name="end_date"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>End Date</FormLabel>
-    <FormControl>
-      <Input type="date" placeholder="end_date" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+          control={form.control}
+          name="end_date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date of birth</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        field.value, "PPP"
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? field.value : undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date() || date < new Date("2024-12-31")
+                    }
+                    
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
 
 <FormField

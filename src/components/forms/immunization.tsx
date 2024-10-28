@@ -20,18 +20,20 @@ import { LoaderButton } from "@/components/loader-button";
 import { Send, Terminal } from "lucide-react";
 
 import { Textarea } from "../ui/textarea";
-import { NewImmunizationSchema } from "@/lib/immunization";
+import { selectImmunizationSchema } from "@/lib/validations/immunization";
+import { EncounterProps } from "@/types";
 
 
 
 
 
-export function ImmunizationForm  ()  {
+export function ImmunizationForm  ({ encounterId, onSuccess }: EncounterProps)  {
 
     
   const { isPending, execute,  error } = useServerAction(createImmunizationAction, {
     onSuccess() {
-        toast.success("Immunization has been created.");      
+        toast.success("Immunization has been created.");   
+        onSuccess();   
     },
     onError() {
         toast.error("Something went wrong.", {
@@ -40,18 +42,18 @@ export function ImmunizationForm  ()  {
     },
   })
 
-  const form = useForm<z.infer<typeof NewImmunizationSchema>>({
-    resolver: zodResolver(NewImmunizationSchema),
+  const form = useForm<z.infer<typeof selectImmunizationSchema>>({
+    resolver: zodResolver(selectImmunizationSchema),
           defaultValues: {
       vaccine_name: "", site: "", vaccination_date: "", vaccination_time: "",vaccinator: "",
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof NewImmunizationSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof selectImmunizationSchema>> = (
     values
   ) => {
     execute({
-              vaccine_name: values.vaccine_name, site: values.site, vaccination_date: values.vaccination_date, vaccination_time: values.vaccination_time, vaccinator: values.vaccinator,
+              vaccine_name: values.vaccine_name, site: values.site, vaccination_date: values.vaccination_date, vaccination_time: values.vaccination_time, vaccinator: values.vaccinator,encounter_id: encounterId
         
     });
   };
@@ -171,4 +173,4 @@ render={({ field }) => (
   </Form>
   </>
 );
-};
+}

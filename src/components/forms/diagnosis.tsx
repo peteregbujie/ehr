@@ -20,14 +20,14 @@ import { LoaderButton } from "@/components/loader-button";
 import { Send, Terminal } from "lucide-react";
 
 import { Textarea } from "../ui/textarea";
-import { NewDiagnosisSchema } from "@/lib/validations/diagnosis";
+import { encounter } from "@/db/seeds";
+import { EncounterProps } from "@/types";
+import { insertDiagnosisSchema } from "@/db/schema/diagnosis";
 
 
-interface DiagnosisFormProps {
-  onSuccess: () => void; // Define the onSuccess prop
-}
 
-export function DiagnosisForm  ({ onSuccess }: DiagnosisFormProps)  {
+
+export function DiagnosisForm  ({ onSuccess,  encounterId }: EncounterProps)  {
 
     
   const { isPending, execute,  error } = useServerAction(createDiagnosisAction, {
@@ -42,25 +42,25 @@ export function DiagnosisForm  ({ onSuccess }: DiagnosisFormProps)  {
     },
   })
 
-  const form = useForm<z.infer<typeof NewDiagnosisSchema>>({
-    resolver: zodResolver(NewDiagnosisSchema),
+  const form = useForm<z.infer<typeof insertDiagnosisSchema>>({
+    resolver: zodResolver(insertDiagnosisSchema),
           defaultValues: {
-      diagnosis_name:"",diagnosis_code:"", severity: "mild",date: "", note: ""
+      diagnosis_name:"",diagnosis_code:"", severity: "mild", note: ""
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof NewDiagnosisSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof insertDiagnosisSchema>> = (
     values
   ) => {
     execute({
               
-        diagnosis_name: values.diagnosis_name, diagnosis_code: values.diagnosis_code, severity: values.severity, date: values.date, note: values.note, 
+        diagnosis_name: values.diagnosis_name, diagnosis_code: values.diagnosis_code, severity: values.severity,  note: values.note, encounter_id: encounterId, 
     });
   };
 
 
        form.reset({
-    diagnosis_name: "", diagnosis_code:"", date: "", severity: "mild",  note: "",
+    diagnosis_name: "", diagnosis_code:"",  severity: "mild",  note: "",
     },
 )
 
@@ -135,26 +135,13 @@ render={({ field }) => (
   <FormItem>
     <FormLabel>Note</FormLabel>
     <FormControl>
-    <Textarea rows={7} {...field} />
+    <Textarea rows={7} {...field} value={field.value || ""}/>
     </FormControl>
     <FormMessage />
   </FormItem>
 )}
 />
 
-<FormField
-control={form.control}
-name="date"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Start Date</FormLabel>
-    <FormControl>
-      <Input type="date" placeholder="date" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
 
 
 

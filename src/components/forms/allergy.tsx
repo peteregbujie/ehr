@@ -19,17 +19,20 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
 import { Send, Terminal } from "lucide-react";
 import { Textarea } from "../ui/textarea";
-import { NewAllergySchema } from "@/lib/validations/allergy";
+
+import { EncounterProps } from "@/types";
+import { insertAllergySchema } from "@/db/schema/allergy";
 
 
 
 
-export function AllergyForm  ()  {
+export function AllergyForm  ({ onSuccess, encounterId }: EncounterProps)  {
 
     
   const { isPending, execute,  error } = useServerAction(createAllergyAction, {
     onSuccess() {
-        toast.success("Allergy has been created.");      
+        toast.success("Allergy has been created.");    
+        onSuccess();  
     },
     onError() {
         toast.error("Something went wrong.", {
@@ -38,18 +41,18 @@ export function AllergyForm  ()  {
     },
   })
 
-  const form = useForm<z.infer<typeof NewAllergySchema>>({
-    resolver: zodResolver(NewAllergySchema),
+  const form = useForm<z.infer<typeof insertAllergySchema>>({
+    resolver: zodResolver(insertAllergySchema),
           defaultValues: {
       allergen: "", severity: "mild", note: "", allergy_reaction:"",
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof NewAllergySchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof insertAllergySchema>> = (
     values
   ) => {
     execute({
-              allergen: values.allergen,  severity: values.severity, note: values.note, allergy_reaction: values.allergy_reaction
+              allergen: values.allergen,  severity: values.severity, note: values.note, allergy_reaction: values.allergy_reaction, encounter_id: encounterId
     });
   };
 
