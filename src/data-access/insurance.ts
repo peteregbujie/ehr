@@ -3,23 +3,18 @@
 // create insurance function. insurance is a related table to patient
 
 import db  from "@/db";
-import InsuranceTable, { insertInsuranceSchema, InsuranceType } from "@/db/schema/insurance";
-import { getPatientById } from "./patient";
+import InsuranceTable, { insertInsuranceSchema, InsuranceType, newInsuranceType } from "@/db/schema/insurance";
+
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import { NewInsuranceType } from "@/lib/validations/insurance";
-import { getPatientLatestEncounterId } from "./encouter";
+
 import { eq } from "drizzle-orm";
 
-export async function CreateInsurance ( insuranceData: NewInsuranceType) {
-   // find patient by id
-  
-   const encounterId = await getPatientLatestEncounterId();  
-   
-
-   const parsedData = insertInsuranceSchema.safeParse({...insuranceData, encounter_id: encounterId});
+export async function CreateInsurance ( insuranceData: newInsuranceType) {
+ 
+   const parsedData = insertInsuranceSchema.safeParse(insuranceData);
 
    if (!parsedData.success) {
-    // Handle parse failure, possibly throw an error or log it
+
     throw new InvalidDataError();
 }
 
@@ -29,7 +24,7 @@ export async function CreateInsurance ( insuranceData: NewInsuranceType) {
 
 
 // update insurance function
-export async function UpdateInsurance (insuranceId: string, insuranceData: InsuranceType) {
+export async function UpdateInsurance (insuranceData: InsuranceType) {
 
     const parsedData = insertInsuranceSchema.safeParse(insuranceData);
 
@@ -38,7 +33,7 @@ export async function UpdateInsurance (insuranceId: string, insuranceData: Insur
         throw new Error('Invalid insurance data');
     }
 
-    await db.update(InsuranceTable).set(parsedData.data).where(eq(InsuranceTable.id, insuranceId)).returning();
+    await db.update(InsuranceTable).set(parsedData.data).where(eq(InsuranceTable.id, insuranceData.id)).returning();
 }
 
 

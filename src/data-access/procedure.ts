@@ -5,11 +5,8 @@
 import db from "@/db";
 import { ProcedureTable } from "@/db/schema";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
-import { getEncounterById, getPatientLatestEncounterId,  } from "./encouter";
 import { eq } from 'drizzle-orm';
-import { getAppointmentsAndEncountersByPatientId,  getAppointmentsAndEncountersByProviderId } from "./appointment";
-import { insertProcedureSchema, ProcedureType } from "@/db/schema/procedure";
-import { NewProcedureType } from "@/lib/validations/procedure";
+import { insertProcedureSchema, NewProcedureType, ProcedureType } from "@/db/schema/procedure";
 
 
 
@@ -18,72 +15,19 @@ export const getProcedure = async () => {
     return diagnosis;
 }
 
-
-  export async function createProcedure(procedureData: NewProcedureType) {
-    // Step 1: Fetch the encounter
-    const encounterId = await getPatientLatestEncounterId();         
+  export async function createProcedure(procedureData: NewProcedureType) {            
      
-       const parsedData = insertProcedureSchema.safeParse({...procedureData, encounter_id: encounterId});
+       const parsedData = insertProcedureSchema.safeParse(procedureData);
 
        if (!parsedData.success) {
            throw new InvalidDataError();
        }
-   
-       // Now parsedData.data should conform to InsertProcedureDataType
+          // Now parsedData.data should conform to InsertProcedureDataType
       await db.insert(ProcedureTable).values(parsedData.data).returning(); 
 
        
   }
-
-  // get diagnosis for an encounter
-
-  export async function getProcedureByEncounterId(encounterId: string): Promise<any[]> {
-    const diagnosis = await db.query.ProcedureTable.findMany({
-      where: eq(ProcedureTable.encounter_id, encounterId), 
-    });
-    return diagnosis;
-  }
-
-
-
-
-  // get diagnosis for a patient
-  // New function to get procedures by patient ID, reusing the abstraction
-export async function getProceduresByPatientId(patientId: string) {
-    const Encounters = await getAppointmentsAndEncountersByPatientId(patientId);
-  
-    // Initialize an array to hold all procedures for the patient
-    let procedures = [];
-  
-    // Step 3: For each encounter, get procedures
-      for (const encounter of Encounters) {
-        const allProcedures = await getProcedureByEncounterId(encounter.id);
-        procedures.push(...allProcedures);
-      }
-    
-  
-    return procedures;
-  }
-
-
-  
-  export async function getProceduresByProviderId(providerId: string) {
-    const Encounters = await getAppointmentsAndEncountersByProviderId(providerId);
-  
-    // Initialize an array to hold all labs for the patient
-    let procedures = [];
-  
-    // Step 3: For each encounter, get labs
-      for (const encounter of Encounters) {
-        const allProcedures = await getProcedureByEncounterId(encounter.id);
-        procedures.push(...allProcedures);
-      }
-    
-  
-    return procedures;
-  }
-
-
+ 
   // delete diagnosis
   export const deleteProcedure = async (diagnosisId: string) => {
     await db.delete(ProcedureTable).where(eq(ProcedureTable.id, diagnosisId)).returning();

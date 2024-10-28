@@ -2,12 +2,12 @@
 
 import db from "@/db";
 import { AdminTypes } from "@/db/schema/admin";
-import { AppointmentTypes } from "@/db/schema/appointment";
-import { EncounterTypes } from "@/db/schema/encounter";
-import { PatientTypes } from "@/db/schema/patient";
+import { AppointmentTypes, selectselectAppointmentSchema } from "@/db/schema/appointment";
+import { EncounterTypes, selectEncounterSchema } from "@/db/schema/encounter";
+import { PatientTypes, selectPatientSchema } from "@/db/schema/patient";
 import { ProviderTypes } from "@/db/schema/provider";
 
-import UserTable, {  insertUserSchema,  UserTypes } from "@/db/schema/user";
+import UserTable, {  insertUserSchema,  selectUserSchema,  UserTypes } from "@/db/schema/user";
 import {  UserRoles } from "@/lib/validations/user";
 import {  SelectAppointment, SelectEncounter, SelectPatient, SelectProvider, SelectUser } from "@/types";
 import { InvalidDataError } from "@/use-cases/errors";
@@ -122,6 +122,41 @@ export async function getPatientIdByEmail(email: string) {
     return user?.patient
 }
 
+function isValidDate(date: any): date is Date {
+  return date instanceof Date && !isNaN(date.getTime());
+}
+
+
+function isMedicalRecord(record: any): record is SelectEncounter {
+  return (
+    Array.isArray(record.medications) &&
+    Array.isArray(record.vitalSigns) &&
+    Array.isArray(record.diagnoses) &&
+    Array.isArray(record.allergies) &&
+    Array.isArray(record.procedures) &&
+    Array.isArray(record.labs) &&
+    Array.isArray(record.immunizations) &&
+    Array.isArray(record.diagnoses) &&
+    Array.isArray(record.insurance)
+  );
+}
+
+
+function isEncounter(encounter: unknown): encounter is SelectEncounter {
+  return selectEncounterSchema.safeParse(encounter).success;
+}
+
+function isAppointment(appointment: unknown): appointment is SelectAppointment {
+  return selectselectAppointmentSchema.safeParse(appointment).success;
+}
+
+function isPatient(patient: unknown): patient is SelectPatient {
+  return selectPatientSchema.safeParse(patient).success;
+}
+
+function isUser(user: unknown): user is SelectUser {
+  return selectUserSchema.safeParse(user).success;
+}
 
 // get user by email
 export async function getUserByEmail(email: string) {
@@ -130,87 +165,154 @@ export async function getUserByEmail(email: string) {
     })
     return user
 }
- export const searchUser = cache(async (query: string): Promise<{user: SelectUser, patient: SelectPatient, appointments: SelectAppointment[], encounters: SelectEncounter[]}> => { 
-  try {
-    const user = await db.query.UserTable.findFirst({
-      where: or(
-        ilike(UserTable.name, `%${query}%`),
-        ilike(UserTable.email, `%${query}%`),
-        eq(UserTable.id, query),
 
-      ),      
-      
-      orderBy: (UserTable, { asc }) => [asc(UserTable.created_at)],
-      with: {
-        patient: {
-          with: {
-            appointments: {
-              orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
-              with: {
-                encounter: {
-                  orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
-                  with: {
-                    medications: true,
-                    vitalSigns: true,
-                    diagnoses: true,
-                    allergies: true,
-                    procedures: true,
-                    labs: true,
-                    immunizations: true,
-                    insurance: true,
+
+interface SearchResult {
+  user: SelectUser;
+  patient: SelectPatient | null;
+  appointments: SelectAppointment[];
+  encounters: SelectEncounter[];
+}
+
+
+function isValidSearchResult(result: unknown): result is SearchResult {
+  if (!result || typeof result !== 'object') return false;
+  
+  const typedResult = result as SearchResult;
+  
+  return (
+    isUser(typedResult.user) &&
+    (typedResult.patient === null || isPatient(typedResult.patient)) &&
+    Array.isArray(typedResult.appointments) &&
+    typedResult.appointments.every(isAppointment) &&
+    Array.isArray(typedResult.encounters) &&
+    typedResult.encounters.every(isEncounter)
+  );
+}
+
+
+  export const searchUser =  cache(async (query: string): Promise<SearchResult>=> {
+    try {
+      // Validate input
+      if (typeof query !== 'string' || query.trim().length === 0) {
+        throw new Error('Invalid search query');
+      }
+
+      const user = await db.query.UserTable.findFirst({
+        where: or(
+          ilike(UserTable.name, `%${query}%`),
+          ilike(UserTable.email, `%${query}%`),
+          eq(UserTable.id, query),
+        ),
+        orderBy: (UserTable, { asc }) => [asc(UserTable.created_at)],
+        with: {
+          patient: {
+            with: {
+              appointments: {
+                orderBy: (AppointmentTable, { asc }) => [
+                  asc(AppointmentTable.scheduled_date),
+                ],
+                with: {
+                  encounter: {
+                    orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
+                    with: {
+                      medications: true,
+                      vitalSigns: true,
+                      diagnoses: true,
+                      allergies: true,
+                      procedures: true,
+                      labs: true,
+                      immunizations: true,
+                      insurance: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    if (!user ) {
-      throw new Error("User not found");
-    }
+      if (!user) {
+        throw new Error("User not found");
+      }
 
+      // Type guard validation for user
+      if (!isUser(user)) {
+        throw new Error("Invalid user data structure");
+      }
 
-    const encounters = user.patient?.appointments.flatMap(appointment =>
-      appointment.encounter.map(encounter => ({
-        ...encounter,
-        medications: encounter.medications,
-        vitalSigns: encounter.vitalSigns,
-        diagnoses: encounter.diagnoses,
-        allergies: encounter.allergies,
-        procedures: encounter.procedures,
-        labs: encounter.labs,
-        immunizations: encounter.immunizations,
-        insurance: encounter.insurance,
-      }))
-    );
+      // Validate patient if exists
+      if (user.patient && !isPatient(user.patient)) {
+        throw new Error("Invalid patient data structure");
+      }
 
-   
-    return {
-      user,
-      patient: user.patient,
-      appointments: user.patient?.appointments,
-      encounters,
+      // Get and validate appointments
+      const appointments = user.patient?.appointments || [];
+      if (!appointments.every(isAppointment)) {
+        throw new Error("Invalid appointment data structure");
+      }
+
+      // Process and validate encounters
+      const encounters = appointments.flatMap(appointment =>
+        appointment.encounter.map(encounter => ({
+          ...encounter,
+          appointmentId: appointment.id,
+          medications: encounter.medications,
+          vitalSigns: encounter.vitalSigns,
+          diagnoses: encounter.diagnoses,
+          allergies: encounter.allergies,
+          procedures: encounter.procedures,
+          labs: encounter.labs,
+          immunizations: encounter.immunizations,
+          insurance: encounter.insurance,
+        }))
+      );
+
+      // Validate encounters
+      if (!encounters.every(isEncounter)) {
+        throw new Error("Invalid encounter data structure");
+      }
+
+      const result: SearchResult = {
+        user,
+        patient: user.patient || null,
+        appointments,
+        encounters,
+      };
+
+      // Final validation of the entire result
+      if (!isValidSearchResult(result)) {
+        throw new Error("Invalid search result structure");
+      }
+
+      return result;
+
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error searching user:", error.message);
+        throw error;
+      }
       
-    };
-  } catch (error) {
-    console.error("Error searching user:", error);
-    throw error;
-  }
-}); 
+      throw new Error("An unexpected error occurred");
+    }
+  })
 
 
 
-// Get All User
-export const getUsers =  unstable_cache(async (): Promise<{
+
+
+interface UsersQueryResult {
   users: SelectUser[],
   patients: SelectPatient[],
   appointments: SelectAppointment[],
   encounters: SelectEncounter[],
   totalUsers: number,
   newOffset: number | null
-}> => { 
+}
+
+// Get All User
+export const getUsers =  cache(async (): Promise<UsersQueryResult> => { 
   try {
     const users = await db.query.UserTable.findMany({
       orderBy: (users, { asc }) => [asc(users.created_at)],
@@ -251,33 +353,57 @@ export const getUsers =  unstable_cache(async (): Promise<{
       throw new Error("No users found");
     }
 
-    const patients = users.map(user => user.patient);
+    const patients = users
+        .map(user => user.patient)
+        .filter((patient): patient is NonNullable<typeof patient> => patient !== null);
 
-    const appointments = users
-      .flatMap(user => user.patient?.appointments ?? []) ;
+        const appointments = patients.flatMap(patient => 
+          patient.appointments.map(appointment => ({
+            ...appointment,
+            patientId: patient.id
+          }))
+        );
+  
 
-    return {
-      users,
-      patients,    
-      appointments,
-      encounters: appointments.flatMap(appointment =>
-        appointment.encounter.map(encounter => ({
-          ...encounter,
-          medications: encounter.medications,
-          vitalSigns: encounter.vitalSigns,
-          diagnoses: encounter.diagnoses,
-          allergies: encounter.allergies,
-          procedures: encounter.procedures,
-          labs: encounter.labs,
-          immunizations: encounter.immunizations,
-          insurance: encounter.insurance,
-        }))
-      ),
 
-      totalUsers,
-      newOffset
+        const encounters = appointments.flatMap(appointment =>
+          appointment.encounter.map(encounter => ({
+            ...encounter,
+            appointmentId: appointment.id,
+            medications: encounter.medications,
+            vitalSigns: encounter.vitalSigns,
+            diagnoses: encounter.diagnoses,
+            allergies: encounter.allergies,
+            procedures: encounter.procedures,
+            labs: encounter.labs,
+            immunizations: encounter.immunizations,
+            insurance: encounter.insurance,
+          }))
+        );
 
-    };
+
+
+        const result: UsersQueryResult = {
+          users,
+          patients,
+          appointments,
+          encounters,
+          totalUsers,
+          newOffset
+        };
+
+
+
+        if (
+          result.users.every(isUser) &&
+          result.patients.every(isPatient) &&
+          result.appointments.every(isAppointment) &&
+          result.encounters.every(isEncounter)
+        ) {
+          return result;
+        }
+  
+        throw new Error("Invalid data structure");
   } catch (error) {
     console.error("Error fetching users:", error);
     throw error;

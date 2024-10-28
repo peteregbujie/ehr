@@ -1,11 +1,11 @@
 import db from "@/db";
-import AppointmentTable, { AppointmentTypes, insertAppointmentSchema } from "@/db/schema/appointment";
+import AppointmentTable, { AppointmentTypes, BookAppointmentTypes, selectAppointmentSchema } from "@/db/schema/appointment";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncountersByAppointmentId } from "./encouter";
-import { NewAppointmentType } from "@/lib/validations/appointment";
+
 import PatientTable from "@/db/schema/patient";
 import { getCurrentUser } from "@/lib/session";
-import { getPatientIdByEmail, searchUser } from "./user";
+import {  searchUser } from "./user";
 import { parseISO,  getDay } from 'date-fns';
 import { eq, and  } from 'drizzle-orm';
 
@@ -26,12 +26,12 @@ const workingHours = [
 
 
 //create appointment
-export const bookAppointment = async (appointmentData: NewAppointmentType) => { 
+export const bookAppointment = async (appointmentData: BookAppointmentTypes) => { 
 
-  const {  provider_id, scheduled_date,  timeSlotIndex, appointmentId, patient_id
+  const {  provider_id, scheduled_date,  timeSlotIndex, id, patient_id
   } = appointmentData;
 
- 
+ const appointmentId = id;
 
   const scheduledDateString = scheduled_date.toISOString();
   const parsedDate = parseISO(scheduledDateString);
@@ -146,7 +146,7 @@ export const getAppointmentById = async (appointmentId: string) => {
 //update appointment
 export const updateAppointment = async (appointmentId: string, appointmentData: AppointmentTypes) => {
     // Parse the input data against the schema  
-    const parsedData = insertAppointmentSchema.safeParse(appointmentData);
+    const parsedData = selectAppointmentSchema.safeParse(appointmentData);
 
     if (!parsedData.success) {
         throw new InvalidDataError();
@@ -166,7 +166,7 @@ export const deleteAppointment = async (appointmentId: string) => {
 // reschedule appointment
 export const rescheduleAppointment = async (appointmentId: string, appointmentData: AppointmentTypes) => {
     // Parse the input data against the schema  
-    const parsedData = insertAppointmentSchema.safeParse(appointmentData);
+    const parsedData = selectAppointmentSchema.safeParse(appointmentData);
 
     if (!parsedData.success) {
         throw new InvalidDataError();
@@ -213,84 +213,7 @@ export async function getAppointmentsAndEncountersByPatientId(patientId: string)
   }
 
 
-export async function getAppointmentsByPhoneNumber(phoneNumber: string) {
-  const patientData = await db.query.PatientTable.findMany({where: eq(PatientTable.phone_number, phoneNumber)})
-
-const PatientId = patientData[0]?.id
-  if (!PatientId) throw new NotFoundError();
-
-  const appointments = await getAppointmentsAndEncountersByPatientId(PatientId)
-  return appointments;
-}
-
-
-export async function getPatientAppointmentsByPhoneNumber(
-  phone_number:string,
-  ) {
-  const raw = await db.query.PatientTable.findMany({
-  where: (PatientTable, {eq}) => eq(PatientTable.phone_number, phone_number),
-  with: {
-    appointments: {
-      orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
-   
-    },
-    },
   
-  });
-  
-  return raw;
-  
-  }
-  
-
-
-export async function getPatientEncountersByPhoneNumber(
-  phone_number:string,
-  ) {
-  const raw = await db.query.PatientTable.findFirst({
-  where: (PatientTable, {eq}) => eq(PatientTable.phone_number, phone_number),
-  with: {
-    appointments: {
-      orderBy: (AppointmentTable, { asc }) => [asc(AppointmentTable.scheduled_date)],
-    with: {
-      encounter: {
-      orderBy: (EncounterTable, { asc }) => [asc(EncounterTable.date)],
-    }
-    },
-    },
-    },
-  
-  });
-  
-  return raw;
-  
-  }
-  
-
-  export async function getPatientLatestAppointment() {
-
-    const currentUser = await getCurrentUser()
-
-    const email = currentUser?.email
-
-    try {
-        const user = await searchUser(email);
-        if (!user) {
-            throw new NotFoundError();
-            
-        }
-
-        const firstPatient = user.patient;
-const latestAppointment = firstPatient.appointments[0];
-       
-const { provider_id, patient_id } = latestAppointment 
-
-// Return the latest appointment along with provider_id and patient_id
-return { latestAppointment, provider_id, patient_id };
-    } catch (error) {
-      throw new InvalidDataError();
-    }
-}
 
 
 
@@ -306,3 +229,5 @@ export async function getProviderNameByAppointmentId(appointmentId: string) {
 
   return result[0]?.providerName;
 }
+
+

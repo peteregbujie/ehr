@@ -1,26 +1,19 @@
-import { NewImmunizationType } from "@/lib/immunization";
-import { getPatientLatestEncounterId } from "./encouter";
 import { InvalidDataError } from "@/use-cases/errors";
-import ImmunizationTable, { insertImmunizationSchema } from "@/db/schema/immunization";
+import ImmunizationTable, { insertImmunizationSchema, NewImmunizationType } from "@/db/schema/immunization";
 import db from "@/db";
 import { eq } from "drizzle-orm";
 
 
 
 export async function createImmunization( labData: NewImmunizationType) {
-  const encounterId = await getPatientLatestEncounterId();  
-   
-       // Now parsedData.data should conform to InsertLabDataType
-       const parsedData = insertImmunizationSchema.safeParse({...labData, encounter_id: encounterId});
+     
+       const parsedData = insertImmunizationSchema.safeParse(labData);
 
        if (!parsedData.success) {
            throw new InvalidDataError();
        }
-   
-       // Now parsedData.data should conform to InsertMedicationDataType
-       await db.insert(ImmunizationTable).values(parsedData.data).returning();
 
-       
+       await db.insert(ImmunizationTable).values(parsedData.data).returning();       
   }
 
 

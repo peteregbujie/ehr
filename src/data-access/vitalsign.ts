@@ -1,18 +1,15 @@
 // create vital sign function
 
-import VitalSignsTable, { insertVitalSignSchema, VitalSignsType } from "@/db/schema/vitalsign";
+import VitalSignsTable, { insertVitalSignSchema, NewVitalSignType, VitalSignsType } from "@/db/schema/vitalsign";
 import { InvalidDataError} from "@/use-cases/errors";
-import {  getPatientLatestEncounterId } from "./encouter";
 import db from "@/db";
-import { NewVitalSignType } from "@/lib/validations/vitalsign";
-import { searchPatient } from "./patient";
 import { eq } from "drizzle-orm";
 
 
 export async function createVitalSign( vitalsignnData: NewVitalSignType) {
-  const encounterId = await getPatientLatestEncounterId();  
+   
   
-       const parsedData = insertVitalSignSchema.safeParse({...vitalsignnData, encounter_id: encounterId});
+       const parsedData = insertVitalSignSchema.safeParse(vitalsignnData);
 
        if (!parsedData.success) {
            throw new InvalidDataError();
@@ -26,27 +23,17 @@ export async function createVitalSign( vitalsignnData: NewVitalSignType) {
 
 
   // update vital sign function
-  export const updateVitalSign = async (vitalSignId: string, vitalSignData: VitalSignsType) => {
+  export const updateVitalSign = async (vitalSignData: VitalSignsType) => {
 
     const parsedData = insertVitalSignSchema.safeParse(vitalSignData);
 
     if (!parsedData.success) {
       throw new InvalidDataError();
     }   
-    await db.update(VitalSignsTable).set(parsedData.data).where(eq(VitalSignsTable.id, vitalSignId)).returning();
+    await db.update(VitalSignsTable).set(parsedData.data).where(eq(VitalSignsTable.id, vitalSignData.id)).returning();
   } 
 
   // delete vital sign function
   export const deleteVitalSign = async (vitalSignId: string) => {
     await db.delete(VitalSignsTable).where(eq(VitalSignsTable.id, vitalSignId)).returning();
   }
-
-  // get all vital signs
-  export const getAllVitalSigns = async () => {
-    return await db.select().from(VitalSignsTable);
-  } 
-
-  //    get vital sign by id
-  export const getVitalSignById = async (vitalSignId: string) => {
-    return await db.select().from(VitalSignsTable).where(eq(VitalSignsTable.id, vitalSignId));
-  } 
