@@ -28,7 +28,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { deleteUserUseCase } from '@/use-cases/user';
-import { SelectUser, SelectPatient, SelectAppointment, SelectEncounter, patientsTableProps } from '@/types';
+import {  DashboardProps } from '@/types';
 import Link from 'next/link';
 
 
@@ -37,7 +37,7 @@ export default function PatientsTable({
   users,
   offset,
   totalUsers,
-}: patientsTableProps) {
+}: DashboardProps) {
 
   const [currentOffset, setCurrentOffset] = useState(offset);
   const router = useRouter();
@@ -64,7 +64,7 @@ export default function PatientsTable({
         <div className="flex justify-between items-center">
           <div>
             <CardTitle className="text-2xl font-bold">Patients</CardTitle>
-            <CardDescription className="text-blue-100">
+            <CardDescription className="text-white">
               Manage your patients
             </CardDescription>
           </div>
@@ -97,10 +97,10 @@ export default function PatientsTable({
                 </TableCell>
                 <TableCell> {new Date(user.date_of_birth).toLocaleDateString()}</TableCell>
                 <TableCell className="hidden md:table-cell">
-  {(user.patient?.appointments?.[0].scheduled_date.toLocaleDateString()) || 'N/A'}
+  {(user.patient?.appointments[0]?.scheduled_date.toLocaleDateString())}
 </TableCell>
 <TableCell className="hidden lg:table-cell max-w-[200px] truncate">
-  {users?.[0].patient?.appointments?.[0].reason || 'N/A'}
+  {user.patient?.appointments[0]?.reason }
 </TableCell>
 
                 <TableCell className="text-right">
