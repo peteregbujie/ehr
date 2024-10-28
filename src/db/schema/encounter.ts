@@ -22,6 +22,7 @@ import VitalSignsTable from "./vitalsign";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import MedicationTable from "./medication";
 import InsuranceTable from "./insurance";
+import { z } from "zod";
 
 
 export const Encounter_type = pgEnum('encounter_type', ["inpatient", "outpatient", "emergency"]);
@@ -69,11 +70,15 @@ export const EncounterRelations = relations(
 
 
 
-// Schema for inserting a encounter - can be used to validate API requests
-export const insertEncounterSchema = createInsertSchema(EncounterTable);
 
-// Schema for selecting a encounter - can be used to validate API responses
+export const insertEncounterSchema = createInsertSchema(EncounterTable).omit({
+  id: true,
+});
+
+
 export const selectEncounterSchema = createSelectSchema(EncounterTable);
+
+export type NewEncounterType = z.infer<typeof insertEncounterSchema>
 
 export type EncounterTypes = InferSelectModel<typeof EncounterTable>
 

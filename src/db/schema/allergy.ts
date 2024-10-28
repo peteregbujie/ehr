@@ -12,6 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const Severity = pgEnum('severity', ["mild","moderate", "severe"]);
 
@@ -45,9 +46,14 @@ export const AllergiesRelations = relations(AllergiesTable, ({ one }) => ({
  }),
 }));
 
-export const insertAllergySchema = createInsertSchema(AllergiesTable);
+export const insertAllergySchema = createInsertSchema(AllergiesTable).omit({
+  id: true,
+});
 
 export const selectAllergiesSchema = createSelectSchema(AllergiesTable);
+
+
+export type NewAllergyType = z.infer<typeof insertAllergySchema>
 
 export type AllergyType = InferSelectModel<typeof AllergiesTable>
 

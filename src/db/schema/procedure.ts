@@ -13,6 +13,7 @@ import {
 
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const procedure_status = pgEnum('procedure_status', ["completed", "incomplete", "cancelled", ]);
 
@@ -24,6 +25,7 @@ const ProcedureTable = pgTable(
   description: varchar("procedure_description").notNull(),
   duration: time("procedure_duration").notNull(),
   date: date("procedure_date").notNull(),
+  time: time("procedure_time").notNull(),
   status: procedure_status("procedure_status").default("completed").notNull(),
   note: varchar("procedure_note").notNull(),
   encounter_id: uuid("encounter_id")
@@ -43,9 +45,11 @@ export const ProcedureRelations = relations(ProcedureTable, ({ one }) => ({
  
 }));
 
-export const insertProcedureSchema = createInsertSchema(ProcedureTable);
-
-export const selectProcedureSchema = createSelectSchema(ProcedureTable);
+export const insertProcedureSchema = createInsertSchema(ProcedureTable).omit({
+  id: true,
+});
+export type NewProcedureType = z.infer<typeof insertProcedureSchema>
+export const selectProcedureSchema = createSelectSchema(ProcedureTable)
 
 export type ProcedureType = InferSelectModel<typeof ProcedureTable>
 

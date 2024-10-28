@@ -111,6 +111,8 @@ export const VerificationTokensTable = pgTable(
 
 export const insertUserSchema = createInsertSchema(UserTable);
 
+export const selectUserSchema = createSelectSchema(UserTable);
+
 export type SelectUser = typeof UserTable.$inferSelect;
 
 

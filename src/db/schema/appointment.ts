@@ -15,6 +15,7 @@ import PatientTable from "./patient";
 import ProviderTable from "./provider";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import EncounterTable from "./encounter";
+import { infer, z } from "zod";
 
 
 
@@ -38,7 +39,7 @@ const AppointmentTable = pgTable(
   timeSlotIndex: smallint("timeSlotIndex").notNull(),
   location: varchar("location", { length: 50 }).notNull(),
   type: Appointment_type('appointment_type').notNull(),
-  status: Apt_Status('appointment_status').default("scheduled").notNull(),
+  status: Apt_Status('appointment_status').notNull(),
   notes: varchar("notes", { length: 500 }).notNull(),
  },
  (appointment) => ({
@@ -58,10 +59,15 @@ export const AppointmentRelations = relations(AppointmentTable, ({ one, many }) 
  encounter: many(EncounterTable),
 }));
 
-export const insertAppointmentSchema = createInsertSchema(AppointmentTable);
+export const insertAppointmentSchema = createInsertSchema(AppointmentTable)
+    .extend({
+        id: z.string().uuid().optional(),
+    });
+
+export type BookAppointmentTypes  = z.infer<typeof insertAppointmentSchema>;
 
 export const selectAppointmentSchema = createSelectSchema(AppointmentTable);
 
-export type AppointmentTypes  = InferSelectModel<typeof AppointmentTable>
+export type AppointmentTypes  = z.infer<typeof selectAppointmentSchema>;
 
 export default AppointmentTable;

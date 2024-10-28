@@ -4,6 +4,7 @@ import { pgTable,uuid,text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import PatientTable from "./patient";
+import { z } from "zod";
 
 const InsuranceTable = pgTable(
  "insurance",
@@ -35,7 +36,10 @@ export const InsuranceRelations = relations(InsuranceTable, ({ one }) => ({
  }),
 }));
 
-export const insertInsuranceSchema = createInsertSchema(InsuranceTable);
+export const insertInsuranceSchema = createInsertSchema(InsuranceTable).omit({
+ id: true,
+});
+export type newInsuranceType = z.infer<typeof insertInsuranceSchema>
 
 export const selectInsuranceSchema = createSelectSchema(InsuranceTable);
 

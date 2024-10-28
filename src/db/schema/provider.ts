@@ -35,7 +35,9 @@ export const providerRelations = relations(ProviderTable, ({ one, many }) => ({
 
 
 
-export const insertProviderSchema = createInsertSchema(ProviderTable);
+export const insertProviderSchema = createInsertSchema(ProviderTable).omit({
+    id: true,
+  });
 export const selectProviderSchema = createSelectSchema(ProviderTable);
 
 export type ProviderTypes = InferSelectModel<typeof ProviderTable>

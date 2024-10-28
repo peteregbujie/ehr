@@ -2,6 +2,7 @@ import { InferSelectModel, relations } from "drizzle-orm";
 import { uuid, pgEnum, pgTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const severity = pgEnum('severity', ["mild","moderate", "severe"]);
 
@@ -37,10 +38,13 @@ export const DiagnosisRelations = relations(DiagnosisTable, ({ one }) => ({
  
 }));
 
-export const insertDiagnosisSchema = createInsertSchema(DiagnosisTable);
+export const insertDiagnosisSchema = createInsertSchema(DiagnosisTable).omit({
+  id: true,
+});
 
 export const selectDiagnosisSchema = createSelectSchema(DiagnosisTable);
 
+export type NewDiagnosisType = z.infer<typeof insertDiagnosisSchema> 
 export type DiagnosisType = InferSelectModel<typeof DiagnosisTable>
 
 export default DiagnosisTable;

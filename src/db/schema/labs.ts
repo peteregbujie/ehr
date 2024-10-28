@@ -12,6 +12,7 @@ import {
 
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const lab_status = pgEnum('lab_status', ["pending", "completed", "cancelled"]);
 
@@ -45,9 +46,10 @@ export const LabRelations = relations(LabTable, ({ one }) => ({
  
 }));
 
-export const insertLabSchema = createInsertSchema(LabTable);
-
-// Schema for selecting a encounter - can be used to validate API responses
+export const insertLabSchema = createInsertSchema(LabTable).omit({
+  id: true,
+});
+export type NewLabType = z.infer<typeof insertLabSchema>
 export const selectLabSchema = createSelectSchema(LabTable);
 
 export type LabType = InferSelectModel<typeof LabTable>

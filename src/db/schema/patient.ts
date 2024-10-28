@@ -97,10 +97,13 @@ export const PatientRelations = relations(PatientTable, ({ one, many }) => ({
   }),
 }));
 
-// Schema for inserting a patient - can be used to validate API requests
-export const insertPatientSchema = createInsertSchema(PatientTable);
+export const insertPatientSchema = createInsertSchema(PatientTable).omit({
+  id: true,
+  created_at: true, 
+  updated_at: true
+});
 
-// Schema for selecting a patient - can be used to validate API responses
+
 export const selectPatientSchema = createSelectSchema(PatientTable);
 
 

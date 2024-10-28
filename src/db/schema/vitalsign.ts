@@ -9,6 +9,8 @@ import {
 } from "drizzle-orm/pg-core";
 import EncounterTable from "./encounter";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
+
 
 const VitalSignsTable = pgTable(
   "vital_signs",
@@ -52,12 +54,30 @@ export const VitalSignRelations = relations(VitalSignsTable, ({ one }) => ({
  
 }));
 
-export type VitalSignsType = InferSelectModel<typeof VitalSignsTable>
+export type VitalSignsType = InferSelectModel<typeof VitalSignsTable> & {
+  height: number;
+  weight: number;
+  body_temperature: number;
+  oxygen_saturation: number;
+  bmi: number;
+}
 
-export const insertVitalSignSchema = createInsertSchema(VitalSignsTable);
+export const insertVitalSignSchema = createInsertSchema(VitalSignsTable).omit({
+  id: true,
+});
+export type NewVitalSignType = z.infer<typeof insertVitalSignSchema>
 
-export const selectVitalSignSchema = createSelectSchema(VitalSignsTable);
-
+export const selectVitalSignSchema = createSelectSchema(VitalSignsTable) 
+ .transform((data) => {
+    return {
+      ...data,
+      height: Number(data.height),
+      weight: Number(data.weight),
+      body_temperature: Number(data.body_temperature),
+      oxygen_saturation: Number(data.oxygen_saturation),
+      bmi: Number(data.bmi),
+    };
+  });
 
 
 export default VitalSignsTable;
