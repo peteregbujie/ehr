@@ -1,5 +1,5 @@
 import { bookAppointment, deleteAppointment, getAllAppointments, getAppointmentById,  getAppointmentByPatientId,  getAppointmentByProviderId, getAvailableTimeSlots, updateAppointment } from "@/data-access/appointment";
-import { AppointmentTypes, BookAppointmentTypes } from "@/db/schema/appointment";
+import { AppointmentType, BookAppointmentType } from "@/db/schema/appointment";
 
 import { ExtendedUser } from "@/types/next-auth";
 
@@ -15,7 +15,7 @@ export async function getAppointmentByIdUseCase (appointmentId: string) {
 }
 
 // update appointment use case
-export async function updateAppointmentUseCase (appointmentId: string, data: AppointmentTypes) {
+export async function updateAppointmentUseCase (appointmentId: string, data: AppointmentType) {
     return await updateAppointment(appointmentId, data)
 }
 
@@ -26,7 +26,7 @@ export async function deleteAppointmentUseCase (appointmentId: string) {
 
 // create appointment use case
 
-export async function bookAppointmentUseCase (user: ExtendedUser, data: BookAppointmentTypes) {
+export async function bookAppointmentUseCase (user: ExtendedUser, data: BookAppointmentType) {
     if (user && user.role !== "provider") {
         throw new Error("Only providers can create diagnoses");
       }
