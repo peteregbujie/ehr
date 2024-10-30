@@ -1,4 +1,4 @@
-import { InferSelectModel, relations } from "drizzle-orm";
+import {  relations } from "drizzle-orm";
 import {
   date, 
   pgEnum,
@@ -64,10 +64,10 @@ export const insertAppointmentSchema = createInsertSchema(AppointmentTable)
         id: z.string().uuid().optional(),
     });
 
-export type BookAppointmentTypes  = z.infer<typeof insertAppointmentSchema>;
+export type BookAppointmentType  = z.infer<typeof insertAppointmentSchema>;
 
 export const selectAppointmentSchema = createSelectSchema(AppointmentTable);
 
-export type AppointmentTypes  = z.infer<typeof selectAppointmentSchema>;
+export type AppointmentType  = z.infer<typeof selectAppointmentSchema>;
 
 export default AppointmentTable;

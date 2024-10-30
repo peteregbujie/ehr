@@ -35,9 +35,8 @@ const VitalSignsTable = pgTable(
     
     oxygen_saturation: numeric("oxygen_saturation", { precision: 5, scale: 2 }).notNull(),
     
-    bmi: numeric("bmi", { precision: 4, scale: 1 }).notNull(),
+    bmi: numeric("bmi", { precision: 4, scale: 1 }).notNull(),    
     
-    measured_at: timestamp("measured_at", { mode: "date" }).notNull(),
   },
   (vitalSigns) => ({
     encounterIndex: uniqueIndex("encounter__id__idx").on(vitalSigns.encounter_id),
@@ -54,13 +53,6 @@ export const VitalSignRelations = relations(VitalSignsTable, ({ one }) => ({
  
 }));
 
-export type VitalSignsType = InferSelectModel<typeof VitalSignsTable> & {
-  height: number;
-  weight: number;
-  body_temperature: number;
-  oxygen_saturation: number;
-  bmi: number;
-}
 
 export const insertVitalSignSchema = createInsertSchema(VitalSignsTable).omit({
   id: true,
@@ -68,16 +60,8 @@ export const insertVitalSignSchema = createInsertSchema(VitalSignsTable).omit({
 export type NewVitalSignType = z.infer<typeof insertVitalSignSchema>
 
 export const selectVitalSignSchema = createSelectSchema(VitalSignsTable) 
- .transform((data) => {
-    return {
-      ...data,
-      height: Number(data.height),
-      weight: Number(data.weight),
-      body_temperature: Number(data.body_temperature),
-      oxygen_saturation: Number(data.oxygen_saturation),
-      bmi: Number(data.bmi),
-    };
-  });
 
 
+export type VitalSignsType = InferSelectModel<typeof VitalSignsTable>
+ 
 export default VitalSignsTable;
