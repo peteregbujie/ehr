@@ -10,19 +10,14 @@ import {
   } from "@/components/ui/form"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useServerAction } from "zsa-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createVitalSignAction } from "@/actions/vitalsign";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
-import { CalendarIcon, Send, Terminal } from "lucide-react";
-
+import {  Send, Terminal } from "lucide-react";
 import { EncounterProps } from "@/types";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { cn } from "@/lib/utils";
-import { Calendar } from "../ui/calendar";
 import { selectVitalSignSchema } from "@/db/schema/vitalsign";
 
 
@@ -47,7 +42,7 @@ export function VitalSignForm  ({ onSuccess, encounterId }: EncounterProps)  {
   const form = useForm<z.infer<typeof selectVitalSignSchema>>({
     resolver: zodResolver(selectVitalSignSchema),
           defaultValues: {
-     height: 0,weight: 0,systolic_pressure: 0,diastolic_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_at: new Date(),
+     height: "",weight: "",systolic_pressure: 0,diastolic_pressure: 0,heart_rate: 0,body_temperature: "",respiratory_rate: 0,oxygen_saturation:" 0",bmi: "0",
     },
   })
 
@@ -55,14 +50,14 @@ export function VitalSignForm  ({ onSuccess, encounterId }: EncounterProps)  {
     values
   ) => {
     execute({
-              height: values.height, weight: values.weight, systolic_pressure: values.systolic_pressure, diastolic_pressure: values.diastolic_pressure, heart_rate: values.heart_rate, body_temperature: values.body_temperature, respiratory_rate: values.respiratory_rate, oxygen_saturation: values.oxygen_saturation, bmi: values.bmi, measured_on: values.measured_at, encounter_id: encounterId
+              height: values.height, weight: values.weight, systolic_pressure: values.systolic_pressure, diastolic_pressure: values.diastolic_pressure, heart_rate: values.heart_rate, body_temperature: values.body_temperature, respiratory_rate: values.respiratory_rate, oxygen_saturation: values.oxygen_saturation, bmi: values.bmi,  encounter_id: encounterId
          
     });
   };
 
 
        form.reset({
-   height: 0,weight: 0,systolic_pressure: 0,diastolic_pressure: 0,heart_rate: 0,body_temperature: 0,respiratory_rate: 0,oxygen_saturation: 0,bmi: 0,measured_at: new Date(),
+   height: "",weight: "",systolic_pressure: 0,diastolic_pressure: 0,heart_rate: 0,body_temperature:"",respiratory_rate: 0,oxygen_saturation: "",bmi: "",
     },
 )
 
@@ -202,52 +197,6 @@ render={({ field }) => (
   </FormItem>
 )}
 />
-
-
-<FormField
-          control={form.control}
-          name="measured_at"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date of birth</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        field.value, "PPP"
-                      ) : (
-                        <span>Measured On</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value ? field.value : undefined}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date() || date < new Date("2024-12-31")
-                    }
-                    
-                  />
-                </PopoverContent>
-              </Popover>
-              
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-
 
 
 <Button disabled={isPending} type="submit" className="w-full">
