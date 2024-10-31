@@ -1,11 +1,5 @@
-import { createProvider, deleteProvider, getAllProviders, updateProvider } from "@/data-access/provider";
+import { createProvider, deleteProvider,  getProviderData,  updateProvider } from "@/data-access/provider";
 import { ProviderTypes } from "@/db/schema/provider";
-
-
-// getall provider use case
-export const getAllProvidersUseCase = async () => {
-    return await getAllProviders();
-}
 
 
 
@@ -23,4 +17,9 @@ export const updateProviderUseCase = async (providerId: string, providerData: Pr
 // delete provider use case
 export const deleteProviderUseCase = async (providerId: string) => {
     return await deleteProvider(providerId);
+}
+
+// get Provider Data use case
+export const getProviderDataUseCase = async (providerId: string) => {
+    return await getProviderData(providerId);
 }
