@@ -1,198 +1,167 @@
+"use client"
 
-import { User, ArrowRight, Calendar, Users, Activity, Bell } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { getPatientWithName } from '@/data-access/patient';
-import { getCurrentUser } from '@/lib/session';
-
-import { SelectAppointment, SelectPatient, SelectProvider, SelectUser } from '@/types';
-import { Icons } from '@/components/shared/icons';
-import {useAllUsersData} from '../hooks/useAllUsersData';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, ClipboardList, UserPlus, Users } from 'lucide-react';
+import { notFound } from 'next/navigation';
 
 
-
+import PatientForm from '@/components/forms/patient';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { getUsersUseCase } from '@/use-cases/user';
 
 export default async function AdminDashboard () {
-  const user = await  getCurrentUser(); 
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
 
-  /* if (!user || user.role !== "admin") {
-    throw new Error('Not logged in');
-  } */
 
-  const { data, error, isLoading } = useAllUsersData();
-  
-  if (isLoading) {
-    return <div><Icons.spinner className="h-8 w-8 animate-spin" /></div>;
+  const closeDialog = () => setOpenDialog(null);
+
+  const result = await getUsersUseCase();
+  const { result: users } = result;
+
+  if (!users) {   
+    notFound()
   }
 
-  if (error)  return <div>{error.message}</div>;
- 
-  
-    const {  users, patients,   providers, appointments } = data as { users: SelectUser[]; patients: SelectPatient[]; providers: SelectProvider[]; appointments: SelectAppointment[]; };
-    // rest of your code
-  
-
-/*   const patientId = patients.map((patient) => patient.id)[0]; */
-
-
-
  
 
-  // Helper function to get the most recent patients
-  const getRecentPatients = async () => {
-    return patients.slice(0, 5).map(async p => ({
-      patientData:  await getPatientWithName(p.id),
-      appointmentDate: p.appointments[0]?.scheduled_date
-    }));
-  };
-
-  // Helper function to get upcoming appointments
-  const getUpcomingAppointments = async () =>  {
-    return appointments.filter(apt => new Date(apt.scheduled_date) > new Date())
-      .slice(0, 5)
-      .map(async apt => ({
-        patientData: await getPatientWithName(apt.patient_id), 
-        date: apt.scheduled_date,
-        type: apt.type
-      }));
-  };
+  const totalPatients = users.map((user) => user.patient).length;
+  const totalProviders = users.filter(user => user.provider).length;
+  const totalAdmins = users.filter(user => user.admin).length;
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
-
-      {/* Admin Bio Section */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Admin Profile</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center space-x-4">
-          <Avatar className="h-20 w-20">
-          <AvatarImage src="/placeholder-avatar.jpg" alt={user?.name || ''} />
-            <AvatarFallback>{user?.name && user.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="text-2xl font-semibold">{user.name}</h2>
-            <p className="text-gray-500">{user.email}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Dashboard Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <h1 className="text-3xl font-bold mb-6">EHR Admin Dashboard</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{patients.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Upcoming Appointments</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{(await getUpcomingAppointments()).length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Providers</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{providers.length}</div>
+            <div className="text-2xl font-bold">{totalPatients}</div>
           </CardContent>
         </Card>
-        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Providers</CardTitle>
+            <ClipboardList className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalProviders}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Admins</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalAdmins}</div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Recent Patients Section */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Recent Patients</CardTitle>
-          <CardDescription>Newly registered or recently active patients</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-4">
-          {await getRecentPatients().then(patients => patients.map(async (patientPromise, index) => {
-  const patient = await patientPromise;
-  return (
-    <li key={index} className="flex items-center justify-between">
-      <div className="flex items-center space-x-4">
-        <Avatar>
-          <AvatarFallback>{patient.patientData[0].name.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div>
-          <p className="font-medium">{patient.patientData[0].name}</p>
-          <p className="text-sm text-gray-500">Last appointment: {new Date(patient.appointmentDate).toLocaleDateString()}</p>
-        </div>
-      </div>
-      <Button variant="ghost" size="sm">
-        View <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
-    </li>
-  );
-}))}
-          </ul>
-        </CardContent>
-      </Card>
+      <Dialog open={openDialog === 'appointment'} onOpenChange={(open) => open ? setOpenDialog('appointment') : closeDialog()}>
+          <DialogTrigger asChild>           
+              <UserPlus className="mr-2 h-4 w-4" />
+              <span>Add Patient</span>
+           
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Patient</DialogTitle>
+            </DialogHeader>
+            <PatientForm  onClose={closeDialog} />
+          </DialogContent>
+        </Dialog>
 
-      {/* Upcoming Appointments Section */}
-      <Card className="mb-8">
-  <CardHeader>
-    <CardTitle>Upcoming Appointments</CardTitle>
-    <CardDescription>Next 5 scheduled appointments</CardDescription>
-  </CardHeader>
-  <CardContent>
-    {await getUpcomingAppointments().then(async appointments => {
-      const resolvedAppointments = await Promise.all(appointments);
-      return (
-        <ul className="space-y-4">
-          {resolvedAppointments.map((apt, index) => (
-            <li key={index} className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">{apt.patientData[0].name}</p>
-                <p className="text-sm text-gray-500">{new Date(apt.date).toLocaleString()} - {apt.type}</p>
-              </div>
-              <Button variant="outline" size="sm">
-                Details
-              </Button>
-            </li>
+      <Tabs defaultValue="patients" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="patients">Patients</TabsTrigger>
+          <TabsTrigger value="providers">Providers</TabsTrigger>
+          <TabsTrigger value="admins">Admins</TabsTrigger>
+        </TabsList>
+        <TabsContent value="patients" className="space-y-4">
+          {users.filter(user => user.patient).map(user => (
+            <Card key={user.id}>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Avatar>
+                    {/* <AvatarImage src={user.patient?.avatar} /> */}
+                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span>{user.name}</span>
+                </CardTitle>
+                <CardDescription>{user.email}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <h4 className="font-semibold mb-2">Upcoming Appointments</h4>
+                {user.patient?.appointments?.slice(0, 3).map(appointment => (
+                  <div key={appointment.id} className="flex items-center space-x-2 mb-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(appointment.scheduled_date).toLocaleDateString()}</span>
+                    <Badge>{appointment.status}</Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
           ))}
-        </ul>
-      );
-    })}
-  </CardContent>
-</Card>
-
-      {/* Quick Actions Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-4">
-          <Button>
-            <User className="mr-2 h-4 w-4" /> Add New Patient
-          </Button>
-          <Button>
-            <Calendar className="mr-2 h-4 w-4" /> Schedule Appointment
-          </Button>
-          <Button>
-            <Activity className="mr-2 h-4 w-4" /> View Reports
-          </Button>
-          <Button>
-            <Bell className="mr-2 h-4 w-4" /> Manage Notifications
-          </Button>
-        </CardContent>
-      </Card>
+        </TabsContent>
+        <TabsContent value="providers" className="space-y-4">
+          {users.filter(user => user.provider).map(user => (
+            <Card key={user.id}>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Avatar>
+                    { <AvatarImage src={user.image} /> }
+                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span>{user.name}</span>
+                </CardTitle>
+                <CardDescription>{user.provider.specialty}</CardDescription>
+                <span>{user.provider.license_number}</span>
+                <span>{user.provider.provider_qualification}</span>
+              </CardHeader>
+              <CardContent>
+                <h4 className="font-semibold mb-2">Upcoming Appointments</h4>
+                {user.provider?.appointments?.slice(0, 3).map(appointment => (
+                  <div key={appointment.id} className="flex items-center space-x-2 mb-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(appointment.scheduled_date).toLocaleTimeString()}</span>
+                    <Badge>{appointment.status}</Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+        <TabsContent value="admins" className="space-y-4">
+          {users.filter(user => user.admin).map(user => (
+            <Card key={user.id}>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Avatar>
+                   {/*  <AvatarImage src={user.admin?.avatar} /> */}
+                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span>{user.name}</span>
+                </CardTitle>
+                <CardDescription>{user.email}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <h4 className="font-semibold mb-2">Admin Role</h4>
+                {/* <Badge>{user.admin?.role}</Badge> */}
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
-
-
 
