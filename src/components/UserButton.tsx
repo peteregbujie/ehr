@@ -1,6 +1,6 @@
 import avatarPlaceholder from "@/assets/images/avatar_placeholder.png";
 import { Lock, LogOut, Settings } from "lucide-react";
-import { User } from "next-auth";
+
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,9 +14,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { ExtendedUser } from "@/types/next-auth";
 
 interface UserButtonProps {
-  user: User;
+  user: ExtendedUser;
 }
 
 export default function UserButton({ user }: UserButtonProps) {

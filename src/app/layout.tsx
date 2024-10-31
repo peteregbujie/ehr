@@ -10,7 +10,7 @@ import { Loader } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
+ export const metadata: Metadata = {
   title: {
     template: "%s | Electronic Health Record",
     absolute: "EHR",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "Electronic Health Record",
 };
 
-export default function RootLayout({
+export default function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;

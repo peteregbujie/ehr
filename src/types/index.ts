@@ -1,6 +1,6 @@
 import { AdminTypes } from "@/db/schema/admin";
 import { AllergyType } from "@/db/schema/allergy";
-import { AppointmentTypes } from "@/db/schema/appointment";
+import { AppointmentType } from "@/db/schema/appointment";
 import { DiagnosisType } from "@/db/schema/diagnosis";
 import { EncounterTypes } from "@/db/schema/encounter";
 import { ImmunizationType } from "@/db/schema/immunization";
@@ -19,8 +19,8 @@ import { VitalSignsType } from "@/db/schema/vitalsign";
 
 export interface SelectEncounter extends EncounterTypes {
 
-  medications: MedicationType[]; // If an encounter can have multiple medications
-  diagnoses: DiagnosisType[]; // Assuming an encounter can have multiple diagnoses
+  medications: MedicationType[]; 
+  diagnoses: DiagnosisType[]; 
   vitalSigns: VitalSignsType[];
   labs: LabType[];
   immunizations: ImmunizationType[];
@@ -32,7 +32,7 @@ export interface SelectEncounter extends EncounterTypes {
 }
 
 
-export interface SelectAppointment extends AppointmentTypes {
+export interface SelectAppointment extends AppointmentType {
   encounter: SelectEncounter[];
 }
 
@@ -55,7 +55,9 @@ export interface SelectProvider extends ProviderTypes{
   
 }
 
-
+export interface SelectAdmin extends AdminTypes{
+  
+}
 export interface SelectProviderPatient {
   patient_id: "";
   provider_id: "";
@@ -89,4 +91,10 @@ export interface DashboardProps {
   users:SelectUser[]
   offset: number;
   totalUsers: number;
+}
+
+
+export interface EncounterProps {
+  encounterId: string,
+  onSuccess: () => void 
 }

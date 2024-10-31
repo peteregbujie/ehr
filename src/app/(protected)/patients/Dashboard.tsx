@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { SearchInput } from '../search';
 import PatientsTable from '../patientsTable';
-import { DashboardProps, SelectUser } from '@/types';
-import { useSearchParams } from 'next/navigation';
+import { DashboardProps } from '@/types';
+
 
 
 

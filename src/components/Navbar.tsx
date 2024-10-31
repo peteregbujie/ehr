@@ -16,7 +16,7 @@ export default function NavBar() {
           EHR
         </Link>
         {user && <UserButton user={user} />}
-        {!user && session.status !== "loading" && <SignInButton />}
+      {/*   {!user && session.status !== "loading" && <SignInButton />} */}
       </nav>
     </header>
   );

@@ -4,3 +4,4 @@ export type SiteConfig = {
     url: string;
 
 };
+
