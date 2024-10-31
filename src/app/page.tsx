@@ -1,70 +1,65 @@
-import React from 'react';
-import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { UserRound, Stethoscope, Shield, ArrowRight } from 'lucide-react';
+"use client";
 
-export default function EHRLandingPage() {
-  const roles = [
-    {
-      title: "Patients",
-      description: "Access your medical records, appointments, and prescriptions",
-      icon: <UserRound className="h-12 w-12 mb-4 text-blue-500" />,
-      link: "/patients",
-      color: "bg-blue-50 hover:bg-blue-100",
-    },
-    {
-      title: "Providers",
-      description: "Manage patient care, schedules, and medical histories",
-      icon: <Stethoscope className="h-12 w-12 mb-4 text-green-500" />,
-      link: "/provider",
-      color: "bg-green-50 hover:bg-green-100",
-    },
-    {
-      title: "Administrators",
-      description: "Oversee system operations, user management, and analytics",
-      icon: <Shield className="h-12 w-12 mb-4 text-purple-500" />,
-      link: "/admin",
-      color: "bg-purple-50 hover:bg-purple-100",
-    },
-  ];
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/config/site";
+import { Icons } from "@/components/shared/icons";
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to Your EHR System</h1>
-          <p className="text-xl text-gray-600">Streamlined healthcare management for everyone</p>
+export default function Login() {
+    const [signInClicked, setSignInClicked] = useState(false);
+    const { status } = useSession();
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            redirect("/landing");
+        }
+    }, [status]);
+
+    // Show loading state while checking session
+    if (status === "loading") {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Icons.spinner className="size-6 animate-spin" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex h-screen">
+            <div className="flex flex-col w-1/4 m-auto rounded-md border-black border-2 justify-center items-center">
+                <div className="flex flex-col items-center justify-center space-y-3 border-b bg-background px-4 py-6 pt-8 text-center md:px-16">
+                    <a href={siteConfig.url}>
+                        <Icons.logo className="size-10" />
+                    </a>
+                    <h3 className="font-satoshi text-2xl font-black">
+                        Sign In
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                        This is strictly for demo purposes - only your email and profile
+                        picture will be stored.
+                    </p>
+                </div>
+
+                <div className="flex flex-col space-y-4 bg-secondary/50 px-4 py-8 md:px-16">
+                    <Button
+                        variant="default"
+                        disabled={signInClicked}
+                        onClick={() => {
+                            setSignInClicked(true);
+                            signIn("google", { callbackUrl: "/landing" });
+                        }}
+                    >
+                        {signInClicked ? (
+                            <Icons.spinner className="mr-2 size-4 animate-spin" />
+                        ) : (
+                            <Icons.google className="mr-2 size-4" />
+                        )}{" "}
+                        Sign In with Google
+                    </Button>
+                </div>
+            </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {roles.map((role, index) => (
-            <Card key={index} className={`${role.color} transition-all duration-300 transform hover:scale-105`}>
-              <CardHeader>
-                <div className="flex justify-center">{role.icon}</div>
-                <CardTitle className="text-2xl font-bold text-center">{role.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-center text-gray-700">
-                  {role.description}
-                </CardDescription>
-              </CardContent>
-              <CardFooter className="flex justify-center">
-                <Link href={role.link} passHref>
-                  <Button variant="outline" className="group">
-                    Enter
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-        
-        <footer className="mt-16 text-center text-gray-500">
-          <p>&copy; 2024 Your EHR System. All rights reserved.</p>
-        </footer>
-      </div>
-    </div>
-  );
+    );
 }
