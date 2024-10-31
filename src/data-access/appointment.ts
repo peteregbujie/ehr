@@ -1,5 +1,5 @@
 import db from "@/db";
-import AppointmentTable, { AppointmentTypes, BookAppointmentTypes, selectAppointmentSchema } from "@/db/schema/appointment";
+import AppointmentTable, { AppointmentType, BookAppointmentType, selectAppointmentSchema } from "@/db/schema/appointment";
 import { InvalidDataError, NotFoundError } from "@/use-cases/errors";
 import { getEncountersByAppointmentId } from "./encouter";
 
@@ -26,7 +26,7 @@ const workingHours = [
 
 
 //create appointment
-export const bookAppointment = async (appointmentData: BookAppointmentTypes) => { 
+export const bookAppointment = async (appointmentData: BookAppointmentType) => { 
 
   const {  provider_id, scheduled_date,  timeSlotIndex, id, patient_id
   } = appointmentData;
@@ -144,7 +144,7 @@ export const getAppointmentById = async (appointmentId: string) => {
 
 
 //update appointment
-export const updateAppointment = async (appointmentId: string, appointmentData: AppointmentTypes) => {
+export const updateAppointment = async (appointmentId: string, appointmentData: AppointmentType) => {
     // Parse the input data against the schema  
     const parsedData = selectAppointmentSchema.safeParse(appointmentData);
 
@@ -164,7 +164,7 @@ export const deleteAppointment = async (appointmentId: string) => {
 
 
 // reschedule appointment
-export const rescheduleAppointment = async (appointmentId: string, appointmentData: AppointmentTypes) => {
+export const rescheduleAppointment = async (appointmentId: string, appointmentData: AppointmentType) => {
     // Parse the input data against the schema  
     const parsedData = selectAppointmentSchema.safeParse(appointmentData);
 

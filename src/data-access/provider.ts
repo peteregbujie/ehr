@@ -8,7 +8,7 @@ import {  getUserById, updateUserRoleFn } from "./user";
 import UserTable, { UserTypes } from "@/db/schema/user";
 import { cache } from "react";
 import { SelectAppointment, SelectEncounter, SelectProvider, SelectUser} from "@/types";
-import { AppointmentTypes } from "@/db/schema/appointment";
+import { AppointmentType } from "@/db/schema/appointment";
 import { EncounterTypes } from "@/db/schema/encounter";
 
 

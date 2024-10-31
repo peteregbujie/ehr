@@ -1,19 +1,18 @@
 
 
 import db from "@/db";
-import { AdminTypes } from "@/db/schema/admin";
-import { AppointmentTypes, selectselectAppointmentSchema } from "@/db/schema/appointment";
+import { AdminTypes, selectAdminSchema } from "@/db/schema/admin";
+import { AppointmentType, selectAppointmentSchema } from "@/db/schema/appointment";
 import { EncounterTypes, selectEncounterSchema } from "@/db/schema/encounter";
 import { PatientTypes, selectPatientSchema } from "@/db/schema/patient";
-import { ProviderTypes } from "@/db/schema/provider";
+import { ProviderTypes, selectProviderSchema } from "@/db/schema/provider";
 
 import UserTable, {  insertUserSchema,  selectUserSchema,  UserTypes } from "@/db/schema/user";
 import {  UserRoles } from "@/lib/validations/user";
-import {  SelectAppointment, SelectEncounter, SelectPatient, SelectProvider, SelectUser } from "@/types";
+import {  SelectAdmin, SelectAppointment, SelectEncounter, SelectPatient, SelectProvider, SelectUser } from "@/types";
 import { InvalidDataError } from "@/use-cases/errors";
 import { UserId } from "@/use-cases/types";
 import { eq, ilike, or , count} from "drizzle-orm";
-import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
 
@@ -22,17 +21,17 @@ import { cache } from "react";
 
 
 export type UserWithRelations = UserTypes & {
-  patient?: PatientTypes & {
-    appointments?: (AppointmentTypes & {
-      encounter?: EncounterTypes[];
+  patient: SelectPatient & {
+    appointments?: (SelectAppointment & {
+      encounter?: SelectEncounter[];
     })[];
   };
-  provider?: ProviderTypes & {
-    appointments?: (AppointmentTypes & {
-      encounter?: EncounterTypes[];
+  provider: SelectProvider & {
+    appointments?: (SelectAppointment & {
+      encounter?: SelectEncounter[];
     })[];
   };
-  admin?: AdminTypes;
+  admin: AdminTypes;
  };
  
  interface UserWithRelationsResult {
@@ -45,7 +44,7 @@ export type UserWithRelations = UserTypes & {
 
 type UserData = UserTypes & {
   patient?: PatientTypes & {
-    appointments?: (AppointmentTypes & {
+    appointments?: (AppointmentType & {
       encounter?: EncounterTypes[];
     })[];
   };  
@@ -122,9 +121,6 @@ export async function getPatientIdByEmail(email: string) {
     return user?.patient
 }
 
-function isValidDate(date: any): date is Date {
-  return date instanceof Date && !isNaN(date.getTime());
-}
 
 
 function isMedicalRecord(record: any): record is SelectEncounter {
@@ -142,19 +138,27 @@ function isMedicalRecord(record: any): record is SelectEncounter {
 }
 
 
-function isEncounter(encounter: unknown): encounter is SelectEncounter {
+function isEncounter(encounter: unknown): encounter is NonNullable<EncounterTypes> {
   return selectEncounterSchema.safeParse(encounter).success;
 }
 
-function isAppointment(appointment: unknown): appointment is SelectAppointment {
-  return selectselectAppointmentSchema.safeParse(appointment).success;
+function isAppointment(appointment: unknown): appointment is NonNullable<AppointmentType> {
+  return selectAppointmentSchema.safeParse(appointment).success;
 }
 
-function isPatient(patient: unknown): patient is SelectPatient {
+function isPatient(patient: unknown): patient is NonNullable<PatientTypes> {
   return selectPatientSchema.safeParse(patient).success;
 }
 
-function isUser(user: unknown): user is SelectUser {
+function isProvider(provider: unknown): provider is NonNullable<ProviderTypes> {
+  return selectProviderSchema.safeParse(provider).success;
+}
+
+function isAdmin(admin: unknown): admin is NonNullable<AdminTypes> {
+  return selectAdminSchema.safeParse(admin).success;
+}
+
+function isUser(user: unknown): user is NonNullable<UserTypes> {
   return selectUserSchema.safeParse(user).success;
 }
 
@@ -311,8 +315,8 @@ interface UsersQueryResult {
   newOffset: number | null
 }
 
-// Get All User
-export const getUsers =  cache(async (): Promise<UsersQueryResult> => { 
+
+export const getUsers = cache(async (): Promise<UserWithRelationsResult> => {
   try {
     const users = await db.query.UserTable.findMany({
       orderBy: (users, { asc }) => [asc(users.created_at)],
@@ -320,16 +324,16 @@ export const getUsers =  cache(async (): Promise<UsersQueryResult> => {
         patient: {
           with: {
             appointments: {
-            orderBy: (appointments, { asc }) => [asc(appointments.scheduled_date)],
+              orderBy: (appointments, { asc }) => [asc(appointments.scheduled_date)],
               with: {
                 encounter: {
-                 orderBy: (encounters, { asc }) => [asc(encounters.date)], 
+                  orderBy: (encounters, { asc }) => [asc(encounters.date)],
                   with: {
                     medications: true,
                     vitalSigns: true,
                     diagnoses: true,
-                  allergies: true, 
-                     procedures: true,
+                    allergies: true,
+                    procedures: true,
                     labs: true,
                     immunizations: true,
                     insurance: true,
@@ -339,79 +343,64 @@ export const getUsers =  cache(async (): Promise<UsersQueryResult> => {
             },
           },
         },
-        
+        provider: {
+          with: {
+            appointments: {
+              orderBy: (appointments, { asc }) => [asc(appointments.scheduled_date)],
+              with: {
+                encounter: {
+                  orderBy: (encounters, { asc }) => [asc(encounters.date)],
+                  with: {
+                    medications: true,
+                    vitalSigns: true,
+                    diagnoses: true,
+                    allergies: true,
+                    procedures: true,
+                    labs: true,
+                    immunizations: true,
+                    insurance: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        admin: true,
       },
       limit: 10,
       offset: 0,
     });
 
-    const totalUsersResult =  await db.select({ count: count() }).from(UserTable);
-    const totalUsers =  Array.isArray(totalUsersResult) ? totalUsersResult[0]?.count || 0 : 0;
-    const newOffset =  (users.length >= 5 ? 0 + 5 : null);
+    const totalUsersResult = await db.select({ count: count() }).from(UserTable);
+    const totalUsers = Array.isArray(totalUsersResult) ? totalUsersResult[0]?.count || 0 : 0;
+    const newOffset = users.length >= 10 ? 10 : null;
 
-    if (!users || users.length === 0) {
-      throw new Error("No users found");
+    const result: UserWithRelationsResult = {
+      result: users.map(user => ({
+        ...user,
+        patient: user.patient && isPatient(user.patient) ? user.patient : {} as SelectPatient,
+        provider: user.provider && isProvider(user.provider) ? user.provider: {} as SelectProvider,
+        admin: user.admin && isAdmin(user.admin) ? user.admin : {} as SelectAdmin,
+      })).filter(user => user.patient?.appointments?.every(isAppointment) && user.patient?.appointments?.every(appointment => appointment.encounter?.every(isEncounter))),
+      newOffset,
+      totalUsers,
+    };
+
+    if (
+      result.result.every(isUser) &&
+      result.result.every(user => user.patient === undefined || (isPatient(user.patient) && user.patient.appointments?.every(isAppointment))) &&
+      result.result.every(user => user.provider === undefined || (isProvider(user.provider) && user.provider.appointments?.every(isAppointment))) &&
+      result.result.every(user => user.admin === undefined || isAdmin(user.admin))
+    ) {
+      return result;
     }
 
-    const patients = users
-        .map(user => user.patient)
-        .filter((patient): patient is NonNullable<typeof patient> => patient !== null);
-
-        const appointments = patients.flatMap(patient => 
-          patient.appointments.map(appointment => ({
-            ...appointment,
-            patientId: patient.id
-          }))
-        );
-  
-
-
-        const encounters = appointments.flatMap(appointment =>
-          appointment.encounter.map(encounter => ({
-            ...encounter,
-            appointmentId: appointment.id,
-            medications: encounter.medications,
-            vitalSigns: encounter.vitalSigns,
-            diagnoses: encounter.diagnoses,
-            allergies: encounter.allergies,
-            procedures: encounter.procedures,
-            labs: encounter.labs,
-            immunizations: encounter.immunizations,
-            insurance: encounter.insurance,
-          }))
-        );
-
-
-
-        const result: UsersQueryResult = {
-          users,
-          patients,
-          appointments,
-          encounters,
-          totalUsers,
-          newOffset
-        };
-
-
-
-        if (
-          result.users.every(isUser) &&
-          result.patients.every(isPatient) &&
-          result.appointments.every(isAppointment) &&
-          result.encounters.every(isEncounter)
-        ) {
-          return result;
-        }
-  
-        throw new Error("Invalid data structure");
+    throw new Error("Invalid data structure");
   } catch (error) {
     console.error("Error fetching users:", error);
     throw error;
   }
 });
-
-
-
 
 
 // Get Searched User
