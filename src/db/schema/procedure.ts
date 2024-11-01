@@ -24,8 +24,8 @@ const ProcedureTable = pgTable(
   name: varchar("procedure_name").notNull(),
   description: varchar("procedure_description").notNull(),
   duration: time("procedure_duration").notNull(),
-  date: date("procedure_date").notNull(),
-  time: time("procedure_time").notNull(),
+  date: date("procedure_date", { mode: "date" }).notNull(),
+  time: time("procedure_time").notNull().default("10:00:00"),
   status: procedure_status("procedure_status").default("completed").notNull(),
   note: varchar("procedure_note").notNull(),
   encounter_id: uuid("encounter_id")

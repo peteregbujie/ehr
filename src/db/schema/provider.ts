@@ -15,8 +15,8 @@ const ProviderTable = pgTable(
   user_id: uuid("user_id")
    .notNull()
    .references(() => UserTable.id, { onDelete: "cascade" }),
-  specialty: varchar("specialty", { length: 2000 }).notNull(),
-   license_number: varchar("license_number", { length: 20 }).notNull(),
+  specialty: varchar("specialty", { length: 2000 }).notNull().default("Primary Care Physician"),
+   license_number: varchar("license_number", { length: 10 }).notNull().default("LIC100000123"),
   provider_qualification: provider_type("provider_type").default("MD").notNull(),
  },
  (provider) => ({
