@@ -29,7 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
-import { getAllProvidersUseCase } from "@/use-cases/provider";
+import {  getProvidersUseCase } from "@/use-cases/provider";
 import { getAppointmentById } from "@/data-access/appointment";
 import { insertAppointmentSchema } from "@/db/schema/appointment";
 
@@ -139,7 +139,7 @@ onError() {
   useEffect(() => {
     const fetchProviders = async () => {
         try {
-            const data = await getAllProvidersUseCase();
+            const data = await getProvidersUseCase();
             // Map the data to get only the id and name
             const providersData = data.map(provider => ({
                 id: provider.id,

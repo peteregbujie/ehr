@@ -17,10 +17,13 @@ import { createLabAction } from "@/actions/lab";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
-import { Send, Terminal } from "lucide-react";
+import { CalendarIcon, Send, Terminal } from "lucide-react";
 import { Textarea } from "../ui/textarea";
-import { NewLabSchema } from "@/lib/validations/lab";
 import { EncounterProps } from "@/types";
+import { insertLabSchema } from "@/db/schema/labs";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Calendar } from "../ui/calendar";
+import { cn } from "@/lib/utils";
 
 
 
@@ -40,14 +43,14 @@ export function LabForm  ({ onSuccess, encounterId }: EncounterProps) {
     },
   })
 
-  const form = useForm<z.infer<typeof NewLabSchema>>({
-    resolver: zodResolver(NewLabSchema),
+  const form = useForm<z.infer<typeof insertLabSchema>>({
+    resolver: zodResolver(insertLabSchema),
           defaultValues: {
       test_Name: "", date_Ordered: new Date(), test_Code: "", result: "", status: "completed", result_Date: new Date(), note: "",
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof NewLabSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof insertLabSchema>> = (
     values
   ) => {
     execute({
@@ -155,18 +158,49 @@ render={({ field }) => (
 />
 
 <FormField
-control={form.control}
-name="date_Ordered"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Date Ordered</FormLabel>
-    <FormControl>
-      <Input type="date" placeholder="Date Ordered" {...{...field, value: field.value.toISOString().split('T')[0]}} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+          control={form.control}
+          name="date_Ordered"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        field.value, "PPP"
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? field.value : undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date() || date < new Date("2024-12-31")
+                    }
+                    
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+    
+
 <FormField
 control={form.control}
 name="result_Date"

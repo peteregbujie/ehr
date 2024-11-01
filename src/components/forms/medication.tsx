@@ -18,13 +18,12 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
 import { CalendarIcon, Send, Terminal } from "lucide-react";
-
 import { Textarea } from "../ui/textarea";
-import { selectMedicationSchema } from "@/lib/validations/medication";
 import { EncounterProps } from "@/types";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar } from "../ui/calendar";
+import { insertMedicationSchema } from "@/db/schema/medication";
 
 
 
@@ -44,14 +43,14 @@ export function MedicationForm  ({ onSuccess, encounterId }: EncounterProps)  {
     },
   })
 
-  const form = useForm<z.infer<typeof selectMedicationSchema>>({
-    resolver: zodResolver(selectMedicationSchema),
+  const form = useForm<z.infer<typeof insertMedicationSchema>>({
+    resolver: zodResolver(insertMedicationSchema),
           defaultValues: {
      medication_name: "", code: "", dosage: "", frequency: "", route: "oral", status: "completed", start_date: new Date(), end_date: new Date(), note: "",
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof selectMedicationSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof insertMedicationSchema>> = (
     values
   ) => {
     execute({

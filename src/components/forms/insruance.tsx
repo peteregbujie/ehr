@@ -10,7 +10,6 @@ import {
   } from "@/components/ui/form"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useServerAction } from "zsa-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createInsuranceAction } from "@/actions/insurance";
@@ -18,8 +17,8 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
 import { Send, Terminal } from "lucide-react";
-import { Textarea } from "../ui/textarea";
-import { NewInsuranceSchema } from "@/lib/validations/insurance";
+import { insertInsuranceSchema } from "@/db/schema/insurance";
+
 
 
 
@@ -38,14 +37,14 @@ export function InsuranceForm  ()  {
     },
   })
 
-  const form = useForm<z.infer<typeof NewInsuranceSchema>>({
-    resolver: zodResolver(NewInsuranceSchema),
+  const form = useForm<z.infer<typeof insertInsuranceSchema>>({
+    resolver: zodResolver(insertInsuranceSchema),
           defaultValues: {
       insurance_provider: "", policy_number:"", group_number:""
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof NewInsuranceSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof insertInsuranceSchema>> = (
     values
   ) => {
     execute({

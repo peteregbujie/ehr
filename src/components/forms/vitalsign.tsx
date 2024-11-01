@@ -18,7 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
 import {  Send, Terminal } from "lucide-react";
 import { EncounterProps } from "@/types";
-import { selectVitalSignSchema } from "@/db/schema/vitalsign";
+import { insertVitalSignSchema } from "@/db/schema/vitalsign";
 
 
 
@@ -39,14 +39,14 @@ export function VitalSignForm  ({ onSuccess, encounterId }: EncounterProps)  {
     },
   })
 
-  const form = useForm<z.infer<typeof selectVitalSignSchema>>({
-    resolver: zodResolver(selectVitalSignSchema),
+  const form = useForm<z.infer<typeof insertVitalSignSchema>>({
+    resolver: zodResolver(insertVitalSignSchema),
           defaultValues: {
      height: "",weight: "",systolic_pressure: 0,diastolic_pressure: 0,heart_rate: 0,body_temperature: "",respiratory_rate: 0,oxygen_saturation:" 0",bmi: "0",
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof selectVitalSignSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof insertVitalSignSchema>> = (
     values
   ) => {
     execute({

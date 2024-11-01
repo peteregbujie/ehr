@@ -17,10 +17,13 @@ import { createProcedureAction } from "@/actions/procedure";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LoaderButton } from "@/components/loader-button";
-import { Send, Terminal } from "lucide-react";
+import { CalendarIcon, Send, Terminal } from "lucide-react";
 import { Textarea } from "../ui/textarea";
-import { selectProcedureSchema } from "@/lib/validations/procedure";
 import { EncounterProps } from "@/types";
+import { insertProcedureSchema } from "@/db/schema/procedure";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Calendar } from "../ui/calendar";
+import { cn } from "@/lib/utils";
 
 
 
@@ -40,14 +43,14 @@ export function ProcedureForm  ({ onSuccess, encounterId }: EncounterProps)  {
     },
   })
 
-  const form = useForm<z.infer<typeof selectProcedureSchema>>({
-    resolver: zodResolver(selectProcedureSchema),
+  const form = useForm<z.infer<typeof insertProcedureSchema>>({
+    resolver: zodResolver(insertProcedureSchema),
           defaultValues: {
-      name: "", description: "", duration: "", date: "", time: "", note: "", status: "completed",
+      name: "", description: "", duration: "", date: new Date(), time: "", note: "", status: "completed",
     },
   })
 
-  const onSubmit: SubmitHandler<z.infer<typeof selectProcedureSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof insertProcedureSchema>> = (
     values
   ) => {
     execute({
@@ -58,7 +61,7 @@ export function ProcedureForm  ({ onSuccess, encounterId }: EncounterProps)  {
 
 
        form.reset({
-    name: "", description: "", duration: "", date: "", time: "", note: "", status: "completed",
+    name: "", description: "", duration: "", date: new Date(), time: "", note: "", status: "completed",
     },
 )
 
@@ -124,19 +127,49 @@ render={({ field }) => (
 )}
 />
 
+
 <FormField
-control={form.control}
-name="date"
-render={({ field }) => (
-  <FormItem>
-    <FormLabel>Date</FormLabel>
-    <FormControl>
-      <Input placeholder="Date" type="date" {...field} />
-    </FormControl>
-    <FormMessage />
-  </FormItem>
-)}
-/>
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        field.value, "PPP"
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? field.value : undefined}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date() || date < new Date("2024-12-31")
+                    }
+                    
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
 <FormField
 control={form.control}
