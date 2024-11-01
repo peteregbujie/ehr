@@ -304,18 +304,6 @@ function isValidSearchResult(result: unknown): result is SearchResult {
 
 
 
-
-
-interface UsersQueryResult {
-  users: SelectUser[],
-  patients: SelectPatient[],
-  appointments: SelectAppointment[],
-  encounters: SelectEncounter[],
-  totalUsers: number,
-  newOffset: number | null
-}
-
-
 export const getUsers = cache(async (): Promise<UserWithRelationsResult> => {
   try {
     const users = await db.query.UserTable.findMany({
@@ -371,36 +359,33 @@ export const getUsers = cache(async (): Promise<UserWithRelationsResult> => {
       offset: 0,
     });
 
+    // Get total count of users
     const totalUsersResult = await db.select({ count: count() }).from(UserTable);
     const totalUsers = Array.isArray(totalUsersResult) ? totalUsersResult[0]?.count || 0 : 0;
     const newOffset = users.length >= 10 ? 10 : null;
 
-    const result: UserWithRelationsResult = {
-      result: users.map(user => ({
+    // Map users, filtering in a single pass
+    const result = users
+      .map(user => ({
         ...user,
-        patient: user.patient && isPatient(user.patient) ? user.patient : {} as SelectPatient,
-        provider: user.provider && isProvider(user.provider) ? user.provider: {} as SelectProvider,
-        admin: user.admin && isAdmin(user.admin) ? user.admin : {} as SelectAdmin,
-      })).filter(user => user.patient?.appointments?.every(isAppointment) && user.patient?.appointments?.every(appointment => appointment.encounter?.every(isEncounter))),
-      newOffset,
-      totalUsers,
-    };
+        patient: user.patient && isPatient(user.patient) ? user.patient : ({} as SelectPatient),
+        provider: user.provider && isProvider(user.provider) ? user.provider : ({} as SelectProvider),
+        admin: user.admin && isAdmin(user.admin) ? user.admin : ({} as SelectAdmin),
+      }))
+      .filter(user => 
+        (user.patient?.appointments?.every(isAppointment) && 
+          user.patient?.appointments?.every(app => app.encounter?.every(isEncounter))) &&
+        (user.provider?.appointments?.every(isAppointment) &&
+          user.provider?.appointments?.every(app => app.encounter?.every(isEncounter)))
+      );
 
-    if (
-      result.result.every(isUser) &&
-      result.result.every(user => user.patient === undefined || (isPatient(user.patient) && user.patient.appointments?.every(isAppointment))) &&
-      result.result.every(user => user.provider === undefined || (isProvider(user.provider) && user.provider.appointments?.every(isAppointment))) &&
-      result.result.every(user => user.admin === undefined || isAdmin(user.admin))
-    ) {
-      return result;
-    }
-
-    throw new Error("Invalid data structure");
+    return { result, newOffset, totalUsers };
   } catch (error) {
     console.error("Error fetching users:", error);
     throw error;
   }
 });
+
 
 
 // Get Searched User
