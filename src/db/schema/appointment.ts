@@ -59,10 +59,37 @@ export const AppointmentRelations = relations(AppointmentTable, ({ one, many }) 
  encounter: many(EncounterTable),
 }));
 
-export const insertAppointmentSchema = createInsertSchema(AppointmentTable)
-    .extend({
-        id: z.string().uuid().optional(),
-    });
+export const insertAppointmentSchema = createInsertSchema(AppointmentTable, {
+  reason: z
+    .string()
+    .min(1, { message: "Reason is required" })
+    .max(50, { message: "Reason must be 50 characters or less" }),
+  patient_id: z.string().uuid({
+    message: "Invalid UUID format for patient_id",
+  }),
+  provider_id: z.string().uuid({
+    message: "Invalid UUID format for provider_id",
+  }),
+  scheduled_date: z.string().datetime({
+    message: "Invalid date format for scheduled_date",
+  }),
+  timeSlotIndex: z
+    .number()
+    .int()
+    .min(0, { message: "Time slot index must be a non-negative integer" }),
+  location: z
+    .string()
+    .min(1, { message: "Location is required" })
+    .max(50, { message: "Location must be 50 characters or less" }),
+  type: z.enum(["new_patient", "follow_up", "annual_physical"]), 
+  status: z.enum(["scheduled", "completed", "canceled"]), 
+  notes: z
+    .string()
+    .min(1, { message: "Notes are required" })
+    .max(500, { message: "Notes must be 500 characters or less" }),
+}).omit({
+  id: true,  
+});
 
 export type BookAppointmentType  = z.infer<typeof insertAppointmentSchema>;
 

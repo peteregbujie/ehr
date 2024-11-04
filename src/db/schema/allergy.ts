@@ -3,8 +3,6 @@ import {
  
   pgEnum,
   pgTable,
-  text,
-  time,
   timestamp,
   uniqueIndex,
   uuid,
@@ -46,8 +44,27 @@ export const AllergiesRelations = relations(AllergiesTable, ({ one }) => ({
  }),
 }));
 
-export const insertAllergySchema = createInsertSchema(AllergiesTable).omit({
+export const insertAllergySchema = createInsertSchema(AllergiesTable, {
+  encounter_id: z.string().uuid({
+    message: "Invalid UUID format for encounter_id",
+  }),
+  allergen: z
+    .string()
+    .min(1, { message: "Allergen is required" })
+    .max(100, { message: "Allergen must be 100 characters or less" }),
+  allergy_reaction: z
+    .string()
+    .min(1, { message: "Allergy reaction is required" })
+    .max(100, { message: "Allergy reaction must be 100 characters or less" }),
+  severity: z.enum(["mild", "moderate", "severe"]), 
+  note: z
+    .string()
+    .min(1, { message: "Note is required" })
+    .max(2000, { message: "Note must be 2000 characters or less" }),
+}).omit({
   id: true,
+  created_At: true,
+  updated_At: true,
 });
 
 export const selectAllergiesSchema = createSelectSchema(AllergiesTable);

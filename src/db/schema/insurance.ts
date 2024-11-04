@@ -36,7 +36,26 @@ export const InsuranceRelations = relations(InsuranceTable, ({ one }) => ({
  }),
 }));
 
-export const insertInsuranceSchema = createInsertSchema(InsuranceTable).omit({
+export const insertInsuranceSchema = createInsertSchema(InsuranceTable, {
+ encounter_id: z.string().uuid({
+  message: "Invalid UUID format for encounter_id",
+}),
+patient_id: z.string().uuid({
+  message: "Invalid UUID format for patient_id",
+}),
+insurance_provider: z
+  .string()
+  .min(1, { message: "Insurance provider is required" })
+  .max(20, { message: "Insurance provider must be 20 characters or less" }),
+policy_number: z
+  .string()
+  .min(1, { message: "Policy number is required" })
+  .max(20, { message: "Policy number must be 20 characters or less" }),
+group_number: z
+  .string()
+  .min(1, { message: "Group number is required" })
+  .max(20, { message: "Group number must be 20 characters or less" }),
+}).omit({
  id: true,
 });
 export type newInsuranceType = z.infer<typeof insertInsuranceSchema>

@@ -44,7 +44,26 @@ export const ImmunizationRelations = relations(
  })
 );
 
-export const insertImmunizationSchema = createInsertSchema(ImmunizationTable).omit({
+export const insertImmunizationSchema = createInsertSchema(ImmunizationTable, {
+  vaccine_name: z
+    .string()
+    .min(1, { message: "Vaccine name is required" })
+    .max(100, { message: "Vaccine name must be 100 characters or less" }),
+  site: z.string().min(1, { message: "Site is required" }),
+  vaccination_date: z.string().datetime({
+    message: "Invalid date format for vaccination_date",
+  }),
+  vaccination_time: z.string().datetime({
+    message: "Invalid time format for time_administered",
+  }),
+  encounter_id: z.string().uuid({
+    message: "Invalid UUID format for encounter_id",
+  }),
+  vaccinator: z
+    .string()
+    .min(1, { message: "Vaccinator name is required" })
+    .max(100, { message: "Vaccinator name must be 100 characters or less" }),
+}).omit({
   id: true,
 });
 

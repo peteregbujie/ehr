@@ -18,6 +18,7 @@ import AdminTable from "./admin";
 import PatientTable from "./patient";
 import ProviderTable from "./provider";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 
 
@@ -109,7 +110,39 @@ export const VerificationTokensTable = pgTable(
   })
 )
 
-export const insertUserSchema = createInsertSchema(UserTable);
+export const insertUserSchema = createInsertSchema(UserTable, {
+  name: z.string()
+    .min(1, "Name is required")
+    .max(100, "Name must be 100 characters or less"),
+  
+  role: z.enum(['patient', 'admin', 'provider']),
+  
+  gender: z.enum(['male', 'female']),
+  
+  date_of_birth: z.coerce.date()
+    .min(new Date('1900-01-01'), "Date of birth must be after 1900")
+    .max(new Date(), "Date of birth cannot be in the future")
+    .default(() => new Date("1990-01-01")),
+  
+  email: z.string()
+    .email("Invalid email format")
+    .max(30, "Email must be 30 characters or less"),
+  
+  emailVerified: z.date()
+    .nullable()
+    .optional(),
+  
+  image: z.string()
+    .min(1, "Image URL is required")
+    .max(2048, "Image URL must be 2048 characters or less")
+    .url("Invalid image URL format"),
+  
+  created_at: z.date()
+    .default(() => new Date()),
+  
+  updated_at: z.date()
+    .default(() => new Date()),
+}).omit({ id: true, created_at: true, updated_at: true }); 
 
 export const selectUserSchema = createSelectSchema(UserTable);
 

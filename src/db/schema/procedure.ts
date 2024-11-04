@@ -45,7 +45,35 @@ export const ProcedureRelations = relations(ProcedureTable, ({ one }) => ({
  
 }));
 
-export const insertProcedureSchema = createInsertSchema(ProcedureTable).omit({
+export const insertProcedureSchema = createInsertSchema(ProcedureTable, {
+  name: z
+  .string()
+  .min(1, { message: "Procedure name is required" })
+  .max(255, { message: "Procedure name must be 255 characters or less" }),
+description: z
+  .string()
+  .min(1, { message: "Procedure description is required" })
+  .max(255, { message: "Procedure description must be 255 characters or less" }),
+duration: z.string().regex(
+  /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/,
+  { message: "Invalid time format for duration (expected HH:MM:SS)" }
+),
+date: z.string().datetime({ message: "Invalid date format for procedure_date" }),
+time: z
+  .string()
+  .regex(/^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/, {
+    message: "Invalid time format for procedure_time (expected HH:MM:SS)",
+  })
+  .default("10:00:00"),
+status: z.enum(["completed", "incomplete", "cancelled"]),
+note: z
+  .string()
+  .min(1, { message: "Procedure note is required" })
+  .max(255, { message: "Procedure note must be 255 characters or less" }),
+encounter_id: z.string().uuid({
+  message: "Invalid UUID format for encounter_id",
+}),
+}).omit({
   id: true,
 });
 export type NewProcedureType = z.infer<typeof insertProcedureSchema>

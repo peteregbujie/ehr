@@ -4,6 +4,7 @@ import AppointmentTable from "./appointment";
 import ProviderPatientTable from "./provider_patient";
 import UserTable from "./user";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const provider_type = pgEnum('provider_type', ["MD",
     "NP"]);
@@ -35,7 +36,23 @@ export const providerRelations = relations(ProviderTable, ({ one, many }) => ({
 
 
 
-export const insertProviderSchema = createInsertSchema(ProviderTable).omit({
+export const insertProviderSchema = createInsertSchema(ProviderTable, {
+  user_id: z.string().uuid({
+    message: "Invalid UUID format for user_id",
+  }),
+  
+  specialty: z.string()
+    .min(1, "Specialty is required")
+    .max(2000, "Specialty must be 2000 characters or less")
+    .default("Primary Care Physician"),
+  
+  license_number: z.string()
+    .min(1, "License number is required")
+    .max(10, "License number must be 10 characters or less")
+    .default("LIC100000123"),
+  
+    provider_qualification: z.enum(["MD", "NP"]),
+}).omit({
     id: true,
   });
 export const selectProviderSchema = createSelectSchema(ProviderTable);

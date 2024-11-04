@@ -48,7 +48,39 @@ export const MedicationRelations = relations(
 
 
 
-export const insertMedicationSchema = createInsertSchema(MedicationTable).omit({
+export const insertMedicationSchema = createInsertSchema(MedicationTable, {
+  encounter_id: z.string().uuid({
+    message: "Invalid UUID format for encounter_id",
+  }),
+  medication_name: z
+    .string()
+    .min(1, { message: "Medication name is required" })
+    .max(100, { message: "Medication name must be 100 characters or less" }),
+  code: z
+    .string()
+    .min(1, { message: "Code is required" })
+    .max(50, { message: "Code must be 50 characters or less" }),
+  dosage: z
+    .string()
+    .min(1, { message: "Dosage is required" })
+    .max(100, { message: "Dosage must be 100 characters or less" }),
+  frequency: z
+    .string()
+    .min(1, { message: "Frequency is required" })
+    .max(100, { message: "Frequency must be 100 characters or less" }),
+  route: z.enum(["oral", "IV"]),
+  status: z.enum(["active", "Inactive", "suspended", "completed"]),
+  note: z
+    .string()
+    .min(1, { message: "Note is required" })
+    .max(100, { message: "Note must be 100 characters or less" }),
+  start_date: z.string().datetime({
+    message: "Invalid date format for start_date",
+  }),
+  end_date: z.string().datetime({
+    message: "Invalid date format for end_date",
+  }),
+}).omit({
   id: true,
 });
 export type NewMedicationType = z.infer<typeof insertMedicationSchema>

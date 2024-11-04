@@ -18,6 +18,7 @@ import UserTable from "./user";
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import InsuranceTable from "./insurance";
 import AddressTable from "./address";
+import { z } from "zod";
 
 
 
@@ -97,7 +98,84 @@ export const PatientRelations = relations(PatientTable, ({ one, many }) => ({
   }),
 }));
 
-export const insertPatientSchema = createInsertSchema(PatientTable).omit({
+export const insertPatientSchema = createInsertSchema(PatientTable, {
+  user_id: z.string().uuid({
+    message: "Invalid UUID format for user_id",
+  }),
+  phone_number: z
+    .string()
+    .regex(/^\d{10}$/, { message: "Phone number must be 10 digits" }),
+  address: z.string().uuid({
+    message: "Invalid UUID format for address_id",
+  }),
+  height: z
+    .number()
+    .min(0, { message: "Height must be a positive value" })
+    .max(999.99, { message: "Height must be less than 1000 cm" }),
+  weight: z
+    .number()
+    .min(0, { message: "Weight must be a positive value" })
+    .max(999.99, { message: "Weight must be less than 1000 kg" }),
+  occupation: z
+    .string()
+    .min(1, { message: "Occupation is required" })
+    .max(50, { message: "Occupation must be 50 characters or less" }),
+  marital_status:  z.enum(["Married", "Single", "Divorced", "Widowed"]),
+  emergency_contact_name: z
+    .string()
+    .min(1, { message: "Emergency contact name is required" })
+    .max(50, { message: "Emergency contact name must be 50 characters or less" }),
+  emergency_contact_relationship: z
+    .string()
+    .min(1, { message: "Emergency contact relationship is required" })
+    .max(50, { message: "Emergency contact relationship must be 50 characters or less" }),
+  emergency_contact_number: z
+    .string()
+    .regex(/^\d{10}$/, { message: "Emergency contact number must be 10 digits" }),
+  socialHistory: z
+    .string()
+    .min(1, { message: "Social history is required" })
+    .max(2000, { message: "Social history must be 2000 characters or less" }),
+  past_medical_history: z
+    .string()
+    .min(1, { message: "Past medical history is required" })
+    .max(2000, { message: "Past medical history must be 2000 characters or less" }),
+  family_medical_history: z
+    .string()
+    .min(1, { message: "Family medical history is required" })
+    .max(2000, { message: "Family medical history must be 2000 characters or less" }),
+  blood_type: z.enum([
+    "A positive",
+    "A negative",
+    "B positive",
+    "B negative",
+    "AB positive",
+    "AB negative",
+    "O positive",
+    "O negative",
+  ]),
+  primary_care_physician: z.string().uuid({
+    message: "Invalid UUID format for primary_care_physician",
+  }),
+  preferred_language: z.enum([
+    "English",
+    "Spanish",
+    "Vietnamese",
+    "Mandarin",
+    "Portuguese",
+  ]),
+  created_at: z.string().datetime({
+    message: "Invalid date format for created_at",
+  }),
+  updated_at: z.string().datetime({
+    message: "Invalid date format for updated_at",
+  }),
+  notes: z
+    .string()
+    .min(1, { message: "Notes are required" })
+    .max(2000, { message: "Notes must be 2000 characters or less" }),
+})
+.omit({
   id: true,
   created_at: true, 
   updated_at: true

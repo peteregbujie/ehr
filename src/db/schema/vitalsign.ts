@@ -54,9 +54,58 @@ export const VitalSignRelations = relations(VitalSignsTable, ({ one }) => ({
 }));
 
 
-export const insertVitalSignSchema = createInsertSchema(VitalSignsTable).omit({
+export const insertVitalSignSchema = createInsertSchema(VitalSignsTable, {
+  encounter_id: z.string().uuid({
+    message: "Invalid UUID format for encounter_id"
+  }),
+    height: z.number()
+    .min(0, "Height must be positive")
+    .max(99.99, "Height exceeds maximum value")
+    .multipleOf(0.01, "Height must have at most 2 decimal places"),
+  
+  weight: z.number()
+    .min(0, "Weight must be positive")
+    .max(999.99, "Weight exceeds maximum value")
+    .multipleOf(0.01, "Weight must have at most 2 decimal places"),
+  
+  systolic_pressure: z.number()
+    .int("Systolic pressure must be an integer")
+    .min(60, "Systolic pressure too low")
+    .max(250, "Systolic pressure too high"),
+  
+  diastolic_pressure: z.number()
+    .int("Diastolic pressure must be an integer")
+    .min(40, "Diastolic pressure too low")
+    .max(150, "Diastolic pressure too high"),
+  
+  heart_rate: z.number()
+    .int("Heart rate must be an integer")
+    .min(30, "Heart rate too low")
+    .max(250, "Heart rate too high"),
+  
+  body_temperature: z.number()
+    .min(95.0, "Body temperature too low")
+    .max(108.0, "Body temperature too high")
+    .multipleOf(0.1, "Body temperature must have at most 1 decimal place"),
+  
+  respiratory_rate: z.number()
+    .int("Respiratory rate must be an integer")
+    .min(8, "Respiratory rate too low")
+    .max(60, "Respiratory rate too high"),
+  
+  oxygen_saturation: z.number()
+    .min(0, "Oxygen saturation must be positive")
+    .max(100.00, "Oxygen saturation cannot exceed 100%")
+    .multipleOf(0.01, "Oxygen saturation must have at most 2 decimal places"),
+  
+  bmi: z.number()
+    .min(10.0, "BMI too low")
+    .max(100.0, "BMI too high")
+    .multipleOf(0.1, "BMI must have at most 1 decimal place"),
+  }).omit({
   id: true,
 });
+
 export type NewVitalSignType = z.infer<typeof insertVitalSignSchema>
 
 export const selectVitalSignSchema = createSelectSchema(VitalSignsTable) 

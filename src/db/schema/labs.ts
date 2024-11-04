@@ -46,7 +46,34 @@ export const LabRelations = relations(LabTable, ({ one }) => ({
  
 }));
 
-export const insertLabSchema = createInsertSchema(LabTable).omit({
+export const insertLabSchema = createInsertSchema(LabTable, {
+  encounter_id: z.string().uuid({
+    message: "Invalid UUID format for encounter_id",
+  }),
+  test_Name: z
+    .string()
+    .min(1, { message: "Test name is required" })
+    .max(100, { message: "Test name must be 100 characters or less" }),
+  test_Code: z
+    .string()
+    .min(1, { message: "Test code is required" })
+    .max(100, { message: "Test code must be 100 characters or less" }),
+  status: z.enum(["pending", "completed", "cancelled"]), 
+  note: z
+    .string()
+    .min(1, { message: "Note is required" })
+    .max(2000, { message: "Note must be 2000 characters or less" }),
+  result: z
+    .string()
+    .min(1, { message: "Result is required" })
+    .max(2000, { message: "Result must be 2000 characters or less" }),
+  result_Date: z.string().datetime({
+    message: "Invalid date format for result_Date",
+  }),
+  date_Ordered: z.string().datetime({
+    message: "Invalid date format for date_Ordered",
+  }),
+}).omit({
   id: true,
 });
 export type NewLabType = z.infer<typeof insertLabSchema>

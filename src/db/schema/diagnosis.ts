@@ -38,8 +38,27 @@ export const DiagnosisRelations = relations(DiagnosisTable, ({ one }) => ({
  
 }));
 
-export const insertDiagnosisSchema = createInsertSchema(DiagnosisTable).omit({
+export const insertDiagnosisSchema = createInsertSchema(DiagnosisTable, {
+  diagnosis_name: z
+    .string()
+    .min(1, { message: "Diagnosis name is required" })
+    .max(50, { message: "Diagnosis name must be 50 characters or less" }),
+  diagnosis_code: z
+    .string()
+    .min(1, { message: "Diagnosis code is required" })
+    .max(50, { message: "Diagnosis code must be 50 characters or less" }),
+  encounter_id: z.string().uuid({
+    message: "Invalid UUID format for encounter_id",
+  }),
+  severity: z.enum(["mild", "moderate", "severe"]), 
+  note: z
+    .string()
+    .max(2000, { message: "Description must be 2000 characters or less" })
+    .optional(),
+}).omit({
   id: true,
+  created_At: true,
+  updated_At: true,
 });
 
 export const selectDiagnosisSchema = createSelectSchema(DiagnosisTable);

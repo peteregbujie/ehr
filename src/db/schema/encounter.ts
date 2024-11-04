@@ -71,8 +71,32 @@ export const EncounterRelations = relations(
 
 
 
-export const insertEncounterSchema = createInsertSchema(EncounterTable).omit({
+export const insertEncounterSchema = createInsertSchema(EncounterTable, {
+  appointment_id: z.string().uuid({
+    message: "Invalid UUID format for appointment_id",
+  }),
+  date: z.string().datetime({
+    message: "Invalid date format for date",
+  }),
+  time: z.string().datetime({
+    message: "Invalid time format for time",
+  }),
+  encounter_type: z.enum(["inpatient", "outpatient", "emergency"]), 
+  chief_complaint: z
+    .string()
+    .min(1, { message: "Chief complaint is required" })
+    .max(200, { message: "Chief complaint must be 2000 characters or less" }),
+  assessment_and_plan: z
+    .string()
+    .min(1, { message: "Assessment and plan is required" })
+    .max(2000, { message: "Assessment and plan must be 2000 characters or less" }),
+  notes: z
+    .string()
+    .min(1, { message: "Notes are required" })
+    .max(2000, { message: "Notes must be 2000 characters or less" }),
+}).omit({
   id: true,
+  updated_at: true,
 });
 
 
