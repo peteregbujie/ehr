@@ -18,7 +18,21 @@ import { cache } from "react";
 
 
 
+export type SingleUser =  UserTypes & {
+  patient: SelectPatient & {
+    appointments?: (SelectAppointment & {
+      encounter?: SelectEncounter[];
+    })[];
+  };
+}
 
+export type SingleProvider =  UserTypes & {
+  provider: SelectProvider & {
+    appointments: (SelectAppointment & {
+      encounter: SelectEncounter[];
+    })[];
+  };
+}
 
 export type UserWithRelations = UserTypes & {
   patient: SelectPatient & {
@@ -33,9 +47,11 @@ export type UserWithRelations = UserTypes & {
   };
   admin: AdminTypes;
  };
+
+
  
- interface UserWithRelationsResult {
-  result: UserWithRelations[];
+ export interface UserWithRelationsResult {
+  users: UserWithRelations[];
   newOffset: number | null;
   totalUsers: number;
 }
@@ -123,21 +139,6 @@ export async function getPatientIdByEmail(email: string) {
 
 
 
-function isMedicalRecord(record: any): record is SelectEncounter {
-  return (
-    Array.isArray(record.medications) &&
-    Array.isArray(record.vitalSigns) &&
-    Array.isArray(record.diagnoses) &&
-    Array.isArray(record.allergies) &&
-    Array.isArray(record.procedures) &&
-    Array.isArray(record.labs) &&
-    Array.isArray(record.immunizations) &&
-    Array.isArray(record.diagnoses) &&
-    Array.isArray(record.insurance)
-  );
-}
-
-
 function isEncounter(encounter: unknown): encounter is NonNullable<EncounterTypes> {
   return selectEncounterSchema.safeParse(encounter).success;
 }
@@ -171,31 +172,7 @@ export async function getUserByEmail(email: string) {
 }
 
 
-interface SearchResult {
-  user: SelectUser;
-  patient: SelectPatient | null;
-  appointments: SelectAppointment[];
-  encounters: SelectEncounter[];
-}
-
-
-function isValidSearchResult(result: unknown): result is SearchResult {
-  if (!result || typeof result !== 'object') return false;
-  
-  const typedResult = result as SearchResult;
-  
-  return (
-    isUser(typedResult.user) &&
-    (typedResult.patient === null || isPatient(typedResult.patient)) &&
-    Array.isArray(typedResult.appointments) &&
-    typedResult.appointments.every(isAppointment) &&
-    Array.isArray(typedResult.encounters) &&
-    typedResult.encounters.every(isEncounter)
-  );
-}
-
-
-  export const searchUser =  cache(async (query: string): Promise<SearchResult>=> {
+  export const searchUser =  cache(async (query: string): Promise<SingleUser>=> {
     try {
       // Validate input
       if (typeof query !== 'string' || query.trim().length === 0) {
@@ -240,65 +217,13 @@ function isValidSearchResult(result: unknown): result is SearchResult {
       if (!user) {
         throw new Error("User not found");
       }
+     
 
-      // Type guard validation for user
-      if (!isUser(user)) {
-        throw new Error("Invalid user data structure");
-      }
-
-      // Validate patient if exists
-      if (user.patient && !isPatient(user.patient)) {
-        throw new Error("Invalid patient data structure");
-      }
-
-      // Get and validate appointments
-      const appointments = user.patient?.appointments || [];
-      if (!appointments.every(isAppointment)) {
-        throw new Error("Invalid appointment data structure");
-      }
-
-      // Process and validate encounters
-      const encounters = appointments.flatMap(appointment =>
-        appointment.encounter.map(encounter => ({
-          ...encounter,
-          appointmentId: appointment.id,
-          medications: encounter.medications,
-          vitalSigns: encounter.vitalSigns,
-          diagnoses: encounter.diagnoses,
-          allergies: encounter.allergies,
-          procedures: encounter.procedures,
-          labs: encounter.labs,
-          immunizations: encounter.immunizations,
-          insurance: encounter.insurance,
-        }))
-      );
-
-      // Validate encounters
-      if (!encounters.every(isEncounter)) {
-        throw new Error("Invalid encounter data structure");
-      }
-
-      const result: SearchResult = {
-        user,
-        patient: user.patient || null,
-        appointments,
-        encounters,
-      };
-
-      // Final validation of the entire result
-      if (!isValidSearchResult(result)) {
-        throw new Error("Invalid search result structure");
-      }
-
-      return result;
+    return user;
 
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error searching user:", error.message);
-        throw error;
-      }
-      
-      throw new Error("An unexpected error occurred");
+      console.error("Error fetching users:", error);
+      throw error;
     }
   })
 
@@ -365,7 +290,7 @@ export const getUsers = cache(async (): Promise<UserWithRelationsResult> => {
     const newOffset = users.length >= 10 ? 10 : null;
 
     // Map users, filtering in a single pass
-    const result = users
+  /*   const result = users
       .map(user => ({
         ...user,
         patient: user.patient && isPatient(user.patient) ? user.patient : ({} as SelectPatient),
@@ -377,9 +302,21 @@ export const getUsers = cache(async (): Promise<UserWithRelationsResult> => {
           user.patient?.appointments?.every(app => app.encounter?.every(isEncounter))) &&
         (user.provider?.appointments?.every(isAppointment) &&
           user.provider?.appointments?.every(app => app.encounter?.every(isEncounter)))
+      ); */
+
+    users
+      .map(user => ({
+        ...user,
+        patient: user.patient ,
+        provider: user.provider ,
+        admin: user.admin ,
+      }))
+      .filter(user => 
+        user.patient?.appointments && 
+        user.provider?.appointments
       );
 
-    return { result, newOffset, totalUsers };
+    return { users, newOffset, totalUsers };
   } catch (error) {
     console.error("Error fetching users:", error);
     throw error;

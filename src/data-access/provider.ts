@@ -4,7 +4,7 @@ import ProviderTable, { ProviderTypes } from "@/db/schema/provider";
 import {  NotFoundError } from "@/use-cases/errors";
 import { ProviderId } from "@/use-cases/types";
 import { eq } from "drizzle-orm";
-import {  updateUserRoleFn } from "./user";
+import {  SingleProvider, updateUserRoleFn } from "./user";
 import UserTable from "@/db/schema/user";
 import { cache } from "react";
 import { SelectAppointment, SelectEncounter, SelectProvider, SelectUser} from "@/types";
@@ -42,7 +42,7 @@ export const deleteProvider = async (providerId: string) => {
 
 
 
-export const getProviderData = cache(async (query: string): Promise<{user: SelectUser, provider: SelectProvider, appointments: SelectAppointment[], encounters: SelectEncounter[]}> => { 
+export const getProviderData = cache(async (query: string): Promise<SingleProvider> => { 
   try {
     const user = await db.query.UserTable.findFirst({
       where: 
@@ -81,7 +81,7 @@ export const getProviderData = cache(async (query: string): Promise<{user: Selec
     }
 
 
-    const encounters = user.provider?.appointments.flatMap(appointment =>
+    /* const encounters = user.provider?.appointments.flatMap(appointment =>
       appointment.encounter.map(encounter => ({
         ...encounter,
         medications: encounter.medications,
@@ -93,18 +93,28 @@ export const getProviderData = cache(async (query: string): Promise<{user: Selec
         immunizations: encounter.immunizations,
         insurance: encounter.insurance,
       }))
-    );
+    ); */
 
    
-    return {
-      user,
-      provider: user.provider,
-      appointments: user.provider?.appointments,
-      encounters,
+    return user
       
-    };
   } catch (error) {
     console.error("Error searching user:", error);
     throw error;
   }
 }); 
+
+// get all providers
+export const getProviders = cache(async () => {
+  try {
+    const providers = await db.query.UserTable.findMany({
+      where: 
+        eq(UserTable.role, "provider"),
+      orderBy: (UserTable, { asc }) => [asc(UserTable.created_at)],
+    });
+    return providers;
+  } catch (error) {
+    console.error("Error searching providers:", error);
+    throw error;
+  }
+});
